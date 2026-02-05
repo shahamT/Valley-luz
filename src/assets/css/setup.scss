@@ -6,14 +6,16 @@
   padding: 0;
 }
 
-html,
-body {
+html {
   height: 100%;
+  direction: rtl;
 }
 
 body {
+  height: 100%;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  direction: rtl;
 }
 
 img,

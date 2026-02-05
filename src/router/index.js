@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isValidRouteDate } from '../helpers/validation.helpers'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -10,12 +11,26 @@ const router = createRouter({
     {
       path: '/monthly-view',
       name: 'monthly-view',
-      component: () => import('../components/MonthlySchedule.vue')
+      component: () => import('../pages/MonthlyViewPage.vue')
     },
     {
-      path: '/daily-view',
+      path: '/daily-view/:date',
       name: 'daily-view',
-      component: () => import('../components/DailySchedule.vue')
+      component: () => import('../pages/DailyViewPage.vue'),
+      props: true,
+      beforeEnter: (to, from, next) => {
+        const dateParam = to.params.date
+        if (isValidRouteDate(dateParam)) {
+          next()
+        } else {
+          next({ name: 'not-found' })
+        }
+      }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../pages/NotFoundPage.vue')
     }
   ]
 })

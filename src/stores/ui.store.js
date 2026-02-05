@@ -1,20 +1,24 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
-export const useUiStore = defineStore('ui', {
-  state: () => ({
-    isEventModalShowing: false,
-    selectedEventId: null
-  }),
+export const useUiStore = defineStore('ui', () => {
+  const isEventModalShowing = ref(false)
+  const selectedEventId = ref(null)
 
-  actions: {
-    openEventModal(eventId) {
-      this.selectedEventId = eventId
-      this.isEventModalShowing = true
-    },
+  function openEventModal(eventId) {
+    selectedEventId.value = eventId
+    isEventModalShowing.value = true
+  }
 
-    closeEventModal() {
-      this.isEventModalShowing = false
-      this.selectedEventId = null
-    }
+  function closeEventModal() {
+    isEventModalShowing.value = false
+    selectedEventId.value = null
+  }
+
+  return {
+    isEventModalShowing,
+    selectedEventId,
+    openEventModal,
+    closeEventModal,
   }
 })

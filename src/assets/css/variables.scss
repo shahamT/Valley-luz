@@ -39,4 +39,26 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-card: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+
+  /* Gradient */
+  --gradient-start: #e8f5e9;
+  --gradient-end: #c8e6c9;
+
+  /* Card */
+  --card-radius: 0.75rem;
+  --card-bg: #ffffff;
+
+  /* Pill Button */
+  --pill-bg: #424242;
+  --pill-text: #ffffff;
+  --pill-radius: 1.5rem;
+  --pill-padding-x: 1rem;
+  --pill-padding-y: 0.5rem;
+
+  /* Calendar */
+  --calendar-day-size: 8rem;
+  --calendar-day-outside-bg: rgba(200, 230, 201, 0.3);
+  --event-badge-bg: #81d4fa;
+  --event-badge-text: #01579b;
 }
