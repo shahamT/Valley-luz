@@ -1,10 +1,10 @@
 <template>
   <div class="MonthCalendar">
-    <div class="MonthCalendar__weekdays">
+    <div class="MonthCalendar-weekdays">
       <MonthlyWeekdayRow />
     </div>
-    <div class="MonthCalendar__gridWrapper">
-      <div class="MonthCalendar__grid">
+    <div class="MonthCalendar-gridWrapper">
+      <div class="MonthCalendar-grid">
         <MonthlyDayCell
           v-for="day in calendarDays"
           :key="day.dateString"
@@ -54,11 +54,11 @@ const calendarDays = computed(() => {
   height: 100%;
   min-height: 0;
 
-  &__weekdays {
+  &-weekdays {
     grid-row: 1;
   }
 
-  &__gridWrapper {
+  &-gridWrapper {
     grid-row: 2;
     overflow-y: auto;
     overflow-x: hidden;
@@ -68,29 +68,29 @@ const calendarDays = computed(() => {
     
     /* Custom scrollbar styling */
     scrollbar-width: thin;
-    scrollbar-color: var(--brand-light-blue) rgba(128, 220, 218, 0.3);
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
     
     &::-webkit-scrollbar {
-      width: 8px;
+      width: var(--scrollbar-width);
     }
     
     &::-webkit-scrollbar-track {
-      background: rgba(128, 220, 218, 0.3);
-      border-radius: 4px;
-      margin: 4px 0;
+      background: var(--scrollbar-track-bg);
+      border-radius: var(--scrollbar-border-radius);
+      margin: var(--scrollbar-margin);
     }
     
     &::-webkit-scrollbar-thumb {
-      background: var(--brand-light-blue);
-      border-radius: 4px;
+      background: var(--scrollbar-thumb-bg);
+      border-radius: var(--scrollbar-border-radius);
     }
     
     &::-webkit-scrollbar-thumb:hover {
-      background: var(--brand-dark-blue);
+      background: var(--scrollbar-thumb-hover-bg);
     }
   }
 
-  &__grid {
+  &-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: var(--spacing-md);

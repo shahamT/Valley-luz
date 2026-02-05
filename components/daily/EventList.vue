@@ -1,18 +1,15 @@
 <template>
   <div class="EventList">
-    <div class="EventList__scrollWrapper">
-      <div class="EventList__scrollArea">
-        <DailyEventCard
-          v-for="event in events"
-          :key="event.id"
-          :time-text="event.timeText"
-          :title="event.title"
-          :desc="event.desc"
-          :price="event.price"
-        />
-      </div>
+    <div class="EventList-scrollWrapper">
+      <DailyEventCard
+        v-for="event in events"
+        :key="event.id"
+        :time-text="event.timeText"
+        :title="event.title"
+        :desc="event.desc"
+        :price="event.price"
+      />
     </div>
-    <div class="EventList__scrollbar"></div>
   </div>
 </template>
 
@@ -36,7 +33,7 @@ defineProps({
   display: flex;
   flex-direction: column;
 
-  &__scrollWrapper {
+  &-scrollWrapper {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
@@ -46,34 +43,26 @@ defineProps({
     
     /* Custom scrollbar styling */
     scrollbar-width: thin;
-    scrollbar-color: var(--brand-light-blue) rgba(128, 220, 218, 0.3);
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
     
     &::-webkit-scrollbar {
-      width: 8px;
+      width: var(--scrollbar-width);
     }
     
     &::-webkit-scrollbar-track {
-      background: rgba(128, 220, 218, 0.3);
-      border-radius: 4px;
-      margin: 4px 0;
+      background: var(--scrollbar-track-bg);
+      border-radius: var(--scrollbar-border-radius);
+      margin: var(--scrollbar-margin);
     }
     
     &::-webkit-scrollbar-thumb {
-      background: var(--brand-light-blue);
-      border-radius: 4px;
+      background: var(--scrollbar-thumb-bg);
+      border-radius: var(--scrollbar-border-radius);
     }
     
     &::-webkit-scrollbar-thumb:hover {
-      background: var(--brand-dark-blue);
+      background: var(--scrollbar-thumb-hover-bg);
     }
-  }
-
-  &__scrollArea {
-    // Content area - no overflow here, handled by wrapper
-  }
-
-  &__scrollbar {
-    display: none; // Using native scrollbar styling instead
   }
 }
 </style>

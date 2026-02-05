@@ -4,8 +4,8 @@
     :class="{ 'DayCell--outside': isOutsideMonth }"
     @click="handleClick"
   >
-    <div class="DayCell__number">{{ dayNumber }}</div>
-    <div v-if="eventsCount > 0" class="DayCell__badge">
+    <div class="DayCell-number">{{ dayNumber }}</div>
+    <div v-if="eventsCount > 0" class="DayCell-badge">
       {{ getEventsCountText(eventsCount) }}
     </div>
   </div>
@@ -67,7 +67,7 @@ const handleClick = () => {
     opacity: 0.6;
   }
 
-  &__number {
+  &-number {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text);
@@ -76,7 +76,7 @@ const handleClick = () => {
     margin-top: 0;
   }
 
-  &__badge {
+  &-badge {
     background-color: var(--event-badge-bg);
     color: var(--event-badge-text);
     font-size: 0.75rem;

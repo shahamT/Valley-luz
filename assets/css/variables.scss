@@ -50,6 +50,16 @@
   /* Gradient */
   --gradient-start: #e8f5e9;
   --gradient-end: #c8e6c9;
+  --gradient-bg-start: rgba(128, 220, 218, 0.5);
+  --gradient-bg-end: rgba(133, 200, 75, 0.5);
+
+  /* Scrollbar */
+  --scrollbar-width: 8px;
+  --scrollbar-track-bg: rgba(128, 220, 218, 0.3);
+  --scrollbar-thumb-bg: var(--brand-light-blue);
+  --scrollbar-thumb-hover-bg: var(--brand-dark-blue);
+  --scrollbar-border-radius: 4px;
+  --scrollbar-margin: 4px 0;
 
   /* Card */
   --card-radius: 0.75rem;

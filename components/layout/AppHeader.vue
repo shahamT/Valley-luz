@@ -1,6 +1,6 @@
 <template>
   <header class="AppHeader">
-    <img src="/logos/valleyluz-logo.png" alt="Valley Luz" class="AppHeader__logo" />
+    <img src="/logos/valleyluz-logo.png" alt="Valley Luz" class="AppHeader-logo" />
   </header>
 </template>
 
@@ -18,7 +18,7 @@
   justify-content: flex-start;
   flex-shrink: 0;
 
-  &__logo {
+  &-logo {
     height: 3rem;
     width: auto;
     object-fit: contain;

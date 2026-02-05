@@ -1,13 +1,13 @@
 <template>
   <div v-if="isEventModalShowing" class="EventModal" @click.self="handleBackdropClick">
-    <div class="EventModal__content">
-      <div class="EventModal__header">
+    <div class="EventModal-content">
+      <div class="EventModal-header">
         <h2>Event Modal</h2>
-        <button @click="closeModal" class="EventModal__close" aria-label="Close modal">
+        <button @click="closeModal" class="EventModal-close" aria-label="Close modal">
           ×
         </button>
       </div>
-      <div class="EventModal__body">
+      <div class="EventModal-body">
         <p>Selected Event ID: <strong>{{ selectedEventId || MODAL_TEXT.noEventSelected }}</strong></p>
         <p>{{ MODAL_TEXT.placeholder }}</p>
       </div>
@@ -43,7 +43,7 @@ const handleBackdropClick = () => {
   justify-content: center;
   z-index: 1000;
 
-  &__content {
+  &-content {
     background-color: var(--color-background);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
@@ -54,14 +54,14 @@ const handleBackdropClick = () => {
     box-shadow: var(--shadow-lg);
   }
 
-  &__header {
+  &-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--spacing-lg);
   }
 
-  &__close {
+  &-close {
     background: none;
     border: none;
     font-size: var(--font-size-3xl);
@@ -83,7 +83,7 @@ const handleBackdropClick = () => {
     }
   }
 
-  &__body {
+  &-body {
     p {
       margin-bottom: var(--spacing-md);
     }

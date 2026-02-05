@@ -1,6 +1,6 @@
 <template>
   <div class="WeekdayRow">
-    <div v-for="day in weekdays" :key="day" class="WeekdayRow__day">
+    <div v-for="day in weekdays" :key="day" class="WeekdayRow-day">
       {{ day }}
     </div>
   </div>
@@ -19,7 +19,7 @@ const weekdays = HEBREW_WEEKDAYS
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 
-  &__day {
+  &-day {
     text-align: center;
     font-size: var(--font-size-sm);
     font-weight: 600;

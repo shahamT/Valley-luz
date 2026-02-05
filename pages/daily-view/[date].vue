@@ -1,14 +1,14 @@
 <template>
   <LayoutAppShell>
     <div class="DailyView">
-      <div class="DailyView__header">
+      <div class="DailyView-header">
         <ControlsTopControls
           mode="daily"
           :date-title="formattedDate"
           @back="goToMonthly"
         />
       </div>
-      <div class="DailyView__content">
+      <div class="DailyView-content">
         <div v-if="eventsStore.isLoading">{{ UI_TEXT.loading }}</div>
         <div v-else-if="eventsStore.isError">{{ UI_TEXT.error }}</div>
         <DailyEventList v-else :events="transformedEvents" />
@@ -20,6 +20,9 @@
 <script setup>
 import { getTodayDateString } from '~/utils/date.helpers'
 import { UI_TEXT } from '~/consts/calendar.const'
+import { isValidRouteDate } from '~/utils/validation.helpers'
+import { formatDateForDisplay, transformEventForCard } from '~/utils/events.helpers'
+import { eventsService } from '~/utils/events.service'
 
 const route = useRoute()
 const eventsStore = useEventsStore()
@@ -61,11 +64,11 @@ const goToMonthly = () => {
   height: 100%;
   gap: var(--spacing-md);
 
-  &__header {
+  &-header {
     grid-row: 1;
   }
 
-  &__content {
+  &-content {
     grid-row: 2;
     min-height: 0;
     overflow-y: auto;

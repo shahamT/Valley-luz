@@ -1,7 +1,7 @@
 <template>
   <button class="PillButton">
-    <span class="PillButton__label">{{ label }}</span>
-    <span v-if="count !== undefined" class="PillButton__count">({{ count }})</span>
+    <span class="PillButton-label">{{ label }}</span>
+    <span v-if="count !== undefined" class="PillButton-count">({{ count }})</span>
   </button>
 </template>
 
@@ -36,11 +36,11 @@ defineProps({
     opacity: 0.9;
   }
 
-  &__label {
+  &-label {
     font-weight: 500;
   }
 
-  &__count {
+  &-count {
     opacity: 0.9;
   }
 }

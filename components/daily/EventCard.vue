@@ -1,10 +1,10 @@
 <template>
   <div class="EventCard">
-    <div class="EventCard__time">{{ timeText }}</div>
-    <div class="EventCard__content">
-      <h3 class="EventCard__title">{{ title }}</h3>
-      <p class="EventCard__desc">{{ desc }}</p>
-      <p class="EventCard__price">{{ price }}</p>
+    <div class="EventCard-time">{{ timeText }}</div>
+    <div class="EventCard-content">
+      <h3 class="EventCard-title">{{ title }}</h3>
+      <p class="EventCard-desc">{{ desc }}</p>
+      <p class="EventCard-price">{{ price }}</p>
     </div>
   </div>
 </template>
@@ -40,7 +40,7 @@ defineProps({
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-md);
 
-  &__time {
+  &-time {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text);
@@ -48,25 +48,25 @@ defineProps({
     min-width: 5rem;
   }
 
-  &__content {
+  &-content {
     flex: 1;
   }
 
-  &__title {
+  &-title {
     font-size: var(--font-size-lg);
     font-weight: 700;
     margin-bottom: var(--spacing-sm);
     color: var(--color-text);
   }
 
-  &__desc {
+  &-desc {
     font-size: var(--font-size-sm);
     color: var(--color-text-light);
     margin-bottom: var(--spacing-sm);
     line-height: 1.6;
   }
 
-  &__price {
+  &-price {
     font-size: var(--font-size-sm);
     color: var(--color-text);
     font-weight: 500;

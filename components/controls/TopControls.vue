@@ -1,19 +1,19 @@
 <template>
   <div class="TopControls">
-    <div class="TopControls__pills">
+    <div class="TopControls-pills">
       <UiPillButton :label="PILL_LABELS.baseCalendar" />
       <UiPillButton :label="PILL_LABELS.categories" :count="categoriesCount" />
     </div>
-    <div class="TopControls__center">
+    <div class="TopControls-center">
       <slot name="center">
-        <div v-if="mode === 'month'" class="TopControls__monthNav">
-          <button class="TopControls__arrow" @click="$emit('prev-month')">←</button>
-          <span class="TopControls__month">{{ monthYear }}</span>
-          <button class="TopControls__arrow" @click="$emit('next-month')">→</button>
+        <div v-if="mode === 'month'" class="TopControls-monthNav">
+          <button class="TopControls-arrow" @click="$emit('prev-month')">←</button>
+          <span class="TopControls-month">{{ monthYear }}</span>
+          <button class="TopControls-arrow" @click="$emit('next-month')">→</button>
         </div>
-        <div v-else-if="mode === 'daily'" class="TopControls__dailyNav">
-          <button class="TopControls__back" @click="$emit('back')">← {{ backButtonText }}</button>
-          <div class="TopControls__date">{{ dateTitle }}</div>
+        <div v-else-if="mode === 'daily'" class="TopControls-dailyNav">
+          <button class="TopControls-back" @click="$emit('back')">← {{ backButtonText }}</button>
+          <div class="TopControls-date">{{ dateTitle }}</div>
         </div>
       </slot>
     </div>
@@ -58,24 +58,24 @@ defineEmits(['prev-month', 'next-month', 'back'])
   margin-bottom: var(--spacing-xl);
   gap: var(--spacing-lg);
 
-  &__pills {
+  &-pills {
     display: flex;
     gap: var(--spacing-md);
   }
 
-  &__center {
+  &-center {
     flex: 1;
     display: flex;
     justify-content: center;
   }
 
-  &__monthNav {
+  &-monthNav {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
   }
 
-  &__arrow {
+  &-arrow {
     background: none;
     border: none;
     font-size: var(--font-size-lg);
@@ -89,19 +89,19 @@ defineEmits(['prev-month', 'next-month', 'back'])
     }
   }
 
-  &__month {
+  &-month {
     font-size: var(--font-size-lg);
     font-weight: 600;
   }
 
-  &__dailyNav {
+  &-dailyNav {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: var(--spacing-sm);
   }
 
-  &__back {
+  &-back {
     background: none;
     border: none;
     font-size: var(--font-size-sm);
@@ -115,7 +115,7 @@ defineEmits(['prev-month', 'next-month', 'back'])
     }
   }
 
-  &__date {
+  &-date {
     font-size: var(--font-size-base);
     font-weight: 500;
   }
