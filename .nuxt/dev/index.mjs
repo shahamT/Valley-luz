@@ -3,7 +3,7 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, sendNoContent, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/@vue/shared/dist/shared.cjs.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/ufo/dist/index.mjs';
@@ -2028,7 +2028,7 @@ const _bzWSbzmh42HAImUki6YCOxLUoV5W4v8cyfsipWnbkA = (function(nitro) {
 
 const rootDir = "C:/Users/shaha/OneDrive/Desktop/Coding/Valley luz";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[],"title":"Valley Luz","htmlAttrs":{"lang":"he","dir":"rtl"}};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"}],"style":[],"script":[],"noscript":[],"title":"Valley Luz","htmlAttrs":{"lang":"he","dir":"rtl"}};
 
 const appRootTag = "div";
 
@@ -2129,7 +2129,22 @@ const plugins = [
 _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1e22b-HaqWfznzfnvFLXrgoV2kdfWdulE\"",
+    "mtime": "2026-02-05T19:37:05.326Z",
+    "size": 123435,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"6a013-Ff3dmyvxmxACNRD22AT8nmFiWR0\"",
+    "mtime": "2026-02-05T19:37:05.326Z",
+    "size": 434195,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2578,11 +2593,13 @@ async function getIslandContext(event) {
 	return ctx;
 }
 
+const _lazy_8mFtIU = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_fO7rgS = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_EM0R44 = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '', handler: _i_ZtEW, lazy: false, middleware: true, method: undefined },
+  { route: '/api/_nuxt', handler: _lazy_8mFtIU, lazy: true, middleware: false, method: "get" },
   { route: '/api/events', handler: _lazy_fO7rgS, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_EM0R44, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
@@ -2924,6 +2941,15 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$2 = defineEventHandler(() => {
+  return sendNoContent();
+});
+
+const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_get = defineEventHandler(async (event) => {

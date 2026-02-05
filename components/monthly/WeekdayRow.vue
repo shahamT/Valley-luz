@@ -17,7 +17,9 @@ const weekdays = HEBREW_WEEKDAYS
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: calc(var(--spacing-md) - 4px); // Reduced by padding-top amount to maintain visual spacing
+  padding-right: var(--scrollbar-total-width);
+  padding-left: 8px; // Match gridWrapper left padding for alignment
 
   &-day {
     text-align: center;

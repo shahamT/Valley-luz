@@ -37,11 +37,12 @@ defineProps({
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: var(--spacing-md);
+    padding-right: var(--scrollbar-padding);
     min-height: 0;
     direction: ltr; // Force scrollbar to right side
     
-    /* Custom scrollbar styling */
+    /* Custom scrollbar styling - reserve space for scrollbar */
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
     

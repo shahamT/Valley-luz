@@ -21,6 +21,7 @@
 
   /* Typography */
   --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-xs: 0.75rem;
   --font-size-base: 1rem;
   --font-size-sm: 0.875rem;
   --font-size-lg: 1.125rem;
@@ -55,6 +56,8 @@
 
   /* Scrollbar */
   --scrollbar-width: 8px;
+  --scrollbar-padding: var(--spacing-md);
+  --scrollbar-total-width: calc(var(--scrollbar-width) + var(--scrollbar-padding));
   --scrollbar-track-bg: rgba(128, 220, 218, 0.3);
   --scrollbar-thumb-bg: var(--brand-light-blue);
   --scrollbar-thumb-hover-bg: var(--brand-dark-blue);
@@ -75,10 +78,19 @@
   /* Calendar */
   --calendar-day-size: 6.5rem;
   --calendar-day-outside-bg: rgba(200, 230, 201, 0.3);
+  --day-cell-hover-bg: #fafbfc;
   --event-badge-bg: #81d4fa;
   --event-badge-text: #01579b;
 
   /* Layout */
   --header-height: 5rem;
   --content-max-width: 900px;
+
+  /* Modal */
+  --modal-backdrop-bg: rgba(0, 0, 0, 0.5);
+  --modal-max-width: 500px;
+  --modal-max-height: 80vh;
+  --modal-width: 90%;
+  --modal-close-size: 2rem;
+  --z-index-modal: 1000;
 }

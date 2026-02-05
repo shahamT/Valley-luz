@@ -23,6 +23,7 @@ export const LayoutAppShell: typeof import("../components/layout/AppShell.vue").
 export const MonthlyDayCell: typeof import("../components/monthly/DayCell.vue").default
 export const MonthlyMonthCalendar: typeof import("../components/monthly/MonthCalendar.vue").default
 export const MonthlyWeekdayRow: typeof import("../components/monthly/WeekdayRow.vue").default
+export const UiIcon: typeof import("../components/ui/Icon.vue").default
 export const UiPillButton: typeof import("../components/ui/PillButton.vue").default
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue").default
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout").default
@@ -56,6 +57,7 @@ export const LazyLayoutAppShell: LazyComponent<typeof import("../components/layo
 export const LazyMonthlyDayCell: LazyComponent<typeof import("../components/monthly/DayCell.vue").default>
 export const LazyMonthlyMonthCalendar: LazyComponent<typeof import("../components/monthly/MonthCalendar.vue").default>
 export const LazyMonthlyWeekdayRow: LazyComponent<typeof import("../components/monthly/WeekdayRow.vue").default>
+export const LazyUiIcon: LazyComponent<typeof import("../components/ui/Icon.vue").default>
 export const LazyUiPillButton: LazyComponent<typeof import("../components/ui/PillButton.vue").default>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue").default>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout").default>

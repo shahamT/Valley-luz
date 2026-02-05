@@ -1,8 +1,8 @@
 <template>
-  <div v-if="isEventModalShowing" class="EventModal" @click.self="handleBackdropClick">
+  <div v-if="isEventModalShowing" class="EventModal" @click.self="closeModal">
     <div class="EventModal-content">
       <div class="EventModal-header">
-        <h2>Event Modal</h2>
+        <h2>{{ MODAL_TEXT.title }}</h2>
         <button @click="closeModal" class="EventModal-close" aria-label="Close modal">
           ×
         </button>
@@ -24,10 +24,6 @@ const { isEventModalShowing, selectedEventId } = storeToRefs(uiStore)
 const closeModal = () => {
   uiStore.closeEventModal()
 }
-
-const handleBackdropClick = () => {
-  closeModal()
-}
 </script>
 
 <style lang="scss">
@@ -37,19 +33,19 @@ const handleBackdropClick = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--modal-backdrop-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-index-modal);
 
   &-content {
     background-color: var(--color-background);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
-    max-width: 500px;
-    width: 90%;
-    max-height: 80vh;
+    max-width: var(--modal-max-width);
+    width: var(--modal-width);
+    max-height: var(--modal-max-height);
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
   }
@@ -69,8 +65,8 @@ const handleBackdropClick = () => {
     cursor: pointer;
     color: var(--color-text-light);
     padding: 0;
-    width: 2rem;
-    height: 2rem;
+    width: var(--modal-close-size);
+    height: var(--modal-close-size);
     display: flex;
     align-items: center;
     justify-content: center;

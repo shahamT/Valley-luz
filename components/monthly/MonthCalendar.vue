@@ -21,16 +21,16 @@
 <script setup>
 import { eventsService } from '~/utils/events.service'
 import { generateCalendarDays } from '~/utils/calendar.helpers'
-import { DEFAULT_YEAR, DEFAULT_MONTH } from '~/consts/calendar.const'
+import { getCurrentYearMonth } from '~/utils/date.helpers'
 
 const props = defineProps({
   year: {
     type: Number,
-    default: DEFAULT_YEAR,
+    default: () => getCurrentYearMonth().year,
   },
   month: {
     type: Number,
-    default: DEFAULT_MONTH,
+    default: () => getCurrentYearMonth().month,
   },
   events: {
     type: Array,
@@ -63,10 +63,13 @@ const calendarDays = computed(() => {
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 0;
-    padding-right: var(--spacing-md);
+    padding-right: var(--scrollbar-padding);
+    padding-top: 4px; // Allow hover transition and shadow to show
+    padding-left: 8px; // Allow shadow to show on left side
     direction: ltr; // Force scrollbar to right side
     
-    /* Custom scrollbar styling */
+    /* Custom scrollbar styling - reserve space for scrollbar */
+    scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
     

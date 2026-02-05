@@ -3,7 +3,7 @@
     <div class="NotFoundPage">
       <h1>404</h1>
       <p>{{ UI_TEXT.notFound }}</p>
-      <button @click="goToMonthly" class="NotFoundPage__button">
+      <button @click="goToMonthly" class="NotFoundPage-button">
         {{ UI_TEXT.backToMonthly }}
       </button>
     </div>
@@ -38,7 +38,7 @@ const goToMonthly = () => {
     color: var(--color-text-light);
   }
 
-  &__button {
+  &-button {
     padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--color-primary);
     color: var(--color-background);

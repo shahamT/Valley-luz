@@ -5,7 +5,8 @@ export const PILL_LABELS = {
 }
 
 export const MODAL_TEXT = {
+  title: 'Event Modal',
   close: 'סגור',
-  noEventSelected: 'None',
-  placeholder: 'This is a placeholder modal component.',
+  noEventSelected: 'אין אירוע נבחר',
+  placeholder: 'זהו רכיב מודאלי של מציין מיקום.',
 }

@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #ffffff;
+  background-color: var(--color-background);
   background-image: linear-gradient(
     135deg,
     var(--gradient-bg-start),

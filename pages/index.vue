@@ -2,7 +2,12 @@
   <LayoutAppShell>
     <div class="MonthlyView">
       <div class="MonthlyView-header">
-        <ControlsTopControls mode="month" :month-year="monthYearDisplay" />
+        <ControlsTopControls 
+          mode="month" 
+          :month-year="monthYearDisplay"
+          @prev-month="handlePrevMonth"
+          @next-month="handleNextMonth"
+        />
       </div>
       <div class="MonthlyView-calendar">
         <MonthlyMonthCalendar :year="currentYear" :month="currentMonth" :events="eventsStore.events" />
@@ -16,11 +21,38 @@ import { getCurrentYearMonth, formatMonthYear } from '~/utils/date.helpers'
 
 const eventsStore = useEventsStore()
 
-const { year: currentYear, month: currentMonth } = getCurrentYearMonth()
+const currentDate = ref(getCurrentYearMonth())
+
+const currentYear = computed(() => currentDate.value.year)
+const currentMonth = computed(() => currentDate.value.month)
 
 const monthYearDisplay = computed(() => {
-  return formatMonthYear(currentYear, currentMonth)
+  return formatMonthYear(currentYear.value, currentMonth.value)
 })
+
+const handlePrevMonth = () => {
+  let newMonth = currentMonth.value - 1
+  let newYear = currentYear.value
+  
+  if (newMonth < 1) {
+    newMonth = 12
+    newYear--
+  }
+  
+  currentDate.value = { year: newYear, month: newMonth }
+}
+
+const handleNextMonth = () => {
+  let newMonth = currentMonth.value + 1
+  let newYear = currentYear.value
+  
+  if (newMonth > 12) {
+    newMonth = 1
+    newYear++
+  }
+  
+  currentDate.value = { year: newYear, month: newMonth }
+}
 </script>
 
 <style lang="scss">
@@ -33,6 +65,8 @@ const monthYearDisplay = computed(() => {
 
   &-header {
     grid-row: 1;
+    padding-right: var(--scrollbar-total-width);
+    padding-left: 8px; // Match gridWrapper left padding for alignment
   }
 
   &-calendar {

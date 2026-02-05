@@ -23,6 +23,7 @@ interface _GlobalComponents {
   'MonthlyDayCell': typeof import("../../components/monthly/DayCell.vue").default
   'MonthlyMonthCalendar': typeof import("../../components/monthly/MonthCalendar.vue").default
   'MonthlyWeekdayRow': typeof import("../../components/monthly/WeekdayRow.vue").default
+  'UiIcon': typeof import("../../components/ui/Icon.vue").default
   'UiPillButton': typeof import("../../components/ui/PillButton.vue").default
   'NuxtWelcome': typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default
   'NuxtLayout': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default
@@ -56,6 +57,7 @@ interface _GlobalComponents {
   'LazyMonthlyDayCell': LazyComponent<typeof import("../../components/monthly/DayCell.vue").default>
   'LazyMonthlyMonthCalendar': LazyComponent<typeof import("../../components/monthly/MonthCalendar.vue").default>
   'LazyMonthlyWeekdayRow': LazyComponent<typeof import("../../components/monthly/WeekdayRow.vue").default>
+  'LazyUiIcon': LazyComponent<typeof import("../../components/ui/Icon.vue").default>
   'LazyUiPillButton': LazyComponent<typeof import("../../components/ui/PillButton.vue").default>
   'LazyNuxtWelcome': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default>
   'LazyNuxtLayout': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default>

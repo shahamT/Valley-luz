@@ -7,9 +7,13 @@
     <div class="TopControls-center">
       <slot name="center">
         <div v-if="mode === 'month'" class="TopControls-monthNav">
-          <button class="TopControls-arrow" @click="$emit('prev-month')">←</button>
+          <button class="TopControls-navButton" @click="$emit('prev-month')" aria-label="Previous month">
+            <UiIcon name="chevron_right" size="md" />
+          </button>
           <span class="TopControls-month">{{ monthYear }}</span>
-          <button class="TopControls-arrow" @click="$emit('next-month')">→</button>
+          <button class="TopControls-navButton" @click="$emit('next-month')" aria-label="Next month">
+            <UiIcon name="chevron_left" size="md" />
+          </button>
         </div>
         <div v-else-if="mode === 'daily'" class="TopControls-dailyNav">
           <button class="TopControls-back" @click="$emit('back')">← {{ backButtonText }}</button>
@@ -75,17 +79,27 @@ defineEmits(['prev-month', 'next-month', 'back'])
     gap: var(--spacing-md);
   }
 
-  &-arrow {
-    background: none;
+  &-navButton {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
     border: none;
-    font-size: var(--font-size-lg);
+    background-color: var(--color-background);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--color-text);
-    padding: var(--spacing-xs);
-    transition: opacity 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--shadow-sm);
 
     &:hover {
-      opacity: 0.7;
+      background-color: var(--day-cell-hover-bg);
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
     }
   }
 
