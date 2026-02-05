@@ -1,10 +1,10 @@
 <template>
-  <div class="DailyEventCard">
-    <div class="DailyEventCard__time">{{ timeText }}</div>
-    <div class="DailyEventCard__content">
-      <h3 class="DailyEventCard__title">{{ title }}</h3>
-      <p class="DailyEventCard__desc">{{ desc }}</p>
-      <p class="DailyEventCard__price">{{ price }}</p>
+  <div class="EventCard">
+    <div class="EventCard__time">{{ timeText }}</div>
+    <div class="EventCard__content">
+      <h3 class="EventCard__title">{{ title }}</h3>
+      <p class="EventCard__desc">{{ desc }}</p>
+      <p class="EventCard__price">{{ price }}</p>
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ defineProps({
 </script>
 
 <style lang="scss">
-.DailyEventCard {
+.EventCard {
   background-color: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--shadow-card);

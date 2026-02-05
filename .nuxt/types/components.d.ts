@@ -16,8 +16,8 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 interface _GlobalComponents {
   'EventModal': typeof import("../../components/EventModal.vue").default
   'ControlsTopControls': typeof import("../../components/controls/TopControls.vue").default
-  'DailyEventCard': typeof import("../../components/daily/DailyEventCard.vue").default
-  'DailyEventList': typeof import("../../components/daily/DailyEventList.vue").default
+  'DailyEventCard': typeof import("../../components/daily/EventCard.vue").default
+  'DailyEventList': typeof import("../../components/daily/EventList.vue").default
   'LayoutAppHeader': typeof import("../../components/layout/AppHeader.vue").default
   'LayoutAppShell': typeof import("../../components/layout/AppShell.vue").default
   'MonthlyDayCell': typeof import("../../components/monthly/DayCell.vue").default
@@ -49,8 +49,8 @@ interface _GlobalComponents {
   'NuxtIsland': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island").default
   'LazyEventModal': LazyComponent<typeof import("../../components/EventModal.vue").default>
   'LazyControlsTopControls': LazyComponent<typeof import("../../components/controls/TopControls.vue").default>
-  'LazyDailyEventCard': LazyComponent<typeof import("../../components/daily/DailyEventCard.vue").default>
-  'LazyDailyEventList': LazyComponent<typeof import("../../components/daily/DailyEventList.vue").default>
+  'LazyDailyEventCard': LazyComponent<typeof import("../../components/daily/EventCard.vue").default>
+  'LazyDailyEventList': LazyComponent<typeof import("../../components/daily/EventList.vue").default>
   'LazyLayoutAppHeader': LazyComponent<typeof import("../../components/layout/AppHeader.vue").default>
   'LazyLayoutAppShell': LazyComponent<typeof import("../../components/layout/AppShell.vue").default>
   'LazyMonthlyDayCell': LazyComponent<typeof import("../../components/monthly/DayCell.vue").default>

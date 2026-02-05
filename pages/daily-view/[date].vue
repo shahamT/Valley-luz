@@ -7,7 +7,7 @@
     />
     <div v-if="eventsStore.isLoading">טוען אירועים...</div>
     <div v-else-if="eventsStore.isError">שגיאה בטעינת אירועים</div>
-    <DailyDailyEventList v-else :events="transformedEvents" />
+    <DailyEventList v-else :events="transformedEvents" />
   </LayoutAppShell>
 </template>
 

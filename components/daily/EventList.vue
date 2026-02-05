@@ -1,7 +1,7 @@
 <template>
-  <div class="DailyEventList">
-    <div class="DailyEventList__scrollArea">
-      <DailyDailyEventCard
+  <div class="EventList">
+    <div class="EventList__scrollArea">
+      <DailyEventCard
         v-for="event in events"
         :key="event.id"
         :time-text="event.timeText"
@@ -10,7 +10,7 @@
         :price="event.price"
       />
     </div>
-    <div class="DailyEventList__scrollbar"></div>
+    <div class="EventList__scrollbar"></div>
   </div>
 </template>
 
@@ -26,7 +26,7 @@ defineProps({
 </script>
 
 <style lang="scss">
-.DailyEventList {
+.EventList {
   position: relative;
   max-width: 800px;
   margin: 0 auto;

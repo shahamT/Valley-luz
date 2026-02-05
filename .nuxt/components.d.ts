@@ -16,8 +16,8 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 
 export const EventModal: typeof import("../components/EventModal.vue").default
 export const ControlsTopControls: typeof import("../components/controls/TopControls.vue").default
-export const DailyEventCard: typeof import("../components/daily/DailyEventCard.vue").default
-export const DailyEventList: typeof import("../components/daily/DailyEventList.vue").default
+export const DailyEventCard: typeof import("../components/daily/EventCard.vue").default
+export const DailyEventList: typeof import("../components/daily/EventList.vue").default
 export const LayoutAppHeader: typeof import("../components/layout/AppHeader.vue").default
 export const LayoutAppShell: typeof import("../components/layout/AppShell.vue").default
 export const MonthlyDayCell: typeof import("../components/monthly/DayCell.vue").default
@@ -49,8 +49,8 @@ export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components/nuxt-island").default
 export const LazyEventModal: LazyComponent<typeof import("../components/EventModal.vue").default>
 export const LazyControlsTopControls: LazyComponent<typeof import("../components/controls/TopControls.vue").default>
-export const LazyDailyEventCard: LazyComponent<typeof import("../components/daily/DailyEventCard.vue").default>
-export const LazyDailyEventList: LazyComponent<typeof import("../components/daily/DailyEventList.vue").default>
+export const LazyDailyEventCard: LazyComponent<typeof import("../components/daily/EventCard.vue").default>
+export const LazyDailyEventList: LazyComponent<typeof import("../components/daily/EventList.vue").default>
 export const LazyLayoutAppHeader: LazyComponent<typeof import("../components/layout/AppHeader.vue").default>
 export const LazyLayoutAppShell: LazyComponent<typeof import("../components/layout/AppShell.vue").default>
 export const LazyMonthlyDayCell: LazyComponent<typeof import("../components/monthly/DayCell.vue").default>
