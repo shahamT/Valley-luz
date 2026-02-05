@@ -15,17 +15,18 @@
 </template>
 
 <script setup>
-// All components and utils are auto-imported by Nuxt
-import { getEventCountsByDate, formatDateToYYYYMMDD } from '~/utils/events.helpers'
+import { eventsService } from '~/utils/events.service'
+import { generateCalendarDays } from '~/utils/calendar.helpers'
+import { DEFAULT_YEAR, DEFAULT_MONTH } from '~/consts/calendar.const'
 
 const props = defineProps({
   year: {
     type: Number,
-    default: 2025,
+    default: DEFAULT_YEAR,
   },
   month: {
     type: Number,
-    default: 2, // February
+    default: DEFAULT_MONTH,
   },
   events: {
     type: Array,
@@ -34,54 +35,11 @@ const props = defineProps({
 })
 
 const eventCountsMap = computed(() => {
-  return getEventCountsByDate(props.events, props.year, props.month)
+  return eventsService.getEventCountsByDate(props.events, props.year, props.month)
 })
 
 const calendarDays = computed(() => {
-  const days = []
-  const firstDay = new Date(props.year, props.month - 1, 1)
-  const lastDay = new Date(props.year, props.month, 0)
-  const daysInMonth = lastDay.getDate()
-  const startDayOfWeek = firstDay.getDay() // 0 = Sunday
-
-  // Add leading days from previous month
-  const prevMonthLastDay = new Date(props.year, props.month - 1, 0).getDate()
-  for (let i = startDayOfWeek - 1; i >= 0; i--) {
-    const dayNum = prevMonthLastDay - i
-    const date = new Date(props.year, props.month - 2, dayNum)
-    days.push({
-      dayNumber: dayNum,
-      isOutsideMonth: true,
-      eventsCount: 0,
-      dateString: formatDateToYYYYMMDD(date),
-    })
-  }
-
-  // Add current month days
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(props.year, props.month - 1, day)
-    const dateString = formatDateToYYYYMMDD(date)
-    days.push({
-      dayNumber: day,
-      isOutsideMonth: false,
-      eventsCount: eventCountsMap.value[dateString] || 0,
-      dateString,
-    })
-  }
-
-  // Add trailing days from next month to complete grid
-  const remainingCells = 42 - days.length // 6 rows * 7 days
-  for (let day = 1; day <= remainingCells; day++) {
-    const date = new Date(props.year, props.month, day)
-    days.push({
-      dayNumber: day,
-      isOutsideMonth: true,
-      eventsCount: 0,
-      dateString: formatDateToYYYYMMDD(date),
-    })
-  }
-
-  return days
+  return generateCalendarDays(props.year, props.month, eventCountsMap.value)
 })
 </script>
 

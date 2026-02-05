@@ -2,15 +2,17 @@
   <LayoutAppShell>
     <div class="NotFoundPage">
       <h1>404</h1>
-      <p>הדף המבוקש לא נמצא</p>
+      <p>{{ UI_TEXT.notFound }}</p>
       <button @click="goToMonthly" class="NotFoundPage__button">
-        חזרה ללו"ז חודשי
+        {{ UI_TEXT.backToMonthly }}
       </button>
     </div>
   </LayoutAppShell>
 </template>
 
 <script setup>
+import { UI_TEXT } from '~/consts/calendar.const'
+
 const goToMonthly = () => {
   navigateTo('/')
 }

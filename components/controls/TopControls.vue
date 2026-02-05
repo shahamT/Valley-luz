@@ -1,8 +1,8 @@
 <template>
   <div class="TopControls">
     <div class="TopControls__pills">
-      <UiPillButton label="יומן בסיס" />
-      <UiPillButton label="קטגוריות" :count="6" />
+      <UiPillButton :label="PILL_LABELS.baseCalendar" />
+      <UiPillButton :label="PILL_LABELS.categories" :count="categoriesCount" />
     </div>
     <div class="TopControls__center">
       <slot name="center">
@@ -12,7 +12,7 @@
           <button class="TopControls__arrow" @click="$emit('next-month')">→</button>
         </div>
         <div v-else-if="mode === 'daily'" class="TopControls__dailyNav">
-          <button class="TopControls__back" @click="$emit('back')">← חזרה ללו"ז חודשי</button>
+          <button class="TopControls__back" @click="$emit('back')">← {{ backButtonText }}</button>
           <div class="TopControls__date">{{ dateTitle }}</div>
         </div>
       </slot>
@@ -21,21 +21,30 @@
 </template>
 
 <script setup>
-// PillButton is auto-imported by Nuxt
+import { PILL_LABELS } from '~/consts/ui.const'
+import { UI_TEXT } from '~/consts/calendar.const'
 
-defineProps({
+const props = defineProps({
   mode: {
     type: String,
     default: 'month', // 'month' or 'daily'
   },
   monthYear: {
     type: String,
-    default: 'פברואר 2025',
+    default: '',
   },
   dateTitle: {
     type: String,
-    default: 'יום ראשון | 6 בפברואר 2025',
+    default: '',
   },
+  categoriesCount: {
+    type: Number,
+    default: 0,
+  },
+})
+
+const backButtonText = computed(() => {
+  return UI_TEXT.backToMonthly
 })
 
 defineEmits(['prev-month', 'next-month', 'back'])

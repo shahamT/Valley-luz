@@ -13,11 +13,7 @@ export function parseDateString(dateString) {
   return new Date(year, month - 1, day)
 }
 
-export function getDateFromISO(isoString) {
-  if (!isoString) return null
-  const date = new Date(isoString)
-  return formatDateToYYYYMMDD(date)
-}
+// Note: getDateFromISO moved to events.service.js as it's used for event data operations
 
 export function formatDateForDisplay(dateString) {
   const date = parseDateString(dateString)
@@ -28,60 +24,8 @@ export function formatDateForDisplay(dateString) {
   return `יום ${weekday} | ${day} ב${month} ${year}`
 }
 
-// Event filtering functions
-export function getActiveEvents(events) {
-  return events.filter((event) => event.isActive === true)
-}
-
-export function getEventOccurrencesOnDate(event, dateString) {
-  if (!event.occurrences || event.occurrences.length === 0) return []
-  
-  return event.occurrences.filter((occurrence) => {
-    if (!occurrence.startTime) return false
-    const occurrenceDate = getDateFromISO(occurrence.startTime)
-    return occurrenceDate === dateString
-  })
-}
-
-export function getEventsForDate(events, dateString) {
-  const activeEvents = getActiveEvents(events)
-  const eventsOnDate = []
-  
-  activeEvents.forEach((event) => {
-    const matchingOccurrences = getEventOccurrencesOnDate(event, dateString)
-    if (matchingOccurrences.length > 0) {
-      matchingOccurrences.forEach((occurrence) => {
-        eventsOnDate.push({ event, occurrence })
-      })
-    }
-  })
-  
-  return eventsOnDate
-}
-
-export function getEventCountsByDate(events, year, month) {
-  const activeEvents = getActiveEvents(events)
-  const countsMap = {}
-  
-  activeEvents.forEach((event) => {
-    if (!event.occurrences) return
-    
-    event.occurrences.forEach((occurrence) => {
-      if (!occurrence.startTime) return
-      
-      const occurrenceDate = new Date(occurrence.startTime)
-      const occurrenceYear = occurrenceDate.getFullYear()
-      const occurrenceMonth = occurrenceDate.getMonth() + 1
-      
-      if (occurrenceYear === year && occurrenceMonth === month) {
-        const dateString = formatDateToYYYYMMDD(occurrenceDate)
-        countsMap[dateString] = (countsMap[dateString] || 0) + 1
-      }
-    })
-  })
-  
-  return countsMap
-}
+// Note: Event querying/filtering functions have been moved to events.service.js
+// This file now contains only formatting and transformation utilities
 
 // Event formatting functions
 export function formatEventTime(occurrence) {

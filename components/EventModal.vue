@@ -8,15 +8,15 @@
         </button>
       </div>
       <div class="EventModal__body">
-        <p>Selected Event ID: <strong>{{ selectedEventId || 'None' }}</strong></p>
-        <p>This is a placeholder modal component.</p>
+        <p>Selected Event ID: <strong>{{ selectedEventId || MODAL_TEXT.noEventSelected }}</strong></p>
+        <p>{{ MODAL_TEXT.placeholder }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// All stores are auto-imported by Nuxt
+import { MODAL_TEXT } from '~/consts/ui.const'
 
 const uiStore = useUiStore()
 const { isEventModalShowing, selectedEventId } = storeToRefs(uiStore)

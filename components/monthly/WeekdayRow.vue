@@ -7,7 +7,9 @@
 </template>
 
 <script setup>
-const weekdays = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+import { HEBREW_WEEKDAYS } from '~/consts/dates.const'
+
+const weekdays = HEBREW_WEEKDAYS
 </script>
 
 <style lang="scss">

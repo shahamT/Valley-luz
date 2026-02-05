@@ -6,12 +6,14 @@
   >
     <div class="DayCell__number">{{ dayNumber }}</div>
     <div v-if="eventsCount > 0" class="DayCell__badge">
-      {{ eventsCount }} אירועים
+      {{ getEventsCountText(eventsCount) }}
     </div>
   </div>
 </template>
 
 <script setup>
+import { UI_TEXT } from '~/consts/calendar.const'
+
 const props = defineProps({
   dayNumber: {
     type: Number,
@@ -30,6 +32,10 @@ const props = defineProps({
     required: true,
   },
 })
+
+const getEventsCountText = (count) => {
+  return UI_TEXT.eventsCount(count)
+}
 
 const handleClick = () => {
   if (!props.isOutsideMonth) {

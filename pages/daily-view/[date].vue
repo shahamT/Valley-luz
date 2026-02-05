@@ -5,14 +5,16 @@
       :date-title="formattedDate"
       @back="goToMonthly"
     />
-    <div v-if="eventsStore.isLoading">טוען אירועים...</div>
-    <div v-else-if="eventsStore.isError">שגיאה בטעינת אירועים</div>
+    <div v-if="eventsStore.isLoading">{{ UI_TEXT.loading }}</div>
+    <div v-else-if="eventsStore.isError">{{ UI_TEXT.error }}</div>
     <DailyEventList v-else :events="transformedEvents" />
   </LayoutAppShell>
 </template>
 
 <script setup>
-// All composables and utils are auto-imported by Nuxt
+import { getTodayDateString } from '~/utils/date.helpers'
+import { UI_TEXT } from '~/consts/calendar.const'
+
 const route = useRoute()
 const eventsStore = useEventsStore()
 
@@ -22,11 +24,7 @@ const dateParam = computed(() => {
     return param
   }
   // Fallback to today's date if invalid
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-  const day = String(today.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return getTodayDateString()
 })
 
 const formattedDate = computed(() => {
@@ -34,7 +32,7 @@ const formattedDate = computed(() => {
 })
 
 const eventsForDate = computed(() => {
-  return getEventsForDate(eventsStore.events, dateParam.value)
+  return eventsService.getEventsForDate(eventsStore.events, dateParam.value)
 })
 
 const transformedEvents = computed(() => {

@@ -33,15 +33,14 @@ declare global {
   const formatEventLocation: typeof import('../../utils/events.helpers').formatEventLocation
   const formatEventPrice: typeof import('../../utils/events.helpers').formatEventPrice
   const formatEventTime: typeof import('../../utils/events.helpers').formatEventTime
-  const getActiveEvents: typeof import('../../utils/events.helpers').getActiveEvents
+  const formatMonthYear: typeof import('../../utils/date.helpers').formatMonthYear
+  const generateCalendarDays: typeof import('../../utils/calendar.helpers').generateCalendarDays
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCurrentInstance: typeof import('../../node_modules/vue').getCurrentInstance
   const getCurrentScope: typeof import('../../node_modules/vue').getCurrentScope
-  const getDateFromISO: typeof import('../../utils/events.helpers').getDateFromISO
-  const getEventCountsByDate: typeof import('../../utils/events.helpers').getEventCountsByDate
-  const getEventOccurrencesOnDate: typeof import('../../utils/events.helpers').getEventOccurrencesOnDate
-  const getEventsForDate: typeof import('../../utils/events.helpers').getEventsForDate
+  const getCurrentYearMonth: typeof import('../../utils/date.helpers').getCurrentYearMonth
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
+  const getTodayDateString: typeof import('../../utils/date.helpers').getTodayDateString
   const h: typeof import('../../node_modules/vue').h
   const hasInjectionContext: typeof import('../../node_modules/vue').hasInjectionContext
   const inject: typeof import('../../node_modules/vue').inject
@@ -241,15 +240,14 @@ declare module 'vue' {
     readonly formatEventLocation: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocation']>
     readonly formatEventPrice: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventPrice']>
     readonly formatEventTime: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventTime']>
-    readonly getActiveEvents: UnwrapRef<typeof import('../../utils/events.helpers')['getActiveEvents']>
+    readonly formatMonthYear: UnwrapRef<typeof import('../../utils/date.helpers')['formatMonthYear']>
+    readonly generateCalendarDays: UnwrapRef<typeof import('../../utils/calendar.helpers')['generateCalendarDays']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentScope']>
-    readonly getDateFromISO: UnwrapRef<typeof import('../../utils/events.helpers')['getDateFromISO']>
-    readonly getEventCountsByDate: UnwrapRef<typeof import('../../utils/events.helpers')['getEventCountsByDate']>
-    readonly getEventOccurrencesOnDate: UnwrapRef<typeof import('../../utils/events.helpers')['getEventOccurrencesOnDate']>
-    readonly getEventsForDate: UnwrapRef<typeof import('../../utils/events.helpers')['getEventsForDate']>
+    readonly getCurrentYearMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getCurrentYearMonth']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
+    readonly getTodayDateString: UnwrapRef<typeof import('../../utils/date.helpers')['getTodayDateString']>
     readonly h: UnwrapRef<typeof import('../../node_modules/vue')['h']>
     readonly hasInjectionContext: UnwrapRef<typeof import('../../node_modules/vue')['hasInjectionContext']>
     readonly inject: UnwrapRef<typeof import('../../node_modules/vue')['inject']>
