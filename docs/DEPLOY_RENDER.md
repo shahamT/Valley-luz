@@ -1,40 +1,24 @@
-# Deploying to Render (Static Site)
+# Deploying to Render (Web Service)
 
-This guide covers deploying the Valley Luz Vue 3 application to Render as a Static Site.
+This guide covers deploying the Valley Luz Nuxt 3 application to Render as a Web Service.
 
-## Render Static Site Settings
+## Render Web Service Settings
 
-When creating a new Static Site on Render, configure the following:
+When creating a new Web Service on Render, configure the following:
 
 ### Build Settings
 
 - **Build Command**: `npm run build`
-- **Publish Directory**: `dist`
+- **Start Command**: `node .output/server/index.mjs`
 
 ### Environment Variables
 
 No environment variables are required for basic deployment.
 
-## SPA Routing Configuration
+### Service Type
 
-Since this is a Single Page Application (SPA) using Vue Router, you need to configure Render to handle client-side routing. When users refresh the page or navigate directly to routes like `/monthly-view` or `/daily-view`, Render must serve the `index.html` file instead of returning a 404.
-
-### Adding a Rewrite Rule
-
-1. In your Render Static Site dashboard, navigate to **Settings**
-2. Scroll down to **Redirects/Rewrites** section
-3. Add the following rewrite rule:
-
-   ```
-   /*    /index.html   200
-   ```
-
-   This rule tells Render to:
-   - Match all paths (`/*`)
-   - Rewrite them to `/index.html`
-   - Return HTTP status 200 (not a redirect)
-
-   This ensures all routes are handled by the Vue Router on the client side.
+- **Environment**: Node.js
+- **Region**: Choose your preferred region
 
 ## Node Version
 
@@ -51,15 +35,28 @@ If you need to override this, you can set the `NODE_VERSION` environment variabl
 
 1. Render will run `npm install` to install dependencies
 2. Then execute `npm run build` to create the production build
-3. The contents of the `dist` directory will be served as static files
+3. Nuxt generates the `.output/` directory with server and client files
+4. The service starts using the start command
+
+## Routing
+
+Nuxt handles routing server-side, so no rewrite rules are needed. All routes are handled automatically by the Nuxt server.
+
+## API Endpoints
+
+The backend API is part of the same service:
+- `/api/events` - GET endpoint for events data
 
 ## Verification
 
 After deployment:
 
 1. Verify the root URL loads correctly
-2. Test navigation between routes (e.g., `/monthly-view` and `/daily-view`)
-3. Test direct URL access (e.g., navigate directly to `/daily-view` in a new tab)
-4. Verify the modal functionality works correctly
+2. Test navigation between routes (e.g., `/` and `/daily-view/2026-02-05`)
+3. Test direct URL access (e.g., navigate directly to `/daily-view/2026-02-05` in a new tab)
+4. Verify the API endpoint works: `https://your-service.onrender.com/api/events`
+5. Verify the modal functionality works correctly
 
-If direct route access returns a 404, ensure the rewrite rule is properly configured.
+## Health Check
+
+Render will automatically check the service health. The default health check path is `/`, which should return a 200 status.
