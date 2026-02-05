@@ -41,6 +41,12 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-card: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
 
+  /* Brand Colors */
+  --brand-dark-blue: #3C92B5;
+  --brand-light-blue: #80DCDA;
+  --brand-dark-green: #0B974A;
+  --brand-light-green: #85C84B;
+
   /* Gradient */
   --gradient-start: #e8f5e9;
   --gradient-end: #c8e6c9;
@@ -57,8 +63,12 @@
   --pill-padding-y: 0.5rem;
 
   /* Calendar */
-  --calendar-day-size: 8rem;
+  --calendar-day-size: 6.5rem;
   --calendar-day-outside-bg: rgba(200, 230, 201, 0.3);
   --event-badge-bg: #81d4fa;
   --event-badge-text: #01579b;
+
+  /* Layout */
+  --header-height: 5rem;
+  --content-max-width: 900px;
 }

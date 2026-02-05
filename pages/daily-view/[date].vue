@@ -1,13 +1,19 @@
 <template>
   <LayoutAppShell>
-    <ControlsTopControls
-      mode="daily"
-      :date-title="formattedDate"
-      @back="goToMonthly"
-    />
-    <div v-if="eventsStore.isLoading">{{ UI_TEXT.loading }}</div>
-    <div v-else-if="eventsStore.isError">{{ UI_TEXT.error }}</div>
-    <DailyEventList v-else :events="transformedEvents" />
+    <div class="DailyView">
+      <div class="DailyView__header">
+        <ControlsTopControls
+          mode="daily"
+          :date-title="formattedDate"
+          @back="goToMonthly"
+        />
+      </div>
+      <div class="DailyView__content">
+        <div v-if="eventsStore.isLoading">{{ UI_TEXT.loading }}</div>
+        <div v-else-if="eventsStore.isError">{{ UI_TEXT.error }}</div>
+        <DailyEventList v-else :events="transformedEvents" />
+      </div>
+    </div>
   </LayoutAppShell>
 </template>
 
@@ -47,3 +53,23 @@ const goToMonthly = () => {
   navigateTo('/')
 }
 </script>
+
+<style lang="scss">
+.DailyView {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  gap: var(--spacing-md);
+
+  &__header {
+    grid-row: 1;
+  }
+
+  &__content {
+    grid-row: 2;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+</style>

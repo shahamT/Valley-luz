@@ -71,8 +71,9 @@ const handleClick = () => {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text);
-    align-self: flex-end;
+    align-self: flex-start;
     margin-bottom: auto;
+    margin-top: 0;
   }
 
   &__badge {

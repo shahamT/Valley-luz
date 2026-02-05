@@ -1,8 +1,9 @@
 import { formatDateToYYYYMMDD } from './events.helpers'
-import { CALENDAR_GRID_SIZE } from '~/consts/calendar.const'
+import { DAYS_PER_WEEK } from '~/consts/calendar.const'
 
 /**
  * Generates calendar grid days for a given month/year
+ * Shows only the weeks that contain days from the current month
  * @param {number} year - Year (e.g., 2026)
  * @param {number} month - Month (1-12, 1-indexed)
  * @param {Object} eventCountsMap - Map of date strings to event counts
@@ -15,8 +16,15 @@ export function generateCalendarDays(year, month, eventCountsMap = {}) {
   const daysInMonth = lastDay.getDate()
   const startDayOfWeek = firstDay.getDay() // 0 = Sunday
 
-  // Add leading days from previous month
+  // Calculate leading days from previous month (to complete first week)
+  // In RTL: Sunday (0) is first day, so if month starts on Sunday, no leading days needed
+  // If month starts on Monday (1), we need 1 leading day (Sunday)
+  // If month starts on Tuesday (2), we need 2 leading days (Sunday, Monday), etc.
   const prevMonthLastDay = new Date(year, month - 1, 0).getDate()
+  
+  // Add leading days from previous month
+  // Loop runs from (startDayOfWeek - 1) down to 0, so count = startDayOfWeek (if > 0)
+  let leadingDays = 0
   for (let i = startDayOfWeek - 1; i >= 0; i--) {
     const dayNum = prevMonthLastDay - i
     const date = new Date(year, month - 2, dayNum)
@@ -26,6 +34,7 @@ export function generateCalendarDays(year, month, eventCountsMap = {}) {
       eventsCount: 0,
       dateString: formatDateToYYYYMMDD(date),
     })
+    leadingDays++
   }
 
   // Add current month days
@@ -40,9 +49,13 @@ export function generateCalendarDays(year, month, eventCountsMap = {}) {
     })
   }
 
-  // Add trailing days from next month to complete grid
-  const remainingCells = CALENDAR_GRID_SIZE - days.length
-  for (let day = 1; day <= remainingCells; day++) {
+  // Calculate trailing days from next month (to complete last week)
+  const totalDaysSoFar = leadingDays + daysInMonth
+  const trailingDays = totalDaysSoFar % DAYS_PER_WEEK === 0 
+    ? 0 
+    : DAYS_PER_WEEK - (totalDaysSoFar % DAYS_PER_WEEK)
+
+  for (let day = 1; day <= trailingDays; day++) {
     const date = new Date(year, month, day)
     days.push({
       dayNumber: day,

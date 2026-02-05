@@ -12,6 +12,7 @@ const { isEventModalShowing } = storeToRefs(uiStore)
 
 <style lang="scss">
 .App {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 </style>
