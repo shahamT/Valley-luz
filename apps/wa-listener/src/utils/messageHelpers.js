@@ -2,14 +2,32 @@ import { DEFAULTS } from '../consts/index.js'
 
 /**
  * Extracts message ID from WhatsApp message object
- * @param {Object} message - Message object from whatsapp-web.js
+ * Handles both original message structure and serialized (flattened) message structure
+ * @param {Object} message - Message object from whatsapp-web.js or serialized message
  * @returns {string} Message ID or 'unknown'
  */
 export function extractMessageId(message) {
-  if (!message || !message.id) {
+  if (!message) {
     return DEFAULTS.UNKNOWN_MESSAGE_ID
   }
-  return message.id._serialized || message.id?.id || DEFAULTS.UNKNOWN_MESSAGE_ID
+  
+  // Handle message.id (works for both original and flattened structures)
+  if (message.id) {
+    // If id is an object with _serialized property
+    if (typeof message.id === 'object' && message.id._serialized) {
+      return message.id._serialized
+    }
+    // If id is an object with id property
+    if (typeof message.id === 'object' && message.id.id) {
+      return message.id.id
+    }
+    // If id is a string
+    if (typeof message.id === 'string') {
+      return message.id
+    }
+  }
+  
+  return DEFAULTS.UNKNOWN_MESSAGE_ID
 }
 
 /**

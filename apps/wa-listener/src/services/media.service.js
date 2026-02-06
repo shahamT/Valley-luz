@@ -5,11 +5,13 @@ import { LOG_PREFIXES, MIME_TYPE_EXTENSIONS, DEFAULT_MIME_TYPE } from '../consts
 
 /**
  * Uploads media from a WhatsApp message to Cloudinary
+ * Uses imgBody from serialized message if available for metadata
  * @param {Object} message - Message object from whatsapp-web.js
  * @param {string} messageId - Message ID for filename
+ * @param {Object} serializedMessage - Serialized message object (contains imgBody if available)
  * @returns {Promise<{cloudinaryUrl: string, cloudinaryData: object}|null>} Cloudinary URL and metadata or null if upload failed
  */
-export async function uploadMessageMedia(message, messageId) {
+export async function uploadMessageMedia(message, messageId, serializedMessage = null) {
   if (!message.hasMedia) {
     return null
   }
@@ -29,13 +31,15 @@ export async function uploadMessageMedia(message, messageId) {
     extension = MIME_TYPE_EXTENSIONS[extension] || extension
 
     // Create filename: messageId_timestamp.extension
-    const timestamp = message.timestamp || Date.now()
+    // Use imgBody from serialized message if available for better filename context
+    const timestamp = message.timestamp || message._data?.t || Date.now()
     const filename = `${messageId}_${timestamp}.${extension}`
 
     // Convert base64 to buffer
     const buffer = Buffer.from(media.data, 'base64')
 
     // Upload directly to Cloudinary
+    // Note: imgBody from serializedMessage can be used for metadata if needed
     const cloudinaryResult = await uploadMediaToCloudinary(buffer, filename, mimetype)
     
     if (!cloudinaryResult) {

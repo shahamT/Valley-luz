@@ -42,10 +42,11 @@ export async function connect() {
 /**
  * Inserts a message document into MongoDB
  * Fails silently - logs errors but never throws
- * @param {Object} rawMessage - The raw message object
+ * @param {Object} rawMessage - The raw message object (without cloudinaryUrl/cloudinaryData)
  * @param {string|null} cloudinaryUrl - Cloudinary URL or null
+ * @param {Object|null} cloudinaryData - Cloudinary metadata or null
  */
-export async function insertMessage(rawMessage, cloudinaryUrl) {
+export async function insertMessage(rawMessage, cloudinaryUrl, cloudinaryData) {
   // If not connected, log warning and skip
   if (!db) {
     logger.warn(LOG_PREFIXES.MONGODB, 'Cannot insert message: MongoDB connection not established')
@@ -57,6 +58,7 @@ export async function insertMessage(rawMessage, cloudinaryUrl) {
     const document = {
       createdAt: new Date(),
       cloudinaryUrl: cloudinaryUrl || null,
+      cloudinaryData: cloudinaryData || null,
       raw: rawMessage,
     }
 

@@ -5,7 +5,7 @@ import { config } from '../config.js'
 import { logger } from '../utils/logger.js'
 import { extractMessageId, extractGroupId } from '../utils/messageHelpers.js'
 import { LOG_PREFIXES, TIMEOUTS, PUPPETEER_ARGS } from '../consts/index.js'
-import { serializeMessage, processMessage } from './message.service.js'
+import { serializeMessage, processMessage, isMessageTypeAllowed } from './message.service.js'
 import { uploadMessageMedia } from './media.service.js'
 import { printGroupMetadata, listAllGroups } from './group.service.js'
 import { insertMessage } from './mongo.service.js'
@@ -107,24 +107,36 @@ export async function initializeClient() {
         return
       }
 
-      // Serialize message data
-      const rawMessage = serializeMessage(message, chat)
+      // Only process messages with allowed types (text, image, video)
+      if (!isMessageTypeAllowed(message)) {
+        if (config.logLevel === 'info') {
+          const messageType = message.type || message._data?.type || 'unknown'
+          logger.info(LOG_PREFIXES.WHATSAPP, `Ignoring message with unsupported type: ${messageType}`)
+        }
+        return
+      }
+
+      // Serialize message data (only keeps specific fields)
+      const rawMessage = serializeMessage(message)
       
       // Upload media to Cloudinary if present
+      // Pass serialized message so imgBody can be used in media processing
       let cloudinaryResult = null
       if (message.hasMedia) {
         const messageId = extractMessageId(message) || `msg_${Date.now()}`
-        cloudinaryResult = await uploadMessageMedia(message, messageId)
+        cloudinaryResult = await uploadMessageMedia(message, messageId, rawMessage)
       }
       
       // Process message with Cloudinary URL
       processMessage(rawMessage, cloudinaryResult)
       
       // Insert to MongoDB as side-effect (fire-and-forget, fail-safe)
+      // Cloudinary data is stored as top-level fields, not in raw message
       try {
         const cloudinaryUrl = cloudinaryResult?.cloudinaryUrl || null
+        const cloudinaryData = cloudinaryResult?.cloudinaryData || null
         // Don't await - fire and forget to avoid blocking
-        insertMessage(rawMessage, cloudinaryUrl).catch((mongoError) => {
+        insertMessage(rawMessage, cloudinaryUrl, cloudinaryData).catch((mongoError) => {
           // Already handled in insertMessage, but catch here as extra safety
           const errorMsg = mongoError instanceof Error ? mongoError.message : String(mongoError)
           logger.error(LOG_PREFIXES.WHATSAPP, `MongoDB insert error (non-blocking): ${errorMsg}`)
