@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { existsSync, mkdirSync } from 'fs'
+import { logError, logErrors } from './utils/errorLogger.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -27,25 +28,43 @@ function loadConfig() {
   // Fail closed in production if no groupIds are provided
   if (isProduction) {
     if (groupIds.length === 0) {
-      console.error('ERROR: WHATSAPP_GROUP_IDS is required in production mode')
-      console.error('Set WHATSAPP_GROUP_IDS in .env (comma-separated) before running in production')
+      logError('WHATSAPP_GROUP_IDS is required in production mode')
+      logError('Set WHATSAPP_GROUP_IDS in .env (comma-separated) before running in production')
       process.exit(1)
     }
 
     const discoveryMode = process.env.WA_DISCOVERY_MODE === 'true'
     if (discoveryMode) {
-      console.error('ERROR: WA_DISCOVERY_MODE must be false in production')
+      logError('WA_DISCOVERY_MODE must be false in production')
       process.exit(1)
     }
+  }
+
+  // Validate MongoDB configuration (required)
+  const mongodbUri = process.env.MONGODB_URI
+  const mongodbDbName = process.env.MONGODB_DB_NAME
+
+  if (!mongodbUri || !mongodbDbName) {
+    logError('MongoDB configuration is required')
+    const missingVars = []
+    if (!mongodbUri) {
+      missingVars.push('  - MONGODB_URI')
+    }
+    if (!mongodbDbName) {
+      missingVars.push('  - MONGODB_DB_NAME')
+    }
+    if (missingVars.length > 0) {
+      logError('Missing required environment variables:')
+      logErrors(missingVars)
+    }
+    logError('Please set these variables in your .env file')
+    process.exit(1)
   }
 
   const config = {
     nodeEnv,
     isProduction,
     authPath: process.env.WA_AUTH_PATH || './auth',
-    dataPath: process.env.WA_DATA_PATH || './data',
-    messagesFile: process.env.WA_MESSAGES_FILE || 'messages.jsonl',
-    mediaPath: process.env.WA_MEDIA_PATH || './data/media',
     groupIds, // Array of group IDs
     discoveryMode: process.env.WA_DISCOVERY_MODE === 'true',
     logLevel: process.env.WA_LOG_LEVEL || 'info',
@@ -56,25 +75,21 @@ function loadConfig() {
       apiSecret: process.env.CLOUDINARY_API_SECRET || '',
       folder: process.env.CLOUDINARY_FOLDER || 'whatsapp-listener',
     },
+    // MongoDB configuration
+    mongodb: {
+      uri: mongodbUri,
+      dbName: mongodbDbName,
+      collectionRawMessages: process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages',
+    },
   }
 
   // Resolve paths relative to wa-listener directory
   const baseDir = join(__dirname, '..')
   config.authPath = join(baseDir, config.authPath)
-  config.dataPath = join(baseDir, config.dataPath)
-  config.mediaPath = join(baseDir, config.mediaPath)
-  const messagesFilePath = join(config.dataPath, config.messagesFile)
-  config.messagesFilePath = messagesFilePath
 
-  // Create directories if they don't exist
+  // Create auth directory if it doesn't exist
   if (!existsSync(config.authPath)) {
     mkdirSync(config.authPath, { recursive: true })
-  }
-  if (!existsSync(config.dataPath)) {
-    mkdirSync(config.dataPath, { recursive: true })
-  }
-  if (!existsSync(config.mediaPath)) {
-    mkdirSync(config.mediaPath, { recursive: true })
   }
 
   return config

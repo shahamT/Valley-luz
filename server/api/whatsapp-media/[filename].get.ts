@@ -1,8 +1,9 @@
-import { readFile } from 'fs/promises'
-import { existsSync } from 'fs'
-import { join } from 'path'
-import { createReadStream } from 'fs'
+import { getMongoConnection } from '~/server/utils/mongodb'
 
+/**
+ * Media endpoint - redirects to Cloudinary URL
+ * Looks up message by filename pattern in MongoDB and redirects to Cloudinary URL
+ */
 export default defineEventHandler(async (event) => {
   const filename = getRouterParam(event, 'filename')
   
@@ -21,40 +22,32 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Path to media file
-  const mediaPath = join(process.cwd(), 'apps/wa-listener/data/media', filename)
+  try {
+    const { db } = await getMongoConnection()
+    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages')
 
-  // Check if file exists
-  if (!existsSync(mediaPath)) {
+    // Find document where cloudinaryUrl contains the filename
+    // Filename format: messageId_timestamp.extension
+    const document = await collection.findOne({
+      cloudinaryUrl: { $regex: filename }
+    })
+
+    if (!document || !document.cloudinaryUrl) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Media file not found',
+      })
+    }
+
+    // Redirect to Cloudinary URL
+    return sendRedirect(event, document.cloudinaryUrl, 302)
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'statusCode' in error) {
+      throw error
+    }
     throw createError({
-      statusCode: 404,
-      statusMessage: 'Media file not found',
+      statusCode: 500,
+      statusMessage: 'Failed to retrieve media',
     })
   }
-
-  // Determine content type from file extension
-  const ext = filename.split('.').pop()?.toLowerCase()
-  const mimeTypes: Record<string, string> = {
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'png': 'image/png',
-    'gif': 'image/gif',
-    'webp': 'image/webp',
-    'mp4': 'video/mp4',
-    'mov': 'video/quicktime',
-    'avi': 'video/x-msvideo',
-    'mp3': 'audio/mpeg',
-    'ogg': 'audio/ogg',
-    'wav': 'audio/wav',
-    'pdf': 'application/pdf',
-    'txt': 'text/plain',
-  }
-
-  const contentType = mimeTypes[ext || ''] || 'application/octet-stream'
-
-  // Set headers and return file stream
-  setHeader(event, 'Content-Type', contentType)
-  setHeader(event, 'Content-Disposition', `inline; filename="${filename}"`)
-  
-  return createReadStream(mediaPath)
 })

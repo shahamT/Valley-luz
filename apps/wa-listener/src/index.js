@@ -1,33 +1,37 @@
 import { config } from './config.js'
-import { initializeClient, destroyClient } from './whatsappClient.js'
+import { initializeClient, destroyClient } from './services/whatsapp.service.js'
+import { connect, close } from './services/mongo.service.js'
+import { logger } from './utils/logger.js'
+import { LOG_PREFIXES } from './consts/index.js'
 
-console.log('=== WhatsApp Group Listener (PoC) ===')
-console.log(`Environment: ${config.nodeEnv}`)
-console.log(`Discovery Mode: ${config.discoveryMode}`)
+logger.info(LOG_PREFIXES.MAIN, '=== WhatsApp Message Service ===')
+logger.info(LOG_PREFIXES.MAIN, `Environment: ${config.nodeEnv}`)
+logger.info(LOG_PREFIXES.MAIN, `Discovery Mode: ${config.discoveryMode}`)
 if (config.discoveryMode) {
-  console.log('Group IDs: (discovery mode - not set)')
+  logger.info(LOG_PREFIXES.MAIN, 'Group IDs: (discovery mode - not set)')
 } else {
-  console.log(`Group IDs: ${config.groupIds.length > 0 ? config.groupIds.join(', ') : '(not set)'}`)
+  logger.info(LOG_PREFIXES.MAIN, `Group IDs: ${config.groupIds.length > 0 ? config.groupIds.join(', ') : '(not set)'}`)
 }
-console.log('')
+logger.info(LOG_PREFIXES.MAIN, '')
 
 // Validate configuration
 if (config.isProduction) {
-  console.log('Running in PRODUCTION mode')
+  logger.info(LOG_PREFIXES.MAIN, 'Running in PRODUCTION mode')
   if (config.groupIds.length === 0) {
-    console.error('ERROR: WHATSAPP_GROUP_IDS is required in production')
+    logger.error(LOG_PREFIXES.CONFIG, 'WHATSAPP_GROUP_IDS is required in production')
     process.exit(1)
   }
   if (config.discoveryMode) {
-    console.error('ERROR: WA_DISCOVERY_MODE must be false in production')
+    logger.error(LOG_PREFIXES.CONFIG, 'WA_DISCOVERY_MODE must be false in production')
     process.exit(1)
   }
 }
 
 // Handle graceful shutdown
 const shutdown = async () => {
-  console.log('\n[Shutdown] Gracefully shutting down...')
+  logger.info(LOG_PREFIXES.SHUTDOWN, '\nGracefully shutting down...')
   await destroyClient()
+  await close()
   process.exit(0)
 }
 
@@ -36,22 +40,39 @@ process.on('SIGTERM', shutdown)
 
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
-  console.error('[Fatal] Uncaught exception:', error)
+  logger.error(LOG_PREFIXES.FATAL, 'Uncaught exception', error)
   shutdown()
 })
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('[Fatal] Unhandled rejection at:', promise, 'reason:', reason)
+  logger.error(LOG_PREFIXES.FATAL, `Unhandled rejection at: ${promise}, reason: ${reason}`)
   shutdown()
 })
 
+// Connect to MongoDB first
+try {
+  const mongoClient = await connect()
+  if (!mongoClient) {
+    logger.error(LOG_PREFIXES.FATAL, 'MongoDB connection failed - cannot proceed')
+    process.exit(1)
+  }
+} catch (error) {
+  const errorMsg = error instanceof Error ? error.message : String(error)
+  logger.error(LOG_PREFIXES.FATAL, `Failed to connect to MongoDB: ${errorMsg}`)
+  process.exit(1)
+}
+
 // Start the client
 try {
-  console.log('[Main] Starting WhatsApp client initialization...')
+  logger.info(LOG_PREFIXES.MAIN, 'Starting WhatsApp client initialization...')
   await initializeClient()
-  console.log('[Main] WhatsApp client initialization completed successfully')
+  logger.info(LOG_PREFIXES.MAIN, 'WhatsApp client initialization completed successfully')
 } catch (error) {
-  console.error('[Fatal] Failed to initialize client:', error.message)
-  console.error('[Fatal] Error stack:', error.stack)
+  const errorMsg = error instanceof Error ? error.message : String(error)
+  logger.error(LOG_PREFIXES.FATAL, `Failed to initialize client: ${errorMsg}`)
+  if (error instanceof Error && error.stack) {
+    logger.error(LOG_PREFIXES.FATAL, `Error stack: ${error.stack}`)
+  }
+  await close()
   process.exit(1)
 }

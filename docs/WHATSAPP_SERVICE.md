@@ -1,16 +1,15 @@
-# WhatsApp Group Listener - PoC Documentation
+# WhatsApp Message Service Documentation
 
 ## Overview
 
-This is a Proof of Concept (PoC) integration for listening to WhatsApp group messages. The listener runs as a separate Node.js service and writes incoming messages to a JSONL file, which can be viewed via a Nuxt API endpoint and frontend page.
-
-**⚠️ Important**: This is a PoC only. Do not use in production without proper security review.
+This is a WhatsApp message integration service that listens to WhatsApp group messages. The service runs as a separate Node.js service and stores incoming messages in MongoDB. Media files are automatically uploaded to Cloudinary.
 
 ## Architecture
 
-- **WhatsApp Listener**: Separate Node.js service in `apps/wa-listener/`
-- **Nuxt API**: Endpoint at `/api/whatsapp-messages` to read messages
-- **Frontend Page**: PoC page at `/poc/whatsapp` to view messages
+- **WhatsApp Message Service**: Separate Node.js service in `apps/wa-listener/`
+- **Nuxt API**: Endpoint at `/api/whatsapp-messages` to read messages from MongoDB
+- **MongoDB**: Database storage for all messages
+- **Cloudinary**: Cloud storage for media files
 
 ## Local Setup
 
@@ -32,13 +31,17 @@ Edit `.env` and configure:
 - `NODE_ENV=development`
 - `WA_DISCOVERY_MODE=true` (initially)
 - Leave `WHATSAPP_GROUP_IDS` empty initially
+- **MongoDB Configuration** (required):
+  - `MONGODB_URI` - Your MongoDB connection string
+  - `MONGODB_DB_NAME` - Your MongoDB database name
+  - `MONGODB_COLLECTION_RAW_MESSAGES` - Collection name (defaults to `raw_messages`)
 - **Cloudinary Configuration** (required for media uploads):
   - `CLOUDINARY_CLOUD_NAME` - Your Cloudinary cloud name (from dashboard)
   - `CLOUDINARY_API_KEY` - Your Cloudinary API key (from dashboard)
   - `CLOUDINARY_API_SECRET` - Your Cloudinary API secret (from dashboard)
   - `CLOUDINARY_FOLDER=whatsapp-listener` (optional, defaults to this)
 
-### 3. Run the Listener
+### 3. Run the Service
 
 ```bash
 # From apps/wa-listener directory
@@ -68,7 +71,7 @@ WA_DISCOVERY_MODE=true
 WHATSAPP_GROUP_IDS=
 ```
 
-### Step 2: Start the Listener
+### Step 2: Start the Service
 
 ```bash
 npm run dev
@@ -81,7 +84,7 @@ When the client is ready, it will automatically list all your groups with their 
 ### Step 4: Test Message
 
 1. Send a test message in your target WhatsApp group
-2. The listener will print group metadata:
+2. The service will print group metadata:
    - Group Name
    - Group ID (ends with @g.us)
    - Sender name
@@ -108,19 +111,19 @@ Replace `120363123456789012@g.us` with your actual group ID. For multiple groups
 WHATSAPP_GROUP_IDS=120363123456789012@g.us,120363123456789013@g.us
 ```
 
-### Step 2: Restart Listener
+### Step 2: Restart Service
 
 ```bash
-# Stop the current listener (Ctrl+C)
+# Stop the current service (Ctrl+C)
 # Then restart
 npm run dev
 ```
 
 ### Step 3: Verify
 
-- The listener should show: "Locked mode active - listening to group: [your-group-id]"
+- The service should show: "Locked mode active - listening to group: [your-group-id]"
 - Send a message in the target group
-- Check `apps/wa-listener/data/messages.jsonl` - it should contain the message
+- Check MongoDB collection - it should contain the message
 
 ## Viewing Messages
 
@@ -130,11 +133,7 @@ npm run dev
 curl http://localhost:3000/api/whatsapp-messages?limit=50
 ```
 
-### Via Frontend
-
-1. Start Nuxt dev server: `npm run dev:web` (or `npm run dev`)
-2. Navigate to: `http://localhost:3000/poc/whatsapp`
-3. Click "רענן" (Refresh) to load messages
+The API endpoint reads from MongoDB and returns messages sorted by creation date (newest first).
 
 ## Running Both Services
 
@@ -166,7 +165,7 @@ Then add to root `package.json`:
 **NEVER commit**:
 - `apps/wa-listener/.env`
 - `apps/wa-listener/auth/**` (WhatsApp session data)
-- `apps/wa-listener/data/**` (message data)
+- Any files containing API keys or secrets
 
 These are automatically ignored by `.gitignore`.
 
@@ -179,8 +178,8 @@ These are automatically ignored by `.gitignore`.
 ### Privacy
 
 - Discovery mode prints only group metadata, never message content
-- Message content is only stored in the local JSONL file
-- The JSONL file is gitignored and should not be committed
+- Message content is stored in MongoDB
+- Media files are stored in Cloudinary
 
 ## Troubleshooting
 
@@ -189,12 +188,12 @@ These are automatically ignored by `.gitignore`.
 **Solution**: Delete the auth folder and re-scan QR:
 ```bash
 rm -rf apps/wa-listener/auth
-# Then restart the listener
+# Then restart the service
 ```
 
 ### "Multiple sessions detected"
 
-**Solution**: Ensure only one listener process is running. Check for running Node processes:
+**Solution**: Ensure only one service process is running. Check for running Node processes:
 ```bash
 # Windows
 tasklist | findstr node
@@ -213,49 +212,54 @@ ps aux | grep node
 ### Messages not appearing
 
 **Check**:
-1. Is the listener running?
+1. Is the service running?
 2. Is `WA_DISCOVERY_MODE=false`?
 3. Is `WHATSAPP_GROUP_IDS` set correctly?
-4. Check `apps/wa-listener/data/messages.jsonl` exists and has content
+4. Check MongoDB connection and collection
 5. Check console logs for errors
 6. For media uploads: Is Cloudinary configured correctly?
 
-### File Size Issues
+### MongoDB Connection Issues
 
-The listener automatically rotates files when they exceed 10MB:
-- Old file: `messages.jsonl` → `messages_YYYYMMDD.jsonl`
-- New file: `messages.jsonl` (empty, ready for new messages)
+**Check**:
+1. Is `MONGODB_URI` correctly formatted?
+2. Is `MONGODB_DB_NAME` set?
+3. Is MongoDB server accessible?
+4. Check console logs for connection errors
 
 ## Message Format
 
-Each message in the JSONL file contains raw WhatsApp data. For messages with media, the structure includes:
+Messages are stored in MongoDB with the following structure:
 
 ```json
 {
-  "id": {
-    "_serialized": "true_120363123456789012@g.us_3EB0123456789ABCDE",
-    "id": "3EB0123456789ABCDE"
-  },
-  "timestamp": 1770402917,
-  "timestampISO": "2026-02-06T18:35:17.000Z",
-  "from": "120363123456789012@g.us",
-  "body": "Message text",
-  "hasMedia": true,
-  "type": "image",
-  "chat": {
-    "id": "120363123456789012@g.us",
-    "name": "My Group",
-    "isGroup": true
-  },
+  "createdAt": "2026-02-06T18:35:17.000Z",
   "cloudinaryUrl": "https://res.cloudinary.com/your-cloud/image/upload/whatsapp-listener/filename.jpg",
-  "cloudinaryData": {
-    "url": "http://res.cloudinary.com/...",
-    "secure_url": "https://res.cloudinary.com/...",
-    "public_id": "whatsapp-listener/filename",
-    "format": "jpg",
-    "bytes": 123456
-  },
-  "localMediaPath": "https://res.cloudinary.com/..." // For backward compatibility
+  "raw": {
+    "id": {
+      "_serialized": "true_120363123456789012@g.us_3EB0123456789ABCDE",
+      "id": "3EB0123456789ABCDE"
+    },
+    "timestamp": 1770402917,
+    "timestampISO": "2026-02-06T18:35:17.000Z",
+    "from": "120363123456789012@g.us",
+    "body": "Message text",
+    "hasMedia": true,
+    "type": "image",
+    "chat": {
+      "id": "120363123456789012@g.us",
+      "name": "My Group",
+      "isGroup": true
+    },
+    "cloudinaryUrl": "https://res.cloudinary.com/...",
+    "cloudinaryData": {
+      "url": "http://res.cloudinary.com/...",
+      "secure_url": "https://res.cloudinary.com/...",
+      "public_id": "whatsapp-listener/filename",
+      "format": "jpg",
+      "bytes": 123456
+    }
+  }
 }
 ```
 
@@ -267,27 +271,16 @@ Each message in the JSONL file contains raw WhatsApp data. For messages with med
 |----------|-------------|---------|----------|
 | `NODE_ENV` | Node environment | `development` | No |
 | `WA_AUTH_PATH` | Path for WhatsApp auth data | `./auth` | No |
-| `WA_DATA_PATH` | Path for message data | `./data` | No |
-| `WA_MESSAGES_FILE` | Messages filename | `messages.jsonl` | No |
 | `WHATSAPP_GROUP_IDS` | Target group IDs (comma-separated) | (empty) | Yes (production) |
 | `WA_DISCOVERY_MODE` | Enable discovery mode | `true` | No |
 | `WA_LOG_LEVEL` | Logging level | `info` | No |
+| `MONGODB_URI` | MongoDB connection string | (empty) | Yes |
+| `MONGODB_DB_NAME` | MongoDB database name | (empty) | Yes |
+| `MONGODB_COLLECTION_RAW_MESSAGES` | MongoDB collection for raw messages | `raw_messages` | No |
 | `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name | (empty) | Yes (for media upload) |
 | `CLOUDINARY_API_KEY` | Cloudinary API key | (empty) | Yes (for media upload) |
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret | (empty) | Yes (for media upload) |
 | `CLOUDINARY_FOLDER` | Cloudinary folder for uploads | `whatsapp-listener` | No |
-
-## Cleanup
-
-To remove this PoC later:
-
-1. Stop all running processes
-2. Delete `apps/wa-listener/` directory
-3. Delete `server/api/whatsapp-messages.get.ts`
-4. Delete `pages/poc/whatsapp.vue`
-5. Remove scripts from root `package.json`
-6. Remove entries from `.gitignore`
-7. Delete this documentation file
 
 ## Cloudinary Media Storage
 
@@ -296,7 +289,7 @@ Media files from WhatsApp messages are automatically uploaded to Cloudinary:
 - **Automatic Upload**: All media (images, videos, audio, documents) is uploaded to Cloudinary
 - **Folder Organization**: All files are stored in the `whatsapp-listener/` folder (configurable via `CLOUDINARY_FOLDER`)
 - **Direct Access**: Media URLs are stored in the message data and accessible via HTTPS
-- **No Local Storage**: Media files are not saved locally (except for backward compatibility with old messages)
+- **No Local Storage**: Media files are not saved locally
 - **Cloudinary Dashboard**: View all uploaded media in your Cloudinary dashboard under the configured folder
 
 ### Getting Your Cloudinary Cloud Name
@@ -307,9 +300,8 @@ Media files from WhatsApp messages are automatically uploaded to Cloudinary:
 
 ## Notes
 
-- The listener processes all message types including media
+- The service processes all message types including media
 - Media files are uploaded to Cloudinary automatically
-- The JSONL file uses append-only writes for performance
-- File rotation happens automatically at 10MB
-- The frontend page is temporary and should be removed before production
-- Old messages with local media paths will still work via the API endpoint
+- Messages are stored in MongoDB with full raw data
+- The API endpoint reads from MongoDB and returns messages sorted by creation date
+- All logging goes through a structured logger service

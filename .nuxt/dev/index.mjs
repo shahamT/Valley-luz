@@ -3,10 +3,9 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, sendNoContent, setHeader, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, sendNoContent, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/@vue/shared/dist/shared.cjs.js';
-import { promises, existsSync, createReadStream } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { MongoClient } from 'mongodb';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue/server-renderer/index.mjs';
@@ -25,6 +24,7 @@ import { createStorage, prefixStorage } from 'file://C:/Users/shaha/OneDrive/Des
 import unstorage_47drivers_47fs from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/unstorage/drivers/fs.mjs';
 import { digest } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/ohash/dist/index.mjs';
 import { toRouteMatcher, createRouter } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/radix3/dist/index.mjs';
+import { readFile } from 'node:fs/promises';
 import consola, { consola as consola$1 } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/consola/dist/index.mjs';
 import { ErrorParser } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/youch-core/build/index.js';
 import { Youch } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/youch/build/index.js';
@@ -32,6 +32,7 @@ import { SourceMapConsumer } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { getContext } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/unctx/dist/index.mjs';
 import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/errx/dist/index.js';
+import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/pathe/dist/index.mjs';
 import { walkResolver } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/unhead/dist/utils.mjs';
@@ -2146,16 +2147,16 @@ _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f1cb-MSF3ybXasvxOG/golSufzHP3EYI\"",
-    "mtime": "2026-02-06T18:38:23.436Z",
-    "size": 127435,
+    "etag": "\"1f0d9-kV559RhTL3XsjNJ2KbAjaVf/MJw\"",
+    "mtime": "2026-02-06T20:50:20.986Z",
+    "size": 127193,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"6d368-k6efohXUjX4UR8Sv/IsUxN4eF20\"",
-    "mtime": "2026-02-06T18:38:23.437Z",
-    "size": 447336,
+    "etag": "\"6cb2c-gSFCvteMSsE3LIm3u0rPJwls/V8\"",
+    "mtime": "2026-02-06T20:50:20.986Z",
+    "size": 445228,
     "path": "index.mjs.map"
   }
 };
@@ -2987,8 +2988,24 @@ const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: index_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+let client = null;
+let db = null;
+async function getMongoConnection() {
+  if (client && db) {
+    return { client, db };
+  }
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB_NAME;
+  if (!uri || !dbName) {
+    throw new Error("MongoDB configuration missing: MONGODB_URI and MONGODB_DB_NAME are required");
+  }
+  client = new MongoClient(uri);
+  await client.connect();
+  db = client.db(dbName);
+  return { client, db };
+}
+
 const _filename__get = defineEventHandler(async (event) => {
-  var _a;
   const filename = getRouterParam(event, "filename");
   if (!filename) {
     throw createError({
@@ -3002,33 +3019,28 @@ const _filename__get = defineEventHandler(async (event) => {
       statusMessage: "Invalid filename"
     });
   }
-  const mediaPath = join(process.cwd(), "apps/wa-listener/data/media", filename);
-  if (!existsSync(mediaPath)) {
+  try {
+    const { db } = await getMongoConnection();
+    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || "raw_messages");
+    const document = await collection.findOne({
+      cloudinaryUrl: { $regex: filename }
+    });
+    if (!document || !document.cloudinaryUrl) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Media file not found"
+      });
+    }
+    return sendRedirect(event, document.cloudinaryUrl, 302);
+  } catch (error) {
+    if (error && typeof error === "object" && "statusCode" in error) {
+      throw error;
+    }
     throw createError({
-      statusCode: 404,
-      statusMessage: "Media file not found"
+      statusCode: 500,
+      statusMessage: "Failed to retrieve media"
     });
   }
-  const ext = (_a = filename.split(".").pop()) == null ? void 0 : _a.toLowerCase();
-  const mimeTypes = {
-    "jpg": "image/jpeg",
-    "jpeg": "image/jpeg",
-    "png": "image/png",
-    "gif": "image/gif",
-    "webp": "image/webp",
-    "mp4": "video/mp4",
-    "mov": "video/quicktime",
-    "avi": "video/x-msvideo",
-    "mp3": "audio/mpeg",
-    "ogg": "audio/ogg",
-    "wav": "audio/wav",
-    "pdf": "application/pdf",
-    "txt": "text/plain"
-  };
-  const contentType = mimeTypes[ext || ""] || "application/octet-stream";
-  setHeader(event, "Content-Type", contentType);
-  setHeader(event, "Content-Disposition", `inline; filename="${filename}"`);
-  return createReadStream(mediaPath);
 });
 
 const _filename__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -3036,47 +3048,29 @@ const _filename__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePr
   default: _filename__get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const MESSAGES_DEFAULT = 200;
+const MESSAGES_MAX = 500;
+
 const whatsappMessages_get = defineEventHandler(async (event) => {
   const query = getQuery$1(event);
-  const limit = Math.min(parseInt(query.limit) || 200, 500);
-  const messagesPath = join(process.cwd(), "apps/wa-listener/data/messages.jsonl");
-  if (!existsSync(messagesPath)) {
-    return { messages: [] };
-  }
+  const limit = Math.min(parseInt(query.limit) || MESSAGES_DEFAULT, MESSAGES_MAX);
   try {
-    const content = await readFile(messagesPath, "utf-8");
-    const lines = content.split("\n").filter((line) => line.trim() !== "");
-    const messages = [];
-    for (const line of lines) {
-      try {
-        const message = JSON.parse(line);
-        messages.push(message);
-      } catch (error) {
-        console.error("[WhatsApp API] Error parsing line:", error);
-      }
-    }
-    messages.sort((a, b) => {
-      const getTimestamp = (msg) => {
-        if (typeof msg.timestamp === "number") {
-          return msg.timestamp;
-        }
-        if (msg.timestampISO) {
-          return new Date(msg.timestampISO).getTime();
-        }
-        if (msg.timestamp) {
-          return new Date(msg.timestamp).getTime();
-        }
-        return 0;
-      };
-      return getTimestamp(b) - getTimestamp(a);
-    });
+    const { db } = await getMongoConnection();
+    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || "raw_messages");
+    const cursor = collection.find({}).sort({ createdAt: -1 }).limit(limit);
+    const documents = await cursor.toArray();
+    const messages = documents.map((doc) => doc.raw);
+    const total = await collection.countDocuments({});
     return {
-      messages: messages.slice(0, limit),
-      total: messages.length
+      messages,
+      total
     };
   } catch (error) {
-    console.error("[WhatsApp API] Error reading messages:", error);
-    return { messages: [], error: "Failed to read messages" };
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Failed to read messages: ${errorMessage}`
+    });
   }
 });
 

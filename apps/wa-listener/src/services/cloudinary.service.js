@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary'
-import { config } from './config.js'
+import { config } from '../config.js'
+import { logger } from '../utils/logger.js'
+import { LOG_PREFIXES } from '../consts/index.js'
 
 // Configure Cloudinary
 cloudinary.config({
@@ -18,7 +20,7 @@ cloudinary.config({
 export async function uploadMediaToCloudinary(buffer, filename, mimetype) {
   // Validate Cloudinary configuration
   if (!config.cloudinary.cloudName || !config.cloudinary.apiKey || !config.cloudinary.apiSecret) {
-    console.error('[Cloudinary] Missing Cloudinary configuration. Check .env file.')
+    logger.error(LOG_PREFIXES.CLOUDINARY, 'Missing Cloudinary configuration. Check .env file.')
     return null
   }
 
@@ -61,7 +63,7 @@ export async function uploadMediaToCloudinary(buffer, filename, mimetype) {
     })
 
     if (config.logLevel === 'info') {
-      console.log(`[Cloudinary] Uploaded media: ${result.secure_url}`)
+      logger.info(LOG_PREFIXES.CLOUDINARY, `Uploaded media: ${result.secure_url}`)
     }
 
     return {
@@ -74,7 +76,8 @@ export async function uploadMediaToCloudinary(buffer, filename, mimetype) {
       bytes: result.bytes,
     }
   } catch (error) {
-    console.error('[Cloudinary] Error uploading media:', error.message)
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.CLOUDINARY, `Error uploading media: ${errorMsg}`)
     return null
   }
 }

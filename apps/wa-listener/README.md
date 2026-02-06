@@ -12,11 +12,20 @@ npm install
 # Create .env file with these contents:
 NODE_ENV=development
 WA_AUTH_PATH=./auth
-WA_DATA_PATH=./data
-WA_MESSAGES_FILE=messages.jsonl
 WHATSAPP_GROUP_IDS=
 WA_DISCOVERY_MODE=true
 WA_LOG_LEVEL=info
+
+# Cloudinary Configuration (required for media uploads)
+CLOUDINARY_CLOUD_NAME=your-cloud-name-here
+CLOUDINARY_API_KEY=your-api-key-here
+CLOUDINARY_API_SECRET=your-api-secret-here
+CLOUDINARY_FOLDER=whatsapp-listener
+
+# MongoDB Configuration (required)
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=your_database_name
+MONGODB_COLLECTION_RAW_MESSAGES=raw_messages
 
 # Note: WHATSAPP_GROUP_IDS can be comma-separated for multiple groups
 # Example: WHATSAPP_GROUP_IDS=120363425326487718@g.us,120363425326487719@g.us
@@ -27,4 +36,4 @@ WA_LOG_LEVEL=info
 npm run dev
 ```
 
-See `docs/WHATSAPP_POC.md` for full documentation.
+See `docs/WHATSAPP_SERVICE.md` for full documentation.

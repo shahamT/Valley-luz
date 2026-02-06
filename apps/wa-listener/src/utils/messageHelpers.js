@@ -1,0 +1,55 @@
+import { DEFAULTS } from '../consts/index.js'
+
+/**
+ * Extracts message ID from WhatsApp message object
+ * @param {Object} message - Message object from whatsapp-web.js
+ * @returns {string} Message ID or 'unknown'
+ */
+export function extractMessageId(message) {
+  if (!message || !message.id) {
+    return DEFAULTS.UNKNOWN_MESSAGE_ID
+  }
+  return message.id._serialized || message.id?.id || DEFAULTS.UNKNOWN_MESSAGE_ID
+}
+
+/**
+ * Extracts group ID from chat object
+ * @param {Object} chat - Chat object from whatsapp-web.js
+ * @returns {string|null} Group ID or null
+ */
+export function extractGroupId(chat) {
+  if (!chat || !chat.id) {
+    return null
+  }
+  return chat.id._serialized || chat.id || null
+}
+
+/**
+ * Converts Unix timestamp to ISO string
+ * @param {number} timestamp - Unix timestamp in seconds
+ * @returns {string} ISO timestamp string
+ */
+export function timestampToISO(timestamp) {
+  if (!timestamp) {
+    return 'unknown'
+  }
+  return new Date(timestamp * 1000).toISOString()
+}
+
+/**
+ * Gets group name from chat object
+ * @param {Object} chat - Chat object from whatsapp-web.js
+ * @returns {string} Group name or default
+ */
+export function getGroupName(chat) {
+  return chat?.name || DEFAULTS.UNKNOWN_GROUP_NAME
+}
+
+/**
+ * Gets sender name from message object
+ * @param {Object} message - Message object from whatsapp-web.js
+ * @returns {string} Sender name or default
+ */
+export function getSenderName(message) {
+  return message?.notifyName || message?._data?.notifyName || DEFAULTS.UNKNOWN_SENDER
+}
