@@ -2124,27 +2124,26 @@ function onConsoleLog(callback) {
 	consola$1.wrapConsole();
 }
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY = defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("error", (error, { event }) => {
+    var _a, _b;
+    if (error.statusCode === 404 && ((_b = (_a = event == null ? void 0 : event.node) == null ? void 0 : _a.req) == null ? void 0 : _b.url) === "/_nuxt/") {
+      return;
+    }
+  });
+});
+
 const plugins = [
   _bzWSbzmh42HAImUki6YCOxLUoV5W4v8cyfsipWnbkA,
-_4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY
+_4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
+_hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1e22b-HaqWfznzfnvFLXrgoV2kdfWdulE\"",
-    "mtime": "2026-02-05T19:37:05.326Z",
-    "size": 123435,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"6a013-Ff3dmyvxmxACNRD22AT8nmFiWR0\"",
-    "mtime": "2026-02-05T19:37:05.326Z",
-    "size": 434195,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));

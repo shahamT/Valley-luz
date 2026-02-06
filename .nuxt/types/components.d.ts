@@ -24,6 +24,9 @@ interface _GlobalComponents {
   'MonthlyMonthCalendar': typeof import("../../components/monthly/MonthCalendar.vue").default
   'MonthlyWeekdayRow': typeof import("../../components/monthly/WeekdayRow.vue").default
   'UiIcon': typeof import("../../components/ui/Icon.vue").default
+  'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
+  'UiMonthYearPicker': typeof import("../../components/ui/MonthYearPicker.vue").default
+  'UiMonthYearPopup': typeof import("../../components/ui/MonthYearPopup.vue").default
   'UiPillButton': typeof import("../../components/ui/PillButton.vue").default
   'NuxtWelcome': typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default
   'NuxtLayout': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default
@@ -58,6 +61,9 @@ interface _GlobalComponents {
   'LazyMonthlyMonthCalendar': LazyComponent<typeof import("../../components/monthly/MonthCalendar.vue").default>
   'LazyMonthlyWeekdayRow': LazyComponent<typeof import("../../components/monthly/WeekdayRow.vue").default>
   'LazyUiIcon': LazyComponent<typeof import("../../components/ui/Icon.vue").default>
+  'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>
+  'LazyUiMonthYearPicker': LazyComponent<typeof import("../../components/ui/MonthYearPicker.vue").default>
+  'LazyUiMonthYearPopup': LazyComponent<typeof import("../../components/ui/MonthYearPopup.vue").default>
   'LazyUiPillButton': LazyComponent<typeof import("../../components/ui/PillButton.vue").default>
   'LazyNuxtWelcome': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default>
   'LazyNuxtLayout': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default>

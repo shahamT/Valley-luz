@@ -5,8 +5,11 @@
         <ControlsTopControls 
           mode="month" 
           :month-year="monthYearDisplay"
+          :current-year="currentYear"
+          :current-month="currentMonth"
           @prev-month="handlePrevMonth"
           @next-month="handleNextMonth"
+          @select-month-year="handleMonthYearSelect"
         />
       </div>
       <div class="MonthlyView-calendar">
@@ -52,6 +55,10 @@ const handleNextMonth = () => {
   }
   
   currentDate.value = { year: newYear, month: newMonth }
+}
+
+const handleMonthYearSelect = ({ year, month }) => {
+  currentDate.value = { year, month }
 }
 </script>
 

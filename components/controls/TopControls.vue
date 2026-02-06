@@ -10,7 +10,25 @@
           <button class="TopControls-navButton" @click="$emit('prev-month')" aria-label="Previous month">
             <UiIcon name="chevron_right" size="md" />
           </button>
-          <span class="TopControls-month">{{ monthYear }}</span>
+          <div class="TopControls-monthTriggerWrapper" ref="monthTriggerRef">
+            <button 
+              ref="monthTriggerButtonRef"
+              class="TopControls-monthTrigger" 
+              @click="toggleMonthYearPicker" 
+              aria-label="Select month and year"
+            >
+              <UiIcon name="expand_more" size="sm" class="TopControls-chevron" />
+              <span class="TopControls-month">{{ monthYear }}</span>
+            </button>
+            <UiMonthYearPopup
+              v-if="isMonthYearPickerOpen"
+              :current-year="currentYear"
+              :current-month="currentMonth"
+              :trigger-element="monthTriggerButtonRef"
+              @close="closeMonthYearPicker"
+              @select="handleMonthYearSelect"
+            />
+          </div>
           <button class="TopControls-navButton" @click="$emit('next-month')" aria-label="Next month">
             <UiIcon name="chevron_left" size="md" />
           </button>
@@ -45,13 +63,38 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  currentYear: {
+    type: Number,
+    default: () => new Date().getFullYear(),
+  },
+  currentMonth: {
+    type: Number,
+    default: () => new Date().getMonth() + 1,
+  },
 })
 
 const backButtonText = computed(() => {
   return UI_TEXT.backToMonthly
 })
 
-defineEmits(['prev-month', 'next-month', 'back'])
+const isMonthYearPickerOpen = ref(false)
+const monthTriggerRef = ref(null)
+const monthTriggerButtonRef = ref(null)
+
+const toggleMonthYearPicker = () => {
+  isMonthYearPickerOpen.value = !isMonthYearPickerOpen.value
+}
+
+const closeMonthYearPicker = () => {
+  isMonthYearPickerOpen.value = false
+}
+
+const emit = defineEmits(['prev-month', 'next-month', 'back', 'select-month-year'])
+
+const handleMonthYearSelect = (year, month) => {
+  emit('select-month-year', { year, month })
+  closeMonthYearPicker()
+}
 </script>
 
 <style lang="scss">
@@ -103,9 +146,34 @@ defineEmits(['prev-month', 'next-month', 'back'])
     }
   }
 
+  &-monthTriggerWrapper {
+    position: relative;
+  }
+
+  &-monthTrigger {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.2s ease;
+    color: var(--brand-dark-blue);
+
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+
+  &-chevron {
+    color: var(--brand-dark-blue);
+  }
+
   &-month {
     font-size: var(--font-size-lg);
     font-weight: 600;
+    color: var(--brand-dark-blue);
   }
 
   &-dailyNav {
