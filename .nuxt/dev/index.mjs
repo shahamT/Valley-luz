@@ -3,8 +3,10 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, sendNoContent, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, sendNoContent, setHeader, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/@vue/shared/dist/shared.cjs.js';
+import { promises, existsSync, createReadStream } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue/server-renderer/index.mjs';
@@ -23,7 +25,6 @@ import { createStorage, prefixStorage } from 'file://C:/Users/shaha/OneDrive/Des
 import unstorage_47drivers_47fs from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/unstorage/drivers/fs.mjs';
 import { digest } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/ohash/dist/index.mjs';
 import { toRouteMatcher, createRouter } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/radix3/dist/index.mjs';
-import { readFile } from 'node:fs/promises';
 import consola, { consola as consola$1 } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/consola/dist/index.mjs';
 import { ErrorParser } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/youch-core/build/index.js';
 import { Youch } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/youch/build/index.js';
@@ -31,7 +32,6 @@ import { SourceMapConsumer } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { getContext } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/unctx/dist/index.mjs';
 import { captureRawStackTrace, parseRawStackTrace } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/errx/dist/index.js';
-import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/pathe/dist/index.mjs';
 import { walkResolver } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/unhead/dist/utils.mjs';
@@ -2143,7 +2143,22 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f1cb-MSF3ybXasvxOG/golSufzHP3EYI\"",
+    "mtime": "2026-02-06T18:38:23.436Z",
+    "size": 127435,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"6d368-k6efohXUjX4UR8Sv/IsUxN4eF20\"",
+    "mtime": "2026-02-06T18:38:23.437Z",
+    "size": 447336,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2594,12 +2609,16 @@ async function getIslandContext(event) {
 
 const _lazy_8mFtIU = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_fO7rgS = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_wKwfEY = () => Promise.resolve().then(function () { return _filename__get$1; });
+const _lazy_FQzII2 = () => Promise.resolve().then(function () { return whatsappMessages_get$1; });
 const _lazy_EM0R44 = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '', handler: _i_ZtEW, lazy: false, middleware: true, method: undefined },
   { route: '/api/_nuxt', handler: _lazy_8mFtIU, lazy: true, middleware: false, method: "get" },
   { route: '/api/events', handler: _lazy_fO7rgS, lazy: true, middleware: false, method: "get" },
+  { route: '/api/whatsapp-media/:filename', handler: _lazy_wKwfEY, lazy: true, middleware: false, method: "get" },
+  { route: '/api/whatsapp-messages', handler: _lazy_FQzII2, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_EM0R44, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_EM0R44, lazy: true, middleware: false, method: undefined }
@@ -2966,6 +2985,104 @@ const index_get = defineEventHandler(async (event) => {
 const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: index_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _filename__get = defineEventHandler(async (event) => {
+  var _a;
+  const filename = getRouterParam(event, "filename");
+  if (!filename) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Filename is required"
+    });
+  }
+  if (filename.includes("..") || filename.includes("/") || filename.includes("\\")) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Invalid filename"
+    });
+  }
+  const mediaPath = join(process.cwd(), "apps/wa-listener/data/media", filename);
+  if (!existsSync(mediaPath)) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Media file not found"
+    });
+  }
+  const ext = (_a = filename.split(".").pop()) == null ? void 0 : _a.toLowerCase();
+  const mimeTypes = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "gif": "image/gif",
+    "webp": "image/webp",
+    "mp4": "video/mp4",
+    "mov": "video/quicktime",
+    "avi": "video/x-msvideo",
+    "mp3": "audio/mpeg",
+    "ogg": "audio/ogg",
+    "wav": "audio/wav",
+    "pdf": "application/pdf",
+    "txt": "text/plain"
+  };
+  const contentType = mimeTypes[ext || ""] || "application/octet-stream";
+  setHeader(event, "Content-Type", contentType);
+  setHeader(event, "Content-Disposition", `inline; filename="${filename}"`);
+  return createReadStream(mediaPath);
+});
+
+const _filename__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _filename__get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const whatsappMessages_get = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const limit = Math.min(parseInt(query.limit) || 200, 500);
+  const messagesPath = join(process.cwd(), "apps/wa-listener/data/messages.jsonl");
+  if (!existsSync(messagesPath)) {
+    return { messages: [] };
+  }
+  try {
+    const content = await readFile(messagesPath, "utf-8");
+    const lines = content.split("\n").filter((line) => line.trim() !== "");
+    const messages = [];
+    for (const line of lines) {
+      try {
+        const message = JSON.parse(line);
+        messages.push(message);
+      } catch (error) {
+        console.error("[WhatsApp API] Error parsing line:", error);
+      }
+    }
+    messages.sort((a, b) => {
+      const getTimestamp = (msg) => {
+        if (typeof msg.timestamp === "number") {
+          return msg.timestamp;
+        }
+        if (msg.timestampISO) {
+          return new Date(msg.timestampISO).getTime();
+        }
+        if (msg.timestamp) {
+          return new Date(msg.timestamp).getTime();
+        }
+        return 0;
+      };
+      return getTimestamp(b) - getTimestamp(a);
+    });
+    return {
+      messages: messages.slice(0, limit),
+      total: messages.length
+    };
+  } catch (error) {
+    console.error("[WhatsApp API] Error reading messages:", error);
+    return { messages: [], error: "Failed to read messages" };
+  }
+});
+
+const whatsappMessages_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: whatsappMessages_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {

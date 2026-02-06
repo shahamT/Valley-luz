@@ -90,3 +90,12 @@ Desktop.ini
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# WhatsApp Listener (PoC)
+apps/wa-listener/.env
+apps/wa-listener/.env.*
+apps/wa-listener/auth/
+apps/wa-listener/data/
+apps/wa-listener/data/media/
+apps/wa-listener/.wwebjs_cache/
+apps/wa-listener/*.log

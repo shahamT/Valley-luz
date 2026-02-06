@@ -9,6 +9,12 @@ declare module "nitropack/types" {
     '/api/events': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/events/index.get').default>>>>
     }
+    '/api/whatsapp-media/:filename': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/whatsapp-media/[filename].get').default>>>>
+    }
+    '/api/whatsapp-messages': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/whatsapp-messages.get').default>>>>
+    }
     '/__nuxt_error': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>
     }
