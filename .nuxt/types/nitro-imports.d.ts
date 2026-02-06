@@ -15,6 +15,7 @@ declare global {
   const callNodeListener: typeof import('../../node_modules/h3').callNodeListener
   const clearResponseHeaders: typeof import('../../node_modules/h3').clearResponseHeaders
   const clearSession: typeof import('../../node_modules/h3').clearSession
+  const closeMongoConnection: typeof import('../../server/utils/mongodb').closeMongoConnection
   const createApp: typeof import('../../node_modules/h3').createApp
   const createAppEventHandler: typeof import('../../node_modules/h3').createAppEventHandler
   const createError: typeof import('../../node_modules/h3').createError
@@ -49,6 +50,7 @@ declare global {
   const getHeader: typeof import('../../node_modules/h3').getHeader
   const getHeaders: typeof import('../../node_modules/h3').getHeaders
   const getMethod: typeof import('../../node_modules/h3').getMethod
+  const getMongoConnection: typeof import('../../server/utils/mongodb').getMongoConnection
   const getProxyRequestHeaders: typeof import('../../node_modules/h3').getProxyRequestHeaders
   const getQuery: typeof import('../../node_modules/h3').getQuery
   const getRequestFingerprint: typeof import('../../node_modules/h3').getRequestFingerprint
@@ -147,3 +149,4 @@ export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from 'C:/Users/shaha/OneDrive/Desktop/Coding/Valley luz/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from 'C:/Users/shaha/OneDrive/Desktop/Coding/Valley luz/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
+export { getMongoConnection, closeMongoConnection } from 'C:/Users/shaha/OneDrive/Desktop/Coding/Valley luz/server/utils/mongodb';
