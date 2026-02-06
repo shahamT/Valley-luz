@@ -12,6 +12,7 @@ export const LOG_PREFIXES = {
   MAIN: '[Main]',
   SHUTDOWN: '[Shutdown]',
   FATAL: '[Fatal]',
+  OPENAI: '[OpenAI]',
 }
 
 /**
