@@ -25,6 +25,13 @@ function loadConfig() {
     .map((id) => id.trim())
     .filter((id) => id !== '')
 
+  // Parse confirmation group IDs (comma-separated or single value)
+  const confirmationGroupIdsEnv = process.env.WHATSAPP_CONFIRMATION_GROUP_IDS || ''
+  const confirmationGroupIds = confirmationGroupIdsEnv
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id !== '')
+
   // Fail closed in production if no groupIds are provided
   if (isProduction) {
     if (groupIds.length === 0) {
@@ -65,7 +72,8 @@ function loadConfig() {
     nodeEnv,
     isProduction,
     authPath: process.env.WA_AUTH_PATH || './auth',
-    groupIds, // Array of group IDs
+    groupIds, // Array of group IDs to listen to
+    confirmationGroupIds, // Array of group IDs to send confirmations to
     discoveryMode: process.env.WA_DISCOVERY_MODE === 'true',
     logLevel: process.env.WA_LOG_LEVEL || 'info',
     // Cloudinary configuration
@@ -80,6 +88,12 @@ function loadConfig() {
       uri: mongodbUri,
       dbName: mongodbDbName,
       collectionRawMessages: process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages',
+      collectionEvents: process.env.MONGODB_COLLECTION_EVENTS || 'events',
+    },
+    // OpenAI configuration
+    openai: {
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 2000,
     },
   }
 

@@ -1,6 +1,6 @@
 /**
  * Event categories constants
- * Used in backend API and processing
+ * Used in event processing and OpenAI integration
  */
 export const EVENT_CATEGORIES = {
   party: {

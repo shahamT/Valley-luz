@@ -13,6 +13,9 @@ export const LOG_PREFIXES = {
   SHUTDOWN: '[Shutdown]',
   FATAL: '[Fatal]',
   OPENAI: '[OpenAI]',
+  EVENT_SERVICE: '[EventService]',
+  CONTACT_SERVICE: '[ContactService]',
+  DUPLICATE_DETECTION: '[DuplicateDetection]',
 }
 
 /**

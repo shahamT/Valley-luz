@@ -81,3 +81,38 @@ export async function uploadMediaToCloudinary(buffer, filename, mimetype) {
     return null
   }
 }
+
+/**
+ * Deletes media from Cloudinary by public_id
+ * Fails silently - logs errors but never throws
+ * @param {string} publicId - Cloudinary public_id
+ * @returns {Promise<boolean>} True if deletion succeeded, false otherwise
+ */
+export async function deleteMediaFromCloudinary(publicId) {
+  if (!publicId) {
+    return false
+  }
+  
+  // Validate Cloudinary configuration
+  if (!config.cloudinary.cloudName || !config.cloudinary.apiKey || !config.cloudinary.apiSecret) {
+    logger.error(LOG_PREFIXES.CLOUDINARY, 'Missing Cloudinary configuration. Cannot delete media.')
+    return false
+  }
+
+  try {
+    const result = await cloudinary.uploader.destroy(publicId)
+    if (result.result === 'ok') {
+      if (config.logLevel === 'info') {
+        logger.info(LOG_PREFIXES.CLOUDINARY, `Deleted media: ${publicId}`)
+      }
+      return true
+    } else {
+      logger.warn(LOG_PREFIXES.CLOUDINARY, `Failed to delete media ${publicId}: ${result.result}`)
+      return false
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.CLOUDINARY, `Error deleting media ${publicId}: ${errorMsg}`)
+    return false
+  }
+}

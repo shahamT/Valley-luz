@@ -8,7 +8,10 @@ import { LOG_PREFIXES, TIMEOUTS, PUPPETEER_ARGS } from '../consts/index.js'
 import { serializeMessage, processMessage, isMessageTypeAllowed } from './message.service.js'
 import { uploadMessageMedia } from './media.service.js'
 import { printGroupMetadata, listAllGroups } from './group.service.js'
-import { insertMessage } from './mongo.service.js'
+import { insertEventDocument, findEventBySignature } from './mongo.service.js'
+import { processEventPipeline } from './event.service.js'
+import { computeMessageSignature } from '../utils/messageHelpers.js'
+import { deleteMediaFromCloudinary } from './cloudinary.service.js'
 
 let client = null
 
@@ -119,6 +122,24 @@ export async function initializeClient() {
       // Serialize message data (only keeps specific fields)
       const rawMessage = serializeMessage(message)
       
+      // Check for duplicate messages before processing
+      const messageText = rawMessage.text || ''
+      const messageSignature = computeMessageSignature(messageText)
+      
+      // If message has text, check for duplicates
+      if (messageSignature) {
+        const existingEvent = await findEventBySignature(messageSignature)
+        if (existingEvent) {
+          // Duplicate found - skip all processing
+          if (config.logLevel === 'info') {
+            const messageId = extractMessageId(rawMessage)
+            logger.info(LOG_PREFIXES.DUPLICATE_DETECTION, `Duplicate message detected: ${messageId} (signature: ${messageSignature.substring(0, 8)}...)`)
+          }
+          // Skip media upload, database insertion, and AI processing
+          return
+        }
+      }
+      
       // Upload media to Cloudinary if present
       // Pass serialized message so imgBody can be used in media processing
       let cloudinaryResult = null
@@ -130,21 +151,50 @@ export async function initializeClient() {
       // Process message with Cloudinary URL
       processMessage(rawMessage, cloudinaryResult)
       
-      // Insert to MongoDB as side-effect (fire-and-forget, fail-safe)
+      // Insert event document and process pipeline (fire-and-forget, fail-safe)
       // Cloudinary data is stored as top-level fields, not in raw message
       try {
         const cloudinaryUrl = cloudinaryResult?.cloudinaryUrl || null
         const cloudinaryData = cloudinaryResult?.cloudinaryData || null
-        // Don't await - fire and forget to avoid blocking
-        insertMessage(rawMessage, cloudinaryUrl, cloudinaryData).catch((mongoError) => {
-          // Already handled in insertMessage, but catch here as extra safety
-          const errorMsg = mongoError instanceof Error ? mongoError.message : String(mongoError)
-          logger.error(LOG_PREFIXES.WHATSAPP, `MongoDB insert error (non-blocking): ${errorMsg}`)
-        })
+        
+        // Insert event document with event=null initially, including message signature
+        const eventDoc = await insertEventDocument(rawMessage, cloudinaryUrl, cloudinaryData, messageSignature)
+        
+        if (eventDoc && eventDoc._id) {
+          // Fire-and-forget event processing pipeline
+          processEventPipeline(
+            eventDoc._id,
+            rawMessage,
+            cloudinaryUrl,
+            cloudinaryData,
+            message,
+            client
+          ).catch((pipelineError) => {
+            // Already handled in processEventPipeline, but catch here as extra safety
+            const errorMsg = pipelineError instanceof Error ? pipelineError.message : String(pipelineError)
+            logger.error(LOG_PREFIXES.WHATSAPP, `Event pipeline error (non-blocking): ${errorMsg}`)
+          })
+        } else {
+          // If document insertion failed but we uploaded media, clean it up
+          if (cloudinaryResult?.cloudinaryData?.public_id) {
+            await deleteMediaFromCloudinary(cloudinaryResult.cloudinaryData.public_id)
+          }
+          logger.warn(LOG_PREFIXES.WHATSAPP, 'Failed to insert event document, skipping pipeline')
+        }
       } catch (error) {
         // Extra safety catch - should never reach here, but ensure handler never crashes
+        // If we uploaded media but insertion failed, try to clean it up
+        if (cloudinaryResult?.cloudinaryData?.public_id) {
+          try {
+            await deleteMediaFromCloudinary(cloudinaryResult.cloudinaryData.public_id)
+          } catch (deleteError) {
+            // Log but don't throw - cleanup failure shouldn't mask original error
+            const deleteErrorMsg = deleteError instanceof Error ? deleteError.message : String(deleteError)
+            logger.error(LOG_PREFIXES.CLOUDINARY, `Failed to cleanup media after insertion error: ${deleteErrorMsg}`)
+          }
+        }
         const errorMsg = error instanceof Error ? error.message : String(error)
-        logger.error(LOG_PREFIXES.WHATSAPP, `Error calling MongoDB insert (non-blocking): ${errorMsg}`)
+        logger.error(LOG_PREFIXES.WHATSAPP, `Error in event document insertion (non-blocking): ${errorMsg}`)
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)

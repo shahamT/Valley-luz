@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { DEFAULTS } from '../consts/index.js'
 
 /**
@@ -70,4 +71,20 @@ export function getGroupName(chat) {
  */
 export function getSenderName(message) {
   return message?.notifyName || message?._data?.notifyName || DEFAULTS.UNKNOWN_SENDER
+}
+
+/**
+ * Computes a deterministic message signature from normalized text
+ * Normalizes whitespace and creates SHA-256 hash
+ * @param {string} text - Message text
+ * @returns {string|null} Hex string signature or null if no text
+ */
+export function computeMessageSignature(text) {
+  if (!text || typeof text !== 'string') {
+    return null
+  }
+  // Normalize whitespace: trim, collapse multiple spaces/tabs/newlines to single space
+  const normalized = text.trim().replace(/\s+/g, ' ')
+  // Create deterministic hash
+  return crypto.createHash('sha256').update(normalized, 'utf8').digest('hex')
 }
