@@ -3,9 +3,9 @@ import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, sendNoContent, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/@vue/shared/dist/shared.cjs.js';
-import { MongoClient } from 'mongodb';
+import { MongoClient } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/mongodb/lib/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file://C:/Users/shaha/OneDrive/Desktop/Coding/Valley%20luz/node_modules/vue/server-renderer/index.mjs';
@@ -2593,7 +2593,6 @@ async function getIslandContext(event) {
 	return ctx;
 }
 
-const _lazy_8mFtIU = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_fO7rgS = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_wKwfEY = () => Promise.resolve().then(function () { return _filename__get$1; });
 const _lazy_FQzII2 = () => Promise.resolve().then(function () { return whatsappMessages_get$1; });
@@ -2601,7 +2600,6 @@ const _lazy_EM0R44 = () => Promise.resolve().then(function () { return renderer$
 
 const handlers = [
   { route: '', handler: _i_ZtEW, lazy: false, middleware: true, method: undefined },
-  { route: '/api/_nuxt', handler: _lazy_8mFtIU, lazy: true, middleware: false, method: "get" },
   { route: '/api/events', handler: _lazy_fO7rgS, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-media/:filename', handler: _lazy_wKwfEY, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-messages', handler: _lazy_FQzII2, lazy: true, middleware: false, method: "get" },
@@ -2945,15 +2943,6 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const index_get$2 = defineEventHandler(() => {
-  return sendNoContent();
-});
-
-const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_get = defineEventHandler(async (event) => {

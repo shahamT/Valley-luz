@@ -26,14 +26,3 @@ export async function getMongoConnection() {
 
   return { client, db }
 }
-
-/**
- * Closes MongoDB connection
- */
-export async function closeMongoConnection() {
-  if (client) {
-    await client.close()
-    client = null
-    db = null
-  }
-}

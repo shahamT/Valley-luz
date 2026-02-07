@@ -20,18 +20,6 @@ export function isValidDateString(dateString) {
 }
 
 /**
- * Validates if a string is a valid ISO date string
- * @param {string} isoString - ISO string to validate
- * @returns {boolean} - True if valid ISO format
- */
-export function isValidISOString(isoString) {
-  if (!isoString || typeof isoString !== 'string') return false
-  
-  const date = new Date(isoString)
-  return !isNaN(date.getTime())
-}
-
-/**
  * Validates route date parameter
  * @param {string} dateParam - Route param to validate
  * @returns {boolean} - True if valid

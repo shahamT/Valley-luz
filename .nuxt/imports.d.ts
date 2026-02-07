@@ -35,7 +35,7 @@ export { generateCalendarDays } from '../utils/calendar.helpers';
 export { getTodayDateString, getCurrentYearMonth, formatMonthYear } from '../utils/date.helpers';
 export { formatDateToYYYYMMDD, parseDateString, formatDateForDisplay, formatEventTime, formatEventPrice, formatEventLocation, transformEventForCard } from '../utils/events.helpers';
 export { eventsService } from '../utils/events.service';
-export { isValidDateString, isValidISOString, isValidRouteDate } from '../utils/validation.helpers';
+export { isValidDateString, isValidRouteDate } from '../utils/validation.helpers';
 export { useEventsStore } from '../stores/events.store';
 export { useUiStore } from '../stores/ui.store';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';

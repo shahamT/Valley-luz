@@ -53,7 +53,6 @@ declare global {
   const isRef: typeof import('../../node_modules/vue').isRef
   const isShallow: typeof import('../../node_modules/vue').isShallow
   const isValidDateString: typeof import('../../utils/validation.helpers').isValidDateString
-  const isValidISOString: typeof import('../../utils/validation.helpers').isValidISOString
   const isValidRouteDate: typeof import('../../utils/validation.helpers').isValidRouteDate
   const isVue2: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue2
   const isVue3: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue3
@@ -260,7 +259,6 @@ declare module 'vue' {
     readonly isRef: UnwrapRef<typeof import('../../node_modules/vue')['isRef']>
     readonly isShallow: UnwrapRef<typeof import('../../node_modules/vue')['isShallow']>
     readonly isValidDateString: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidDateString']>
-    readonly isValidISOString: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidISOString']>
     readonly isValidRouteDate: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidRouteDate']>
     readonly isVue2: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue2']>
     readonly isVue3: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue3']>
