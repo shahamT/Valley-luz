@@ -8,6 +8,35 @@ let client = null
 let db = null
 
 /**
+ * Ensures text index exists on rawMessage.text field for candidate search
+ * Fails silently - logs warnings but never throws
+ * @returns {Promise<boolean>} True if index exists or was created, false otherwise
+ */
+export async function ensureTextIndex() {
+  if (!db) {
+    return false
+  }
+  try {
+    const collection = db.collection(config.mongodb.collectionEvents)
+    // Check if text index exists
+    const indexes = await collection.indexes()
+    const hasTextIndex = indexes.some(idx => 
+      idx.key && idx.key['rawMessage.text'] === 'text'
+    )
+    
+    if (!hasTextIndex) {
+      await collection.createIndex({ 'rawMessage.text': 'text' })
+      logger.info(LOG_PREFIXES.MONGODB, 'Created text index on rawMessage.text')
+    }
+    return true
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.warn(LOG_PREFIXES.MONGODB, `Could not ensure text index: ${errorMsg}`)
+    return false
+  }
+}
+
+/**
  * Connects to MongoDB and stores connection references
  * Reuses existing connection if already connected
  * @returns {Promise<MongoClient>} MongoDB client instance
@@ -27,6 +56,10 @@ export async function connect() {
     await client.connect()
     db = client.db(config.mongodb.dbName)
     logger.info(LOG_PREFIXES.MONGODB, `Connected to database: ${config.mongodb.dbName}`)
+    
+    // Ensure text index exists for candidate search
+    await ensureTextIndex()
+    
     return client
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
@@ -182,6 +215,54 @@ export async function deleteEventDocument(eventId) {
 }
 
 /**
+ * Finds candidate events using MongoDB text search
+ * Fails silently - logs errors but never throws
+ * @param {Array<string>} searchKeys - Array of search key phrases
+ * @param {Object} excludeEventId - Event ID to exclude from search
+ * @returns {Promise<Array>} Array of candidate documents with _id and rawMessage.text
+ */
+export async function findCandidateEvents(searchKeys, excludeEventId = null) {
+  if (!db || !searchKeys || searchKeys.length === 0) {
+    return []
+  }
+  
+  try {
+    const collection = db.collection(config.mongodb.collectionEvents)
+    
+    // Combine searchKeys into single search string
+    const searchString = searchKeys.join(' ')
+    
+    // Build query: text search + isActive filter + exclude current event
+    const query = {
+      $text: { $search: searchString },
+      isActive: true,
+    }
+    
+    if (excludeEventId) {
+      const excludeId = excludeEventId._id || excludeEventId
+      query._id = { $ne: excludeId }
+    }
+    
+    // Find candidates, limit to 5, return only _id and rawMessage.text
+    const candidates = await collection
+      .find(query)
+      .project({ _id: 1, 'rawMessage.text': 1 })
+      .limit(5)
+      .toArray()
+    
+    if (config.logLevel === 'info' && candidates.length > 0) {
+      logger.info(LOG_PREFIXES.MONGODB, `Found ${candidates.length} candidate event(s) for search: ${searchString.substring(0, 50)}...`)
+    }
+    
+    return candidates
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.MONGODB, `Error finding candidate events: ${errorMsg}`)
+    return []
+  }
+}
+
+/**
  * Updates an event document with the enriched event object
  * Fails silently - logs errors but never throws
  * @param {Object} eventId - MongoDB ObjectId or document with _id
@@ -221,6 +302,127 @@ export async function updateEventDocument(eventId, event) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     logger.error(LOG_PREFIXES.MONGODB, `Error updating event document: ${errorMsg}`)
     return false
+  }
+}
+
+/**
+ * Updates an existing event document with new event data and metadata
+ * Fails silently - logs errors but never throws
+ * @param {Object} eventId - MongoDB ObjectId or document with _id
+ * @param {Object} newEvent - New event object
+ * @param {Object} newRawMessage - New raw message object
+ * @param {string|null} newCloudinaryUrl - New Cloudinary URL or null
+ * @param {Object|null} newCloudinaryData - New Cloudinary metadata or null
+ * @returns {Promise<boolean>} True if update succeeded, false otherwise
+ */
+export async function updateEventWithNewData(eventId, newEvent, newRawMessage, newCloudinaryUrl, newCloudinaryData) {
+  if (!db) {
+    logger.warn(LOG_PREFIXES.MONGODB, 'Cannot update event: MongoDB connection not established')
+    return false
+  }
+
+  try {
+    const collection = db.collection(config.mongodb.collectionEvents)
+    
+    // Extract _id if eventId is a document object
+    const id = eventId._id || eventId
+
+    const result = await collection.updateOne(
+      { _id: id },
+      { 
+        $set: { 
+          event: newEvent,
+          rawMessage: newRawMessage,
+          cloudinaryUrl: newCloudinaryUrl || null,
+          cloudinaryData: newCloudinaryData || null,
+          updatedAt: new Date(),
+        } 
+      }
+    )
+
+    if (result.matchedCount === 0) {
+      logger.warn(LOG_PREFIXES.MONGODB, `Event document ${id} not found for update`)
+      return false
+    }
+
+    if (config.logLevel === 'info') {
+      logger.info(LOG_PREFIXES.MONGODB, `Updated event document ${id} with new data`)
+    }
+
+    return true
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.MONGODB, `Error updating event with new data: ${errorMsg}`)
+    return false
+  }
+}
+
+/**
+ * Appends an old version to the previousVersions array
+ * Fails silently - logs errors but never throws
+ * @param {Object} eventId - MongoDB ObjectId or document with _id
+ * @param {Object} oldVersion - Old version object with event, rawMessage, cloudinaryUrl, cloudinaryData, timestamp
+ * @returns {Promise<boolean>} True if append succeeded, false otherwise
+ */
+export async function appendToPreviousVersions(eventId, oldVersion) {
+  if (!db) {
+    logger.warn(LOG_PREFIXES.MONGODB, 'Cannot append to previousVersions: MongoDB connection not established')
+    return false
+  }
+
+  try {
+    const collection = db.collection(config.mongodb.collectionEvents)
+    
+    // Extract _id if eventId is a document object
+    const id = eventId._id || eventId
+
+    const result = await collection.updateOne(
+      { _id: id },
+      { $push: { previousVersions: oldVersion } }
+    )
+
+    if (result.matchedCount === 0) {
+      logger.warn(LOG_PREFIXES.MONGODB, `Event document ${id} not found for appending previous version`)
+      return false
+    }
+
+    if (config.logLevel === 'info') {
+      logger.info(LOG_PREFIXES.MONGODB, `Appended previous version to event document ${id}`)
+    }
+
+    return true
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.MONGODB, `Error appending to previousVersions: ${errorMsg}`)
+    return false
+  }
+}
+
+/**
+ * Gets an event document by ID
+ * Fails silently - logs errors but never throws
+ * @param {Object} eventId - MongoDB ObjectId or document with _id
+ * @returns {Promise<Object|null>} Event document or null if not found
+ */
+export async function getEventDocument(eventId) {
+  if (!db) {
+    logger.warn(LOG_PREFIXES.MONGODB, 'Cannot get event: MongoDB connection not established')
+    return null
+  }
+
+  try {
+    const collection = db.collection(config.mongodb.collectionEvents)
+    
+    // Extract _id if eventId is a document object
+    const id = eventId._id || eventId
+
+    const document = await collection.findOne({ _id: id })
+
+    return document
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.MONGODB, `Error getting event document: ${errorMsg}`)
+    return null
   }
 }
 

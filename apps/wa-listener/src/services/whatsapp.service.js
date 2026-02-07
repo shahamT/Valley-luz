@@ -122,6 +122,12 @@ export async function initializeClient() {
       // Serialize message data (only keeps specific fields)
       const rawMessage = serializeMessage(message)
       
+      // Validate serialized message structure
+      if (!rawMessage || typeof rawMessage !== 'object') {
+        logger.error(LOG_PREFIXES.WHATSAPP, 'Failed to serialize message - invalid structure')
+        return
+      }
+      
       // Check for duplicate messages before processing
       const messageText = rawMessage.text || ''
       const messageSignature = computeMessageSignature(messageText)
@@ -131,10 +137,8 @@ export async function initializeClient() {
         const existingEvent = await findEventBySignature(messageSignature)
         if (existingEvent) {
           // Duplicate found - skip all processing
-          if (config.logLevel === 'info') {
-            const messageId = extractMessageId(rawMessage)
-            logger.info(LOG_PREFIXES.DUPLICATE_DETECTION, `Duplicate message detected: ${messageId} (signature: ${messageSignature.substring(0, 8)}...)`)
-          }
+          const messageId = extractMessageId(rawMessage)
+          logger.info(LOG_PREFIXES.DUPLICATE_DETECTION, `Duplicate message detected: ${messageId} (signature: ${messageSignature.substring(0, 8)}...) - skipping processing`)
           // Skip media upload, database insertion, and AI processing
           return
         }
