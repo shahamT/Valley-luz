@@ -7,6 +7,7 @@
       @prev-month="$emit('prev-month')"
       @next-month="$emit('next-month')"
       @select-month-year="$emit('select-month-year', $event)"
+      @year-change="$emit('year-change', $event)"
     />
     <div class="AppShell-content">
       <slot />
@@ -33,7 +34,7 @@ const props = defineProps({
   },
 })
 
-defineEmits(['prev-month', 'next-month', 'select-month-year'])
+defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
 </script>
 
 <style lang="scss">

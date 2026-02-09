@@ -6,6 +6,7 @@
     @prev-month="handlePrevMonth"
     @next-month="handleNextMonth"
     @select-month-year="handleMonthYearSelect"
+    @year-change="handleYearChange"
   >
     <div class="MonthlyView">
       <div class="MonthlyView-header">
@@ -66,6 +67,10 @@ const handleNextMonth = () => {
 
 const handleMonthYearSelect = ({ year, month }) => {
   currentDate.value = { year, month }
+}
+
+const handleYearChange = ({ year }) => {
+  currentDate.value = { ...currentDate.value, year }
 }
 
 const handleToggleCategory = (categoryId) => {

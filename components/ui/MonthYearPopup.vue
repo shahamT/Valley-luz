@@ -1,43 +1,20 @@
 <template>
-  <Teleport to="body">
-    <div
-      v-if="!isMobile"
-      class="MonthYearPopup"
-      @click.self="handleClose"
-    >
-      <div
-        ref="popupRef"
-        class="MonthYearPopup-content"
-        :style="popupStyle"
-      >
-        <UiMonthYearPicker
-          :year="currentDate.year"
-          :month="currentDate.month"
-          @select="handleSelect"
-        />
-      </div>
-    </div>
-    <div
-      v-else
-      class="MonthYearPopup MonthYearPopup--mobile"
-      @click.self="handleClose"
-    >
-      <div
-        ref="popupRef"
-        class="MonthYearPopup-content MonthYearPopup-content--mobile"
-      >
-        <UiMonthYearPicker
-          :year="currentDate.year"
-          :month="currentDate.month"
-          @select="handleSelect"
-        />
-      </div>
-    </div>
-  </Teleport>
+  <div
+    ref="popupRef"
+    class="MonthYearPopup"
+    @click.stop
+  >
+    <UiMonthYearSelection
+      :current-date="currentDate"
+      @select="handleSelect"
+      @year-change="handleYearChange"
+    />
+  </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ref } from 'vue'
+import { onClickOutside } from '@vueuse/core'
 
 const props = defineProps({
   currentDate: {
@@ -46,131 +23,46 @@ const props = defineProps({
   },
   triggerElement: {
     type: Object,
-    default: null,
+    required: true,
   },
 })
 
-const emit = defineEmits(['close', 'select'])
+const emit = defineEmits(['close', 'select', 'year-change'])
 
 const popupRef = ref(null)
-const popupStyle = ref({})
 
-const isMobile = computed(() => {
-  if (process.client) {
-    return window.innerWidth <= 768
-  }
-  return false
-})
-
-const updatePosition = async () => {
-  if (isMobile.value || !props.triggerElement?.value || !popupRef.value) {
-    return
-  }
-
-  await nextTick()
-
-  const triggerRect = props.triggerElement.value.getBoundingClientRect()
-  const popupRect = popupRef.value.getBoundingClientRect()
-  const viewportWidth = window.innerWidth
-  const viewportHeight = window.innerHeight
-
-  // Position below the trigger, aligned to the right (RTL)
-  let top = triggerRect.bottom + 8
-  let right = viewportWidth - triggerRect.right
-
-  // Adjust if popup would overflow viewport
-  if (top + popupRect.height > viewportHeight) {
-    top = triggerRect.top - popupRect.height - 8
-  }
-
-  if (right + popupRect.width > viewportWidth) {
-    right = viewportWidth - triggerRect.left - popupRect.width
-  }
-
-  popupStyle.value = {
-    top: `${top}px`,
-    right: `${right}px`,
-  }
-}
-
-const handleClose = () => {
+const handleSelect = (data) => {
+  emit('select', data)
   emit('close')
 }
 
-const handleSelect = (year, month) => {
-  emit('select', year, month)
+const handleYearChange = (data) => {
+  emit('year-change', data)
 }
 
-const handleClickOutside = (event) => {
-  if (popupRef.value && !popupRef.value.contains(event.target)) {
-    if (props.triggerElement?.value && !props.triggerElement.value.contains(event.target)) {
-      handleClose()
-    }
+onClickOutside(
+  popupRef,
+  () => {
+    emit('close')
+  },
+  {
+    ignore: [props.triggerElement],
   }
-}
-
-onMounted(() => {
-  if (process.client) {
-    updatePosition()
-    window.addEventListener('resize', updatePosition)
-    document.addEventListener('click', handleClickOutside)
-  }
-})
-
-onUnmounted(() => {
-  if (process.client) {
-    window.removeEventListener('resize', updatePosition)
-    document.removeEventListener('click', handleClickOutside)
-  }
-})
-
-watch(() => props.triggerElement, () => {
-  if (props.triggerElement?.value) {
-    updatePosition()
-  }
-}, { immediate: true })
+)
 </script>
 
 <style lang="scss">
 .MonthYearPopup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 280px;
   z-index: var(--z-index-modal);
-  pointer-events: none;
-
-  // Desktop: no backdrop, just positioning container
-  @media (min-width: 769px) {
-    background: transparent;
-  }
-
-  &--mobile {
-    background-color: var(--modal-backdrop-bg);
-    pointer-events: all;
-    display: flex;
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  &-content {
-    position: fixed;
-    background-color: var(--color-background);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-md);
-    box-shadow: var(--shadow-lg);
-    min-width: 280px;
-    pointer-events: all;
-    z-index: calc(var(--z-index-modal) + 1);
-
-    &--mobile {
-      position: relative;
-      width: 100%;
-      max-width: 100%;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      padding: var(--spacing-lg);
-    }
-  }
 }
 </style>

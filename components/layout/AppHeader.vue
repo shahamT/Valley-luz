@@ -17,11 +17,19 @@
               <span class="AppHeader-month">{{ monthYear }}</span>
             </button>
             <UiMonthYearPopup
-              v-if="isMonthYearPickerOpen"
+              v-if="isMonthYearPickerOpen && !isMobile"
               :current-date="currentDate"
               :trigger-element="monthTriggerButtonRef"
               @close="closeMonthYearPicker"
               @select="handleMonthYearSelect"
+              @year-change="handleYearChange"
+            />
+            <UiMonthYearModal
+              v-if="isMonthYearPickerOpen && isMobile"
+              :current-date="currentDate"
+              @close="closeMonthYearPicker"
+              @select="handleMonthYearSelect"
+              @year-change="handleYearChange"
             />
           </div>
           <button class="AppHeader-navButton" @click="$emit('next-month')" aria-label="Next month">
@@ -35,6 +43,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 const props = defineProps({
   showMonthYear: {
     type: Boolean,
@@ -53,10 +63,12 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['prev-month', 'next-month', 'select-month-year'])
+const emit = defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
 
 const isMonthYearPickerOpen = ref(false)
 const monthTriggerButtonRef = ref(null)
+
+const isMobile = useScreenWidth(768)
 
 const toggleMonthYearPicker = () => {
   isMonthYearPickerOpen.value = !isMonthYearPickerOpen.value
@@ -69,6 +81,10 @@ const closeMonthYearPicker = () => {
 const handleMonthYearSelect = ({ year, month }) => {
   emit('select-month-year', { year, month })
   closeMonthYearPicker()
+}
+
+const handleYearChange = ({ year }) => {
+  emit('year-change', { year })
 }
 </script>
 

@@ -1,55 +1,51 @@
 <template>
-  <div
-    v-if="isOpen"
-    class="MonthYearModal"
-    @click.self="handleClose"
-  >
-    <div class="MonthYearModal-content">
-      <div class="MonthYearModal-header">
-        <h2 class="MonthYearModal-title">בחר חודש ושנה</h2>
-        <button
-          @click="handleClose"
-          class="MonthYearModal-close"
-          aria-label="Close modal"
-        >
-          ×
-        </button>
-      </div>
-      <div class="MonthYearModal-body">
-        <UiMonthYearPicker
-          :year="currentYear"
-          :month="currentMonth"
+  <Teleport to="body">
+    <div
+      class="MonthYearModal"
+      @click.self="handleClose"
+    >
+      <div class="MonthYearModal-content">
+        <div class="MonthYearModal-header">
+          <h2 class="MonthYearModal-title">בחר חודש ושנה</h2>
+          <button
+            class="MonthYearModal-closeButton"
+            @click="handleClose"
+            aria-label="סגור"
+          >
+            <UiIcon name="close" size="md" />
+          </button>
+        </div>
+        <UiMonthYearSelection
+          :current-date="currentDate"
           @select="handleSelect"
+          @year-change="handleYearChange"
         />
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>
 const props = defineProps({
-  isOpen: {
-    type: Boolean,
-    required: true,
-  },
-  currentYear: {
-    type: Number,
-    required: true,
-  },
-  currentMonth: {
-    type: Number,
+  currentDate: {
+    type: Object,
     required: true,
   },
 })
 
-const emit = defineEmits(['close', 'select'])
+const emit = defineEmits(['close', 'select', 'year-change'])
 
 const handleClose = () => {
   emit('close')
 }
 
-const handleSelect = (year, month) => {
-  emit('select', year, month)
+const handleSelect = (data) => {
+  emit('select', data)
+  emit('close')
+}
+
+const handleYearChange = (data) => {
+  emit('year-change', data)
 }
 </script>
 
@@ -65,72 +61,53 @@ const handleSelect = (year, month) => {
   align-items: center;
   justify-content: center;
   z-index: var(--z-index-modal);
-  padding: var(--spacing-md);
-
-  @media (max-width: 768px) {
-    padding: 0;
-    align-items: flex-end;
-  }
+  padding: 0;
 
   &-content {
-    background-color: var(--color-background);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
-    max-width: var(--modal-max-width);
+    position: relative;
     width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-lg);
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-
-    @media (max-width: 768px) {
-      max-width: 100%;
-      width: 100%;
-      max-height: 100vh;
-      height: 100vh;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      padding: var(--spacing-lg);
-    }
+    background-color: var(--color-background);
   }
 
   &-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
   }
 
   &-title {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: 600;
     color: var(--color-text);
     margin: 0;
   }
 
-  &-close {
+  &-closeButton {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--color-text-light);
     padding: var(--spacing-xs);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    transition: background-color 0.2s ease, color 0.2s ease;
-    width: 2rem;
-    height: 2rem;
+    color: var(--color-text);
+    transition: opacity 0.2s ease;
+    border-radius: 50%;
 
     &:hover {
-      background-color: var(--color-surface);
-      color: var(--color-text);
+      opacity: 0.7;
+      background-color: var(--day-cell-hover-bg);
     }
-  }
-
-  &-body {
-    flex: 1;
-    min-height: 0;
   }
 }
 </style>

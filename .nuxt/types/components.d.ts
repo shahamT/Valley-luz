@@ -29,6 +29,7 @@ interface _GlobalComponents {
   'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
   'UiMonthYearPicker': typeof import("../../components/ui/MonthYearPicker.vue").default
   'UiMonthYearPopup': typeof import("../../components/ui/MonthYearPopup.vue").default
+  'UiMonthYearSelection': typeof import("../../components/ui/MonthYearSelection.vue").default
   'UiPillButton': typeof import("../../components/ui/PillButton.vue").default
   'NuxtWelcome': typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default
   'NuxtLayout': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default
@@ -68,6 +69,7 @@ interface _GlobalComponents {
   'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>
   'LazyUiMonthYearPicker': LazyComponent<typeof import("../../components/ui/MonthYearPicker.vue").default>
   'LazyUiMonthYearPopup': LazyComponent<typeof import("../../components/ui/MonthYearPopup.vue").default>
+  'LazyUiMonthYearSelection': LazyComponent<typeof import("../../components/ui/MonthYearSelection.vue").default>
   'LazyUiPillButton': LazyComponent<typeof import("../../components/ui/PillButton.vue").default>
   'LazyNuxtWelcome': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default>
   'LazyNuxtLayout': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default>

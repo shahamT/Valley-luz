@@ -2,28 +2,15 @@
   <div class="MonthYearPicker">
     <div class="MonthYearPicker-yearSection">
       <label class="MonthYearPicker-label">שנה</label>
-      <div class="MonthYearPicker-yearSelector">
+      <div class="MonthYearPicker-yearGrid">
         <button
+          v-for="yearOption in availableYears"
+          :key="yearOption"
           class="MonthYearPicker-yearButton"
-          @click="decrementYear"
-          aria-label="Previous year"
+          :class="{ 'MonthYearPicker-yearButton--active': yearOption === localYear }"
+          @click="selectYear(yearOption)"
         >
-          <UiIcon name="chevron_right" size="sm" />
-        </button>
-        <input
-          v-model.number="localYear"
-          type="number"
-          class="MonthYearPicker-yearInput"
-          :min="minYear"
-          :max="maxYear"
-          @change="handleYearChange"
-        />
-        <button
-          class="MonthYearPicker-yearButton"
-          @click="incrementYear"
-          aria-label="Next year"
-        >
-          <UiIcon name="chevron_left" size="sm" />
+          {{ yearOption }}
         </button>
       </div>
     </div>
@@ -34,7 +21,11 @@
           v-for="(monthName, index) in HEBREW_MONTHS"
           :key="index"
           class="MonthYearPicker-monthButton"
-          :class="{ 'MonthYearPicker-monthButton--active': (index + 1) === localMonth }"
+          :class="{ 
+            'MonthYearPicker-monthButton--active': (index + 1) === localMonth,
+            'MonthYearPicker-monthButton--disabled': isMonthDisabled(index + 1)
+          }"
+          :disabled="isMonthDisabled(index + 1)"
           @click="selectMonth(index + 1)"
         >
           {{ monthName }}
@@ -45,6 +36,7 @@
 </template>
 
 <script setup>
+import { computed, ref, watch } from 'vue'
 import { HEBREW_MONTHS } from '~/consts/dates.const'
 
 const props = defineProps({
@@ -59,13 +51,17 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:year', 'update:month', 'select'])
+const emit = defineEmits(['update:year', 'update:month', 'select', 'year-change'])
 
 const localYear = ref(props.year)
 const localMonth = ref(props.month)
 
-const minYear = 2020
-const maxYear = 2030
+const currentYear = new Date().getFullYear()
+const currentMonth = new Date().getMonth() + 1
+
+const availableYears = computed(() => {
+  return [currentYear, currentYear + 1, currentYear + 2]
+})
 
 watch(() => props.year, (newYear) => {
   localYear.value = newYear
@@ -75,30 +71,26 @@ watch(() => props.month, (newMonth) => {
   localMonth.value = newMonth
 })
 
-const handleYearChange = () => {
-  if (localYear.value < minYear) {
-    localYear.value = minYear
-  } else if (localYear.value > maxYear) {
-    localYear.value = maxYear
+const isMonthDisabled = (month) => {
+  if (localYear.value > currentYear) {
+    return false
   }
-  emit('update:year', localYear.value)
+  if (localYear.value < currentYear) {
+    return true
+  }
+  return month < currentMonth
 }
 
-const incrementYear = () => {
-  if (localYear.value < maxYear) {
-    localYear.value++
-    emit('update:year', localYear.value)
-  }
-}
-
-const decrementYear = () => {
-  if (localYear.value > minYear) {
-    localYear.value--
-    emit('update:year', localYear.value)
-  }
+const selectYear = (year) => {
+  localYear.value = year
+  emit('update:year', year)
+  emit('year-change', year)
 }
 
 const selectMonth = (month) => {
+  if (isMonthDisabled(month)) {
+    return
+  }
   localMonth.value = month
   emit('update:month', month)
   emit('select', localYear.value, month)
@@ -124,51 +116,40 @@ const selectMonth = (month) => {
     color: var(--color-text-light);
   }
 
-  &-yearSelector {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
+  &-yearGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-xs);
   }
 
   &-yearButton {
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    border: none;
-    background-color: var(--color-background);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    box-shadow: var(--shadow-sm);
-
-    &:hover {
-      background-color: var(--day-cell-hover-bg);
-      transform: scale(1.05);
-    }
-
-    &:active {
-      transform: scale(0.95);
-    }
-  }
-
-  &-yearInput {
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    text-align: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    width: 4.5rem;
     background-color: var(--color-background);
     color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
-    &:focus {
-      outline: none;
-      border-color: var(--brand-dark-blue);
+    &:hover {
+      background-color: var(--brand-dark-green);
+      border-color: var(--brand-dark-green);
+      color: var(--color-background);
+      transform: translateY(-1px);
+    }
+
+    &--active {
+      background-color: var(--brand-light-green);
+      color: var(--color-background);
+      border-color: var(--brand-light-green);
+      font-weight: 600;
+
+      &:hover {
+        background-color: var(--brand-dark-green);
+        border-color: var(--brand-dark-green);
+      }
     }
   }
 
@@ -191,11 +172,12 @@ const selectMonth = (month) => {
     font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
-    &:hover {
-      background-color: var(--day-cell-hover-bg);
-      border-color: var(--brand-dark-blue);
+    &:hover:not(:disabled) {
+      background-color: var(--brand-dark-green);
+      border-color: var(--brand-dark-green);
+      color: var(--color-background);
       transform: translateY(-1px);
     }
 
@@ -209,6 +191,12 @@ const selectMonth = (month) => {
         background-color: var(--brand-dark-green);
         border-color: var(--brand-dark-green);
       }
+    }
+
+    &--disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
 }

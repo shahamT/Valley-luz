@@ -29,6 +29,7 @@ export const UiLoadingSpinner: typeof import("../components/ui/LoadingSpinner.vu
 export const UiMonthYearModal: typeof import("../components/ui/MonthYearModal.vue").default
 export const UiMonthYearPicker: typeof import("../components/ui/MonthYearPicker.vue").default
 export const UiMonthYearPopup: typeof import("../components/ui/MonthYearPopup.vue").default
+export const UiMonthYearSelection: typeof import("../components/ui/MonthYearSelection.vue").default
 export const UiPillButton: typeof import("../components/ui/PillButton.vue").default
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue").default
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout").default
@@ -68,6 +69,7 @@ export const LazyUiLoadingSpinner: LazyComponent<typeof import("../components/ui
 export const LazyUiMonthYearModal: LazyComponent<typeof import("../components/ui/MonthYearModal.vue").default>
 export const LazyUiMonthYearPicker: LazyComponent<typeof import("../components/ui/MonthYearPicker.vue").default>
 export const LazyUiMonthYearPopup: LazyComponent<typeof import("../components/ui/MonthYearPopup.vue").default>
+export const LazyUiMonthYearSelection: LazyComponent<typeof import("../components/ui/MonthYearSelection.vue").default>
 export const LazyUiPillButton: LazyComponent<typeof import("../components/ui/PillButton.vue").default>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue").default>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout").default>

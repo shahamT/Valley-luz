@@ -4,7 +4,7 @@
  */
 export const EVENT_CATEGORIES = {
   party: {
-    label: 'מסיבה / ריקודים',
+    label: 'מסיבה / ריקוד',
     color: '#EF4444',
   },
   show: {

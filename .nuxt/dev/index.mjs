@@ -2148,22 +2148,7 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1c771-pr8XQJdTNuDK7uelfmpeD2dlRwU\"",
-    "mtime": "2026-02-09T20:27:40.703Z",
-    "size": 116593,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"71793-VMY2ZfbOSc+QKDcxeGIkxdJ5gRM\"",
-    "mtime": "2026-02-09T20:27:40.703Z",
-    "size": 464787,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2968,7 +2953,7 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 
 const EVENT_CATEGORIES = {
   party: {
-    label: "\u05DE\u05E1\u05D9\u05D1\u05D4 / \u05E8\u05D9\u05E7\u05D5\u05D3\u05D9\u05DD",
+    label: "\u05DE\u05E1\u05D9\u05D1\u05D4 / \u05E8\u05D9\u05E7\u05D5\u05D3",
     color: "#EF4444"
   },
   show: {
