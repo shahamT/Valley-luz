@@ -11,6 +11,14 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
       cdnURL: string,
    },
 
+   mongodbUri: string,
+
+   mongodbDbName: string,
+
+   mongodbCollectionEvents: string,
+
+   mongodbCollectionRawMessages: string,
+
    nitro: {
       envPrefix: string,
    },

@@ -1,6 +1,13 @@
 <template>
   <div class="AppShell">
-    <LayoutAppHeader />
+    <LayoutAppHeader
+      :show-month-year="showMonthYear"
+      :month-year="monthYear"
+      :current-date="currentDate"
+      @prev-month="$emit('prev-month')"
+      @next-month="$emit('next-month')"
+      @select-month-year="$emit('select-month-year', $event)"
+    />
     <div class="AppShell-content">
       <slot />
     </div>
@@ -8,15 +15,29 @@
 </template>
 
 <script setup>
-// AppHeader is auto-imported by Nuxt
+const props = defineProps({
+  showMonthYear: {
+    type: Boolean,
+    default: false,
+  },
+  monthYear: {
+    type: String,
+    default: '',
+  },
+  currentDate: {
+    type: Object,
+    default: () => ({
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+    }),
+  },
+})
+
+defineEmits(['prev-month', 'next-month', 'select-month-year'])
 </script>
 
 <style lang="scss">
 .AppShell {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
   background-color: var(--color-background);
   background-image: linear-gradient(
     135deg,
@@ -25,14 +46,13 @@
   );
 
   &-content {
-    flex: 1;
     max-width: var(--content-max-width);
     width: 100%;
     margin: 0 auto;
     padding: var(--spacing-xl);
+    padding-top: calc(var(--header-height) + var(--spacing-xl));
     display: flex;
     flex-direction: column;
-    min-height: 0;
   }
 }
 </style>

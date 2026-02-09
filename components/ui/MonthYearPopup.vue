@@ -11,8 +11,8 @@
         :style="popupStyle"
       >
         <UiMonthYearPicker
-          :year="currentYear"
-          :month="currentMonth"
+          :year="currentDate.year"
+          :month="currentDate.month"
           @select="handleSelect"
         />
       </div>
@@ -27,8 +27,8 @@
         class="MonthYearPopup-content MonthYearPopup-content--mobile"
       >
         <UiMonthYearPicker
-          :year="currentYear"
-          :month="currentMonth"
+          :year="currentDate.year"
+          :month="currentDate.month"
           @select="handleSelect"
         />
       </div>
@@ -37,15 +37,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 
 const props = defineProps({
-  currentYear: {
-    type: Number,
-    required: true,
-  },
-  currentMonth: {
-    type: Number,
+  currentDate: {
+    type: Object,
     required: true,
   },
   triggerElement: {
@@ -113,12 +109,6 @@ const handleClickOutside = (event) => {
   }
 }
 
-watch(() => props.triggerElement, () => {
-  if (props.triggerElement?.value) {
-    updatePosition()
-  }
-}, { immediate: true })
-
 onMounted(() => {
   if (process.client) {
     updatePosition()
@@ -133,6 +123,12 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside)
   }
 })
+
+watch(() => props.triggerElement, () => {
+  if (props.triggerElement?.value) {
+    updatePosition()
+  }
+}, { immediate: true })
 </script>
 
 <style lang="scss">

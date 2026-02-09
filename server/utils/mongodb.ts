@@ -3,18 +3,14 @@ import { MongoClient, Db } from 'mongodb'
 let client: MongoClient | null = null
 let db: Db | null = null
 
-/**
- * Gets MongoDB connection from environment variables
- * Reuses existing connection if available
- * @returns {Promise<{client: MongoClient, db: Db}>} MongoDB client and database
- */
 export async function getMongoConnection() {
   if (client && db) {
     return { client, db }
   }
 
-  const uri = process.env.MONGODB_URI
-  const dbName = process.env.MONGODB_DB_NAME
+  const config = useRuntimeConfig()
+  const uri = config.mongodbUri || process.env.MONGODB_URI
+  const dbName = config.mongodbDbName || process.env.MONGODB_DB_NAME
 
   if (!uri || !dbName) {
     throw new Error('MongoDB configuration missing: MONGODB_URI and MONGODB_DB_NAME are required')

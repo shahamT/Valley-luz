@@ -32,3 +32,57 @@ export function formatMonthYear(year, month) {
   const monthName = HEBREW_MONTHS[month - 1]
   return `${monthName} ${year}`
 }
+
+/**
+ * Gets the previous month and year
+ * @param {number} year - Current year
+ * @param {number} month - Current month (1-12, 1-indexed)
+ * @returns {{year: number, month: number}} Previous month and year
+ */
+export function getPrevMonth(year, month) {
+  let newMonth = month - 1
+  let newYear = year
+
+  if (newMonth < 1) {
+    newMonth = 12
+    newYear--
+  }
+
+  return { year: newYear, month: newMonth }
+}
+
+/**
+ * Gets the next month and year
+ * @param {number} year - Current year
+ * @param {number} month - Current month (1-12, 1-indexed)
+ * @returns {{year: number, month: number}} Next month and year
+ */
+export function getNextMonth(year, month) {
+  let newMonth = month + 1
+  let newYear = year
+
+  if (newMonth > 12) {
+    newMonth = 1
+    newYear++
+  }
+
+  return { year: newYear, month: newMonth }
+}
+
+/**
+ * Validates if a month is valid (1-12)
+ * @param {number} month - Month to validate
+ * @returns {boolean} True if month is valid
+ */
+export function isValidMonth(month) {
+  return Number.isInteger(month) && month >= 1 && month <= 12
+}
+
+/**
+ * Validates if a year is reasonable (1900-2100)
+ * @param {number} year - Year to validate
+ * @returns {boolean} True if year is valid
+ */
+export function isValidYear(year) {
+  return Number.isInteger(year) && year >= 1900 && year <= 2100
+}

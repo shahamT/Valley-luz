@@ -13,8 +13,6 @@ export function parseDateString(dateString) {
   return new Date(year, month - 1, day)
 }
 
-// Note: getDateFromISO moved to events.service.js as it's used for event data operations
-
 export function formatDateForDisplay(dateString) {
   const date = parseDateString(dateString)
   const weekday = HEBREW_WEEKDAYS[date.getDay()]
@@ -24,25 +22,21 @@ export function formatDateForDisplay(dateString) {
   return `יום ${weekday} | ${day} ב${month} ${year}`
 }
 
-// Note: Event querying/filtering functions have been moved to events.service.js
-// This file now contains only formatting and transformation utilities
-
-// Event formatting functions
 export function formatEventTime(occurrence) {
   if (!occurrence.hasTime) {
     return 'כל היום'
   }
-  
+
   if (!occurrence.startTime) {
     return ''
   }
-  
+
   // Parse UTC ISO string and convert to local time for display
   const startDate = new Date(occurrence.startTime)
   const startHours = String(startDate.getHours()).padStart(2, '0')
   const startMinutes = String(startDate.getMinutes()).padStart(2, '0')
   const startTime = `${startHours}:${startMinutes}`
-  
+
   if (occurrence.endTime) {
     const endDate = new Date(occurrence.endTime)
     const endHours = String(endDate.getHours()).padStart(2, '0')
@@ -50,7 +44,7 @@ export function formatEventTime(occurrence) {
     const endTime = `${endHours}:${endMinutes}`
     return `${startTime}-${endTime}`
   }
-  
+
   return startTime
 }
 
@@ -63,11 +57,11 @@ export function formatEventPrice(event) {
 
 export function formatEventLocation(event) {
   if (!event.location) return ''
-  
+
   const parts = []
   if (event.location.city) parts.push(event.location.city)
   if (event.location.addressLine1) parts.push(event.location.addressLine1)
-  
+
   return parts.join(', ')
 }
 

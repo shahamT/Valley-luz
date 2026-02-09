@@ -6,8 +6,9 @@ export default defineEventHandler(async (event) => {
   const limit = Math.min(parseInt(query.limit as string) || MESSAGES_DEFAULT, MESSAGES_MAX)
 
   try {
+    const config = useRuntimeConfig()
     const { db } = await getMongoConnection()
-    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages')
+    const collection = db.collection(config.mongodbCollectionRawMessages || process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages')
 
     // Query messages, sorted by createdAt descending (newest first)
     const cursor = collection.find({}).sort({ createdAt: -1 }).limit(limit)

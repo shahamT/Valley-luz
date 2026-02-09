@@ -648,7 +648,11 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "public": {}
+  "public": {},
+  "mongodbUri": "mongodb+srv://shahamt_db_user:38UvWxQkxUx2kVk6@valley-luz-app.z42llxh.mongodb.net/?appName=valley-luz-app",
+  "mongodbDbName": "valley_luz_app",
+  "mongodbCollectionEvents": "events",
+  "mongodbCollectionRawMessages": "raw_messages"
 };
 const envOptions = {
   prefix: "NITRO_",
@@ -2144,7 +2148,22 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1c771-pr8XQJdTNuDK7uelfmpeD2dlRwU\"",
+    "mtime": "2026-02-09T20:27:40.703Z",
+    "size": 116593,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"71793-VMY2ZfbOSc+QKDcxeGIkxdJ5gRM\"",
+    "mtime": "2026-02-09T20:27:40.703Z",
+    "size": 464787,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2593,6 +2612,7 @@ async function getIslandContext(event) {
 	return ctx;
 }
 
+const _lazy_9PueEQ = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_fO7rgS = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_wKwfEY = () => Promise.resolve().then(function () { return _filename__get$1; });
 const _lazy_FQzII2 = () => Promise.resolve().then(function () { return whatsappMessages_get$1; });
@@ -2600,6 +2620,7 @@ const _lazy_EM0R44 = () => Promise.resolve().then(function () { return renderer$
 
 const handlers = [
   { route: '', handler: _i_ZtEW, lazy: false, middleware: true, method: undefined },
+  { route: '/api/categories', handler: _lazy_9PueEQ, lazy: true, middleware: false, method: "get" },
   { route: '/api/events', handler: _lazy_fO7rgS, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-media/:filename', handler: _lazy_wKwfEY, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-messages', handler: _lazy_FQzII2, lazy: true, middleware: false, method: "get" },
@@ -2945,21 +2966,100 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get = defineEventHandler(async (event) => {
+const EVENT_CATEGORIES = {
+  party: {
+    label: "\u05DE\u05E1\u05D9\u05D1\u05D4 / \u05E8\u05D9\u05E7\u05D5\u05D3\u05D9\u05DD",
+    color: "#EF4444"
+  },
+  show: {
+    label: "\u05D4\u05D5\u05E4\u05E2\u05D4",
+    color: "#8B5CF6"
+  },
+  lecture: {
+    label: "\u05D4\u05E8\u05E6\u05D0\u05D4",
+    color: "#3B82F6"
+  },
+  nature: {
+    label: "\u05D8\u05D9\u05D5\u05DC / \u05E1\u05D9\u05D5\u05E8 \u05D1\u05D8\u05D1\u05E2",
+    color: "#10B981"
+  },
+  volunteering: {
+    label: "\u05D4\u05EA\u05E0\u05D3\u05D1\u05D5\u05EA",
+    color: "#06B6D4"
+  },
+  religion: {
+    label: "\u05D3\u05EA",
+    color: "#6B7280"
+  },
+  food: {
+    label: "\u05D0\u05D5\u05DB\u05DC",
+    color: "#F59E0B"
+  },
+  sport: {
+    label: "\u05E1\u05E4\u05D5\u05E8\u05D8",
+    color: "#DC2626"
+  },
+  fair: {
+    label: "\u05D9\u05E8\u05D9\u05D3",
+    color: "#F97316"
+  },
+  second_hand: {
+    label: "\u05D9\u05D3 \u05E9\u05E0\u05D9\u05D9\u05D4",
+    color: "#78716C"
+  },
+  art: {
+    label: "\u05D0\u05DE\u05E0\u05D5\u05EA \u05D5\u05D9\u05E6\u05D9\u05E8\u05D4",
+    color: "#A855F7"
+  },
+  music: {
+    label: "\u05DE\u05D5\u05D6\u05D9\u05E7\u05D4",
+    color: "#EC4899"
+  },
+  community_meetup: {
+    label: "\u05DE\u05E4\u05D2\u05E9 \u05E7\u05D4\u05D9\u05DC\u05EA\u05D9",
+    color: "#0EA5E9"
+  },
+  jam: {
+    label: "\u05D2'\u05D0\u05DD",
+    color: "#F43F5E"
+  },
+  course: {
+    label: "\u05D7\u05D5\u05D2",
+    color: "#6366F1"
+  },
+  festival: {
+    label: "\u05E4\u05E1\u05D8\u05D9\u05D1\u05DC",
+    color: "#EAB308"
+  },
+  workshop: {
+    label: "\u05E1\u05D3\u05E0\u05D4",
+    color: "#14B8A6"
+  },
+  health: {
+    label: "\u05D1\u05E8\u05D9\u05D0\u05D5\u05EA",
+    color: "#22C55E"
+  },
+  kids: {
+    label: "\u05D9\u05DC\u05D3\u05D9\u05DD",
+    color: "#FBBF24"
+  }
+};
+
+const index_get$2 = defineEventHandler(async (event) => {
   try {
-    const eventsData = await Promise.resolve().then(function () { return events$1; });
-    return eventsData.default;
+    return EVENT_CATEGORIES;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to fetch events"
+      statusMessage: `Failed to fetch categories: ${errorMessage}`
     });
   }
 });
 
-const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get
+  default: index_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 let client = null;
@@ -2968,8 +3068,9 @@ async function getMongoConnection() {
   if (client && db) {
     return { client, db };
   }
-  const uri = process.env.MONGODB_URI;
-  const dbName = process.env.MONGODB_DB_NAME;
+  const config = useRuntimeConfig();
+  const uri = config.mongodbUri || process.env.MONGODB_URI;
+  const dbName = config.mongodbDbName || process.env.MONGODB_DB_NAME;
   if (!uri || !dbName) {
     throw new Error("MongoDB configuration missing: MONGODB_URI and MONGODB_DB_NAME are required");
   }
@@ -2978,6 +3079,77 @@ async function getMongoConnection() {
   db = client.db(dbName);
   return { client, db };
 }
+
+function transformEventForFrontend(doc) {
+  var _a, _b, _c, _d, _e, _f;
+  const backendEvent = doc.event;
+  if (!backendEvent) {
+    return null;
+  }
+  const eventId = ((_a = doc._id) == null ? void 0 : _a.toString()) || String(doc._id);
+  const dateCreated = doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt);
+  const occurrences = backendEvent.occurrence ? [backendEvent.occurrence] : backendEvent.occurrences && Array.isArray(backendEvent.occurrences) ? backendEvent.occurrences : [];
+  if (occurrences.length > 0 && !occurrences[0].startTime) {
+    console.warn("[EventsAPI] Occurrence missing startTime:", occurrences[0]);
+  }
+  return {
+    id: eventId,
+    title: backendEvent.Title || "",
+    shortDescription: backendEvent.shortDescription || "",
+    fullDescription: backendEvent.fullDescription || "",
+    categories: backendEvent.categories || [],
+    mainCategory: backendEvent.mainCategory || "",
+    price: (_b = backendEvent.price) != null ? _b : null,
+    media: backendEvent.media || [],
+    urls: backendEvent.urls || [],
+    location: {
+      city: ((_c = backendEvent.location) == null ? void 0 : _c.City) || "",
+      addressLine1: ((_d = backendEvent.location) == null ? void 0 : _d.addressLine1) || void 0,
+      addressLine2: ((_e = backendEvent.location) == null ? void 0 : _e.addressLine2) || void 0,
+      locationDetails: ((_f = backendEvent.location) == null ? void 0 : _f.locationDetails) || void 0
+    },
+    occurrences,
+    isActive: doc.isActive !== false,
+    dateCreated,
+    publisherPhone: backendEvent.publisherPhone || void 0
+  };
+}
+const index_get = defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const mongoUri = config.mongodbUri || process.env.MONGODB_URI;
+  const mongoDbName = config.mongodbDbName || process.env.MONGODB_DB_NAME;
+  const collectionName = config.mongodbCollectionEvents || process.env.MONGODB_COLLECTION_EVENTS || "events";
+  if (!mongoUri || !mongoDbName) {
+    console.error("[EventsAPI] MongoDB not configured");
+    return [];
+  }
+  try {
+    const { db } = await getMongoConnection();
+    const collection = db.collection(collectionName);
+    const query = {
+      isActive: true,
+      event: { $ne: null }
+    };
+    const documents = await collection.find(query).toArray();
+    const transformedEvents = documents.map((doc) => {
+      try {
+        return transformEventForFrontend(doc);
+      } catch (error) {
+        console.error("[EventsAPI] Error transforming document:", error instanceof Error ? error.message : String(error));
+        return null;
+      }
+    }).filter((event2) => event2 !== null);
+    return transformedEvents;
+  } catch (error) {
+    console.error("[EventsAPI] Error fetching events:", error instanceof Error ? error.message : String(error));
+    return [];
+  }
+});
+
+const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get
+}, Symbol.toStringTag, { value: 'Module' }));
 
 const _filename__get = defineEventHandler(async (event) => {
   const filename = getRouterParam(event, "filename");
@@ -2994,8 +3166,9 @@ const _filename__get = defineEventHandler(async (event) => {
     });
   }
   try {
+    const config = useRuntimeConfig();
     const { db } = await getMongoConnection();
-    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || "raw_messages");
+    const collection = db.collection(config.mongodbCollectionRawMessages || process.env.MONGODB_COLLECTION_RAW_MESSAGES || "raw_messages");
     const document = await collection.findOne({
       cloudinaryUrl: { $regex: filename }
     });
@@ -3029,8 +3202,9 @@ const whatsappMessages_get = defineEventHandler(async (event) => {
   const query = getQuery$1(event);
   const limit = Math.min(parseInt(query.limit) || MESSAGES_DEFAULT, MESSAGES_MAX);
   try {
+    const config = useRuntimeConfig();
     const { db } = await getMongoConnection();
-    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || "raw_messages");
+    const collection = db.collection(config.mongodbCollectionRawMessages || process.env.MONGODB_COLLECTION_RAW_MESSAGES || "raw_messages");
     const cursor = collection.find({}).sort({ createdAt: -1 }).limit(limit);
     const documents = await cursor.toArray();
     const messages = documents.map((doc) => doc.raw);
@@ -3310,567 +3484,5 @@ function renderHTMLDocument(html) {
 const renderer$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: renderer
-}, Symbol.toStringTag, { value: 'Module' }));
-
-const events = [
-	{
-		id: "evt_001",
-		dateCreated: "2026-02-01T08:12:00Z",
-		publisherPhone: "+972547180883",
-		images: [
-		],
-		urls: [
-			{
-				title: "כרטיסים",
-				url: "https://example.com/tickets/evt_001"
-			}
-		],
-		categories: [
-			"party",
-			"music"
-		],
-		mainCategory: "party",
-		title: "מסיבת טכנו לילית בגולן",
-		fullDescription: "<h2>🌌 מסיבת טכנו תחת הכוכבים</h2><p>לילה של <strong>סאונד עמוק</strong>, טבע פתוח ואנרגיות גבוהות. DJ לייב, בר פתוח ואווירה שאין במרכז.</p><p>🖤 לבוא חופשי, לרקוד עד הזריחה.</p>",
-		shortDescription: "מסיבת טכנו פתוחה בטבע עם DJ לייב.",
-		location: {
-			city: "רמת הגולן",
-			addressLine1: "חוות הג'לבון",
-			addressLine2: null,
-			locationDetails: "מיקום מדויק יישלח לרוכשים"
-		},
-		price: 120,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-05T20:00:00Z",
-				endTime: null
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_002",
-		dateCreated: "2026-02-01T09:30:00Z",
-		publisherPhone: "+972509294963",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"community_meetup",
-			"art"
-		],
-		mainCategory: "community_meetup",
-		title: "חוגגות אהבה – קהילה ואמנות",
-		fullDescription: "<p>💖 מפגש קהילתי לא קיטשי לכבוד יום האהבה.</p><ul><li>🍷 יין</li><li>🧀 גבינות</li><li>🌸 דוכן פרחים</li><li>🎶 מוזיקה טובה</li></ul><p><em>אהבה מתחילה בעצמנו.</em></p>",
-		shortDescription: "אירוע קהילתי עם אמנות, אוכל ומוזיקה.",
-		location: {
-			city: "חיפה",
-			addressLine1: "Szold Art",
-			addressLine2: null,
-			locationDetails: "מתחם פתוח עם מחצלות וישיבה חופשית"
-		},
-		price: 0,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-13T08:00:00Z",
-				endTime: "2026-02-13T13:00:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_003",
-		dateCreated: "2026-02-01T10:00:00Z",
-		publisherPhone: "+972545520555",
-		images: [
-		],
-		urls: [
-			{
-				title: "עמוד האירוע",
-				url: "https://example.com/events/evt_003"
-			}
-		],
-		categories: [
-			"music",
-			"show"
-		],
-		mainCategory: "music",
-		title: "סיון טלמור – מופע דואו אינטימי",
-		fullDescription: "<p>🎤 סיון טלמור במופע אינטימי, בין <strong>פולק, ג׳אז ורוקנרול</strong>.</p><p>ערב קרוב, חשוף ומרגש.</p>",
-		shortDescription: "מופע דואו אינטימי של סיון טלמור.",
-		location: {
-			city: "תל אביב",
-			addressLine1: "פילוסוף",
-			addressLine2: "רחוב אלנבי 21",
-			locationDetails: null
-		},
-		price: 90,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-07T19:00:00Z",
-				endTime: null
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_004",
-		dateCreated: "2026-02-01T11:15:00Z",
-		publisherPhone: "+972523800138",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"food"
-		],
-		mainCategory: "food",
-		title: "ערב קובה וקוסקוס גלילי",
-		fullDescription: "<p>🥘 ערב אוכל ביתי עם <strong>קובה במרק סגול</strong> וקוסקוס לפי המסורת.</p><p>חוויה חמימה, משפחתית וטעימה.</p>",
-		shortDescription: "ערב אוכל גלילי מסורתי.",
-		location: {
-			city: "שדה נחמיה",
-			addressLine1: "חצר פרטית",
-			addressLine2: null,
-			locationDetails: "איסוף במקום"
-		},
-		price: 75,
-		occurrences: [
-			{
-				hasTime: false,
-				startTime: "2026-02-06T00:00:00Z",
-				endTime: null
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_005",
-		dateCreated: "2026-02-01T12:00:00Z",
-		publisherPhone: "+972508889999",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"nature"
-		],
-		mainCategory: "nature",
-		title: "סיור זריחה בנחל עמוד",
-		fullDescription: "<p>🌄 סיור הליכה קל בנחל עמוד.</p><p>מתאים למתחילים, כולל עצירות, הסברים ונשימות.</p>",
-		shortDescription: "סיור זריחה רגוע בטבע.",
-		location: {
-			city: "גליל עליון",
-			addressLine1: "נחל עמוד",
-			addressLine2: null,
-			locationDetails: "נקודת מפגש תישלח לנרשמים"
-		},
-		price: 0,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-14T04:30:00Z",
-				endTime: "2026-02-14T07:30:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_006",
-		dateCreated: "2026-02-01T13:20:00Z",
-		publisherPhone: "+972501234567",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"workshop",
-			"art"
-		],
-		mainCategory: "workshop",
-		title: "סדנת קדרות יפנית",
-		fullDescription: "<p>🏺 סדנת קדרות בהשראת מסורת <strong>Mingei</strong>.</p><p>עבודה בידיים, חיבור לחומר ויצירה אישית.</p>",
-		shortDescription: "סדנת קדרות שימושית באווירה רגועה.",
-		location: {
-			city: "להבות הבשן",
-			addressLine1: "סטודיו ליאת בן אדיבה",
-			addressLine2: null,
-			locationDetails: "קבוצה קטנה"
-		},
-		price: 220,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-20T08:00:00Z",
-				endTime: "2026-02-20T11:00:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_007",
-		dateCreated: "2026-02-01T14:00:00Z",
-		publisherPhone: "+972546667777",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"festival"
-		],
-		mainCategory: "festival",
-		title: "פסטיבל אדם וטבע",
-		fullDescription: "<p>🎬 פסטיבל קולנוע עצמאי בנושאי <strong>אדם, טבע וסביבה</strong>.</p><p>הקרנות, שיחות ויוצרים.</p>",
-		shortDescription: "פסטיבל קולנוע סביבתי.",
-		location: {
-			city: "ירושלים",
-			addressLine1: "סינמטק ירושלים",
-			addressLine2: "דרך חברון 11",
-			locationDetails: null
-		},
-		price: 60,
-		occurrences: [
-			{
-				hasTime: false,
-				startTime: "2026-03-10T00:00:00Z",
-				endTime: "2026-03-12T00:00:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_008",
-		dateCreated: "2026-02-01T15:10:00Z",
-		publisherPhone: "+972549999111",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"second_hand",
-			"fair"
-		],
-		mainCategory: "second_hand",
-		title: "יריד יד שנייה קהילתי",
-		fullDescription: "<p>👕 בגדים, חפצים, מוזיקה ואנשים טובים.</p><p>להביא, להחליף, למצוא אוצרות.</p>",
-		shortDescription: "יריד יד שנייה פתוח לקהל.",
-		location: {
-			city: "חיפה",
-			addressLine1: "גן האם",
-			addressLine2: null,
-			locationDetails: "אירוע פתוח"
-		},
-		price: 0,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-21T07:00:00Z",
-				endTime: "2026-02-21T12:00:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_009",
-		dateCreated: "2026-02-01T16:00:00Z",
-		publisherPhone: "+972543333444",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"lecture"
-		],
-		mainCategory: "lecture",
-		title: "הרצאה: לחיות לאט בעולם מהיר",
-		fullDescription: "<p>🧠 הרצאה על <strong>קצב, עומס ותשומת לב</strong>.</p><p>כלים פשוטים לחיים רגועים יותר.</p>",
-		shortDescription: "הרצאה על קצב חיים מודע.",
-		location: {
-			city: "תל אביב",
-			addressLine1: "מרכז ענב",
-			addressLine2: "אבן גבירול 71",
-			locationDetails: null
-		},
-		price: 50,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-18T17:00:00Z",
-				endTime: null
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_010",
-		dateCreated: "2026-02-01T17:00:00Z",
-		publisherPhone: "+972555551234",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"jam",
-			"music"
-		],
-		mainCategory: "jam",
-		title: "ג׳אם פתוח – כלים ואנשים",
-		fullDescription: "<p>🎸 ג׳אם פתוח – להביא כלי, קול או אוזן.</p><p>בלי במה, בלי לחץ, רק מוזיקה.</p>",
-		shortDescription: "מפגש ג׳אם פתוח למוזיקאים.",
-		location: {
-			city: "פרדס חנה",
-			addressLine1: "סטודיו ביתי",
-			addressLine2: null,
-			locationDetails: "הכתובת תישלח בפרטי"
-		},
-		price: 0,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-22T18:00:00Z",
-				endTime: null
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_011_edge_multiday_partial_times",
-		dateCreated: "2026-02-02T07:05:00Z",
-		publisherPhone: "+972520001111",
-		images: [
-			"/images/events/evt_011/poster_1.jpg"
-		],
-		urls: [
-			{
-				title: "עמוד פסטיבל",
-				url: "https://example.com/festival/evt_011"
-			},
-			{
-				title: "כרטיסים (ייתכן שנפתח בקרוב)",
-				url: "https://example.com/festival/evt_011/tickets"
-			}
-		],
-		categories: [
-			"festival",
-			"music",
-			"art"
-		],
-		mainCategory: "festival",
-		title: "פסטיבל חורף בגליל – 3 ימים",
-		fullDescription: "<h2>❄️ פסטיבל חורף בגליל</h2><p><strong>3 ימים</strong> של מוזיקה, אמנות, מדורות וטעימות.</p><p>⚠️ <em>שעות מדויקות לכל מתחם יפורסמו בהמשך.</em></p><p>🌲 מתאים למשפחות וגם לחבר׳ה.</p>",
-		shortDescription: "פסטיבל 3 ימים בגליל (שעות מלאות יתעדכנו).",
-		location: {
-			city: "גליל עליון",
-			addressLine1: "מתחם יער פתוח",
-			addressLine2: null,
-			locationDetails: "מספר נקודות פעילות – מיקום מדויק לכל יום יישלח לנרשמים"
-		},
-		price: null,
-		occurrences: [
-			{
-				hasTime: false,
-				startTime: "2026-02-26T00:00:00Z",
-				endTime: "2026-02-28T00:00:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_012_edge_multiple_occurrences_same_event",
-		dateCreated: "2026-02-02T07:20:00Z",
-		publisherPhone: "+972539999222",
-		images: [
-		],
-		urls: [
-			{
-				title: "הרשמה",
-				url: "https://example.com/workshop/evt_012"
-			}
-		],
-		categories: [
-			"workshop",
-			"health",
-			"community_meetup"
-		],
-		mainCategory: "workshop",
-		title: "סדנת נשימה ומדיטציה – 2 מועדים לבחירה",
-		fullDescription: "<p>🧘 סדנה מעשית לנשימה ומדיטציה.</p><p><strong>שני מועדים לבחירה</strong> – אותו תוכן, אותה קבוצה קטנה.</p><p>✨ מתאים גם למתחילים.</p>",
-		shortDescription: "סדנת נשימה ומדיטציה עם 2 מועדים.",
-		location: {
-			city: "תל אביב",
-			addressLine1: "סטודיו שקט",
-			addressLine2: "דרך מנחם בגין 132",
-			locationDetails: "קומה 3, דלת עם שלט קטן"
-		},
-		price: 180,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-11T16:30:00Z",
-				endTime: "2026-02-11T18:30:00Z"
-			},
-			{
-				hasTime: true,
-				startTime: "2026-02-18T16:30:00Z",
-				endTime: "2026-02-18T18:30:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_013_edge_time_range_ambiguous",
-		dateCreated: "2026-02-02T07:40:00Z",
-		publisherPhone: "+972548888333",
-		images: [
-		],
-		urls: [
-		],
-		categories: [
-			"party",
-			"music"
-		],
-		mainCategory: "party",
-		title: "אפטר שישי בבוקר – עד שמרגיש נכון",
-		fullDescription: "<p>🌞 אפטר שישי בבוקר – מוזיקה טובה, אנשים טובים.</p><p>⏰ כתבו: <strong>08:00–?</strong> (מסיימים כשמרגיש נכון).</p><p>⚠️ אין שעת סיום רשמית.</p>",
-		shortDescription: "אפטר שישי בבוקר עם סיום לא מוגדר.",
-		location: {
-			city: "חיפה",
-			addressLine1: "גינה פרטית",
-			addressLine2: null,
-			locationDetails: "כתובת מלאה תישלח רק למאושרים"
-		},
-		price: 50,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-06T06:00:00Z",
-				endTime: null
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_014_edge_no_location_online_only",
-		dateCreated: "2026-02-02T08:05:00Z",
-		publisherPhone: "+972507777444",
-		images: [
-			"/images/events/evt_014/banner_1.png"
-		],
-		urls: [
-			{
-				title: "זום",
-				url: "https://example.com/zoom/evt_014"
-			},
-			{
-				title: "סילבוס",
-				url: "https://example.com/course/evt_014/syllabus"
-			}
-		],
-		categories: [
-			"lecture",
-			"health"
-		],
-		mainCategory: "lecture",
-		title: "וובינר אונליין: שינה טובה יותר תוך שבוע",
-		fullDescription: "<h3>😴 וובינר אונליין</h3><p>שעה אחת של כלים פרקטיים לשינה טובה יותר.</p><p>✅ כולל Q&A בסוף.</p><p>📍 <strong>מיקום:</strong> אונליין (זום)</p>",
-		shortDescription: "וובינר זום על שיפור שינה + שאלות בסוף.",
-		location: {
-			city: "אונליין",
-			addressLine1: "Zoom",
-			addressLine2: null,
-			locationDetails: "קישור לזום יישלח לנרשמים"
-		},
-		price: 0,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-17T18:00:00Z",
-				endTime: "2026-02-17T19:00:00Z"
-			}
-		],
-		isActive: true
-	},
-	{
-		id: "evt_015_edge_conflicting_date_in_text",
-		dateCreated: "2026-02-02T08:30:00Z",
-		publisherPhone: "+972541111555",
-		images: [
-		],
-		urls: [
-			{
-				title: "פוסט עם פרטים",
-				url: "https://example.com/post/evt_015"
-			}
-		],
-		categories: [
-			"sport",
-			"community_meetup",
-			"nature"
-		],
-		mainCategory: "sport",
-		title: "ריצת שקיעה קהילתית – (תאריך לא סגור)",
-		fullDescription: "<p>🏃‍♂️ ריצת שקיעה קהילתית בקצב חברי.</p><p>⚠️ הודעה כתבה: <strong>חמישי 12.2</strong> אבל בסוף נכתב: <strong>נפגשים שישי 13.2</strong>.</p><p>כרגע <em>לא ברור</em> – מחכים לאישור סופי.</p>",
-		shortDescription: "ריצת שקיעה עם תאריך סותר בהודעה (ממתין לאישור).",
-		location: {
-			city: "תל אביב",
-			addressLine1: "פארק הירקון",
-			addressLine2: null,
-			locationDetails: "נקודת מפגש תישלח כשיהיה תאריך סופי"
-		},
-		price: 0,
-		occurrences: [
-			{
-				hasTime: false,
-				startTime: null,
-				endTime: null
-			}
-		],
-		isActive: false
-	},
-	{
-		id: "evt_016_edge_price_unknown_donation_optional",
-		dateCreated: "2026-02-02T09:00:00Z",
-		publisherPhone: "+972559999666",
-		images: [
-		],
-		urls: [
-			{
-				title: "להצטרפות לקבוצת עדכונים",
-				url: "https://example.com/join/evt_016"
-			}
-		],
-		categories: [
-			"volunteering",
-			"community_meetup"
-		],
-		mainCategory: "volunteering",
-		title: "התנדבות: אריזות מזון למשפחות",
-		fullDescription: "<p>🤝 התנדבות קהילתית לאריזת מזון למשפחות.</p><p>💛 <strong>ללא עלות</strong> – תרומה אופציונלית למי שרוצה.</p><p>🎯 צריך ידיים טובות וחיוך.</p>",
-		shortDescription: "התנדבות לאריזות מזון (תרומה אופציונלית).",
-		location: {
-			city: "רחובות",
-			addressLine1: "מרכז קהילתי",
-			addressLine2: null,
-			locationDetails: "הכתובת המדויקת תישלח אחרי הרשמה"
-		},
-		price: null,
-		occurrences: [
-			{
-				hasTime: true,
-				startTime: "2026-02-15T15:00:00Z",
-				endTime: "2026-02-15T18:00:00Z"
-			}
-		],
-		isActive: true
-	}
-];
-
-const events$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: events
 }, Symbol.toStringTag, { value: 'Module' }));
 //# sourceMappingURL=index.mjs.map

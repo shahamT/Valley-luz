@@ -5,79 +5,79 @@
 export const EVENT_CATEGORIES = {
   party: {
     label: 'מסיבה / ריקודים',
-    color: '#FF6B6B',
+    color: '#EF4444',
   },
   show: {
     label: 'הופעה',
-    color: '#845EC2',
+    color: '#8B5CF6',
   },
   lecture: {
     label: 'הרצאה',
-    color: '#4D96FF',
+    color: '#3B82F6',
   },
   nature: {
     label: 'טיול / סיור בטבע',
-    color: '#2ECC71',
+    color: '#10B981',
   },
   volunteering: {
     label: 'התנדבות',
-    color: '#1ABC9C',
+    color: '#06B6D4',
   },
   religion: {
     label: 'דת',
-    color: '#8E8D8A',
+    color: '#6B7280',
   },
   food: {
     label: 'אוכל',
-    color: '#F39C12',
+    color: '#F59E0B',
   },
   sport: {
     label: 'ספורט',
-    color: '#E74C3C',
+    color: '#DC2626',
   },
   fair: {
     label: 'יריד',
-    color: '#F7B801',
+    color: '#F97316',
   },
   second_hand: {
     label: 'יד שנייה',
-    color: '#6C757D',
+    color: '#78716C',
   },
   art: {
     label: 'אמנות ויצירה',
-    color: '#C77DFF',
+    color: '#A855F7',
   },
   music: {
     label: 'מוזיקה',
-    color: '#FF4D9D',
+    color: '#EC4899',
   },
   community_meetup: {
     label: 'מפגש קהילתי',
-    color: '#00B4D8',
+    color: '#0EA5E9',
   },
   jam: {
     label: "ג'אם",
-    color: '#FF922B',
+    color: '#F43F5E',
   },
   course: {
     label: 'חוג',
-    color: '#3A86FF',
+    color: '#6366F1',
   },
   festival: {
     label: 'פסטיבל',
-    color: '#FF006E',
+    color: '#EAB308',
   },
   workshop: {
     label: 'סדנה',
-    color: '#FB5607',
+    color: '#14B8A6',
   },
   health: {
     label: 'בריאות',
-    color: '#2EC4B6',
+    color: '#22C55E',
   },
   kids: {
     label: 'ילדים',
-    color: '#FFD93D',
+    color: '#FBBF24',
   },
 }
 

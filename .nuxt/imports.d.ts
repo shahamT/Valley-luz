@@ -30,12 +30,17 @@ export { requestIdleCallback, cancelIdleCallback } from '#app/compat/idle-callba
 export { setInterval } from '#app/compat/interval';
 export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composables';
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
+export { useCategories } from '../composables/useCategories';
 export { useEvents } from '../composables/useEvents';
+export { useScreenWidth } from '../composables/useScreenWidth';
+export { getDisplayEvents, getAdditionalEventsCount, isWeekendDay, getCategoryColor, getMoreEventsText } from '../utils/calendar-display.helpers';
 export { generateCalendarDays } from '../utils/calendar.helpers';
-export { getTodayDateString, getCurrentYearMonth, formatMonthYear } from '../utils/date.helpers';
+export { getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isValidMonth, isValidYear } from '../utils/date.helpers';
 export { formatDateToYYYYMMDD, parseDateString, formatDateForDisplay, formatEventTime, formatEventPrice, formatEventLocation, transformEventForCard } from '../utils/events.helpers';
 export { eventsService } from '../utils/events.service';
+export { logger } from '../utils/logger';
 export { isValidDateString, isValidRouteDate } from '../utils/validation.helpers';
+export { useCategoriesStore } from '../stores/categories.store';
 export { useEventsStore } from '../stores/events.store';
 export { useUiStore } from '../stores/ui.store';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';

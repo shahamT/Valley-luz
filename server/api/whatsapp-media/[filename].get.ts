@@ -23,8 +23,9 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const config = useRuntimeConfig()
     const { db } = await getMongoConnection()
-    const collection = db.collection(process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages')
+    const collection = db.collection(config.mongodbCollectionRawMessages || process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages')
 
     // Find document where cloudinaryUrl contains the filename
     // Filename format: messageId_timestamp.extension

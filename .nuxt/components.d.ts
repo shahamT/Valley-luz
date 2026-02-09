@@ -23,7 +23,9 @@ export const LayoutAppShell: typeof import("../components/layout/AppShell.vue").
 export const MonthlyDayCell: typeof import("../components/monthly/DayCell.vue").default
 export const MonthlyMonthCalendar: typeof import("../components/monthly/MonthCalendar.vue").default
 export const MonthlyWeekdayRow: typeof import("../components/monthly/WeekdayRow.vue").default
+export const UiCategoryPill: typeof import("../components/ui/CategoryPill.vue").default
 export const UiIcon: typeof import("../components/ui/Icon.vue").default
+export const UiLoadingSpinner: typeof import("../components/ui/LoadingSpinner.vue").default
 export const UiMonthYearModal: typeof import("../components/ui/MonthYearModal.vue").default
 export const UiMonthYearPicker: typeof import("../components/ui/MonthYearPicker.vue").default
 export const UiMonthYearPopup: typeof import("../components/ui/MonthYearPopup.vue").default
@@ -60,7 +62,9 @@ export const LazyLayoutAppShell: LazyComponent<typeof import("../components/layo
 export const LazyMonthlyDayCell: LazyComponent<typeof import("../components/monthly/DayCell.vue").default>
 export const LazyMonthlyMonthCalendar: LazyComponent<typeof import("../components/monthly/MonthCalendar.vue").default>
 export const LazyMonthlyWeekdayRow: LazyComponent<typeof import("../components/monthly/WeekdayRow.vue").default>
+export const LazyUiCategoryPill: LazyComponent<typeof import("../components/ui/CategoryPill.vue").default>
 export const LazyUiIcon: LazyComponent<typeof import("../components/ui/Icon.vue").default>
+export const LazyUiLoadingSpinner: LazyComponent<typeof import("../components/ui/LoadingSpinner.vue").default>
 export const LazyUiMonthYearModal: LazyComponent<typeof import("../components/ui/MonthYearModal.vue").default>
 export const LazyUiMonthYearPicker: LazyComponent<typeof import("../components/ui/MonthYearPicker.vue").default>
 export const LazyUiMonthYearPopup: LazyComponent<typeof import("../components/ui/MonthYearPopup.vue").default>

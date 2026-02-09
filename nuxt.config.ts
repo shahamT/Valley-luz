@@ -26,6 +26,10 @@ export default defineNuxtConfig({
   
   runtimeConfig: {
     // Private keys (only available on server-side)
+    mongodbUri: process.env.MONGODB_URI,
+    mongodbDbName: process.env.MONGODB_DB_NAME,
+    mongodbCollectionEvents: process.env.MONGODB_COLLECTION_EVENTS || 'events',
+    mongodbCollectionRawMessages: process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages',
     // Public keys (exposed to client-side)
     public: {},
   },

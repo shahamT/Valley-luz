@@ -6,14 +6,6 @@ import { formatDateToYYYYMMDD } from './events.helpers'
  */
 export const eventsService = {
   /**
-   * Fetches events from the API
-   * @returns {Promise<Array>} Array of events
-   */
-  async fetchEvents() {
-    return await $fetch('/api/events')
-  },
-
-  /**
    * Filters events to only active ones
    * @param {Array} events - Array of events
    * @returns {Array} Array of active events
@@ -61,21 +53,25 @@ export const eventsService = {
   },
 
   /**
-   * Gets event counts grouped by date for a specific month
+   * Gets event data grouped by date for a specific month
    * @param {Array} events - Array of events
    * @param {number} year - Year (e.g., 2026)
    * @param {number} month - Month (1-12, 1-indexed)
-   * @returns {Object} Map of date strings to event counts
+   * @returns {Object} Map of date strings to arrays of event objects with mainCategory
    */
-  getEventCountsByDate(events, year, month) {
+  getEventsByDate(events, year, month) {
     const activeEvents = this.getActiveEvents(events)
-    const countsMap = {}
+    const eventsMap = {}
 
     activeEvents.forEach((event) => {
-      if (!event.occurrences) return
+      if (!event.occurrences) {
+        return
+      }
 
       event.occurrences.forEach((occurrence) => {
-        if (!occurrence.startTime) return
+        if (!occurrence.startTime) {
+          return
+        }
 
         const occurrenceDate = new Date(occurrence.startTime)
         const occurrenceYear = occurrenceDate.getFullYear()
@@ -83,9 +79,30 @@ export const eventsService = {
 
         if (occurrenceYear === year && occurrenceMonth === month) {
           const dateString = formatDateToYYYYMMDD(occurrenceDate)
-          countsMap[dateString] = (countsMap[dateString] || 0) + 1
+          if (!eventsMap[dateString]) {
+            eventsMap[dateString] = []
+          }
+          eventsMap[dateString].push(event)
         }
       })
+    })
+
+    return eventsMap
+  },
+
+  /**
+   * Gets event counts grouped by date for a specific month
+   * @param {Array} events - Array of events
+   * @param {number} year - Year (e.g., 2026)
+   * @param {number} month - Month (1-12, 1-indexed)
+   * @returns {Object} Map of date strings to event counts
+   */
+  getEventCountsByDate(events, year, month) {
+    const eventsMap = this.getEventsByDate(events, year, month)
+    const countsMap = {}
+
+    Object.keys(eventsMap).forEach((dateString) => {
+      countsMap[dateString] = eventsMap[dateString].length
     })
 
     return countsMap
@@ -100,5 +117,24 @@ export const eventsService = {
     if (!isoString) return null
     const date = new Date(isoString)
     return formatDateToYYYYMMDD(date)
+  },
+
+  /**
+   * Filters events by category IDs (checks all categories in event)
+   * @param {Array} events - Array of events
+   * @param {Array} categoryIds - Array of category IDs to filter by
+   * @returns {Array} Filtered array of events
+   */
+  filterEventsByCategories(events, categoryIds) {
+    if (!Array.isArray(events) || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+      return events
+    }
+
+    return events.filter((event) => {
+      if (!event.categories || !Array.isArray(event.categories)) {
+        return false
+      }
+      return event.categories.some((categoryId) => categoryIds.includes(categoryId))
+    })
   },
 }

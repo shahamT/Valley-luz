@@ -1,6 +1,11 @@
 <template>
   <div class="WeekdayRow">
-    <div v-for="day in weekdays" :key="day" class="WeekdayRow-day">
+    <div 
+      v-for="(day, index) in weekdays" 
+      :key="day" 
+      class="WeekdayRow-day"
+      :class="{ 'WeekdayRow-day--weekend': isWeekendDay(index) }"
+    >
       {{ day }}
     </div>
   </div>
@@ -8,8 +13,19 @@
 
 <script setup>
 import { HEBREW_WEEKDAYS } from '~/consts/dates.const'
+import { WEEKEND_DAYS } from '~/consts/calendar.const'
 
-const weekdays = HEBREW_WEEKDAYS
+const SHORT_WEEKDAYS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']
+
+const isMobile = useScreenWidth(768)
+
+const weekdays = computed(() => {
+  return isMobile.value ? SHORT_WEEKDAYS : HEBREW_WEEKDAYS
+})
+
+const isWeekendDay = (index) => {
+  return WEEKEND_DAYS.includes(index)
+}
 </script>
 
 <style lang="scss">
@@ -18,8 +34,6 @@ const weekdays = HEBREW_WEEKDAYS
   grid-template-columns: repeat(7, 1fr);
   gap: var(--spacing-md);
   margin-bottom: calc(var(--spacing-md) - 4px); // Reduced by padding-top amount to maintain visual spacing
-  padding-right: var(--scrollbar-total-width);
-  padding-left: 8px; // Match gridWrapper left padding for alignment
 
   &-day {
     text-align: center;
@@ -27,6 +41,14 @@ const weekdays = HEBREW_WEEKDAYS
     font-weight: 600;
     color: var(--color-text-light);
     padding: var(--spacing-sm);
+
+    &--weekend {
+      color: var(--brand-dark-green);
+    }
+  }
+
+  @media (max-width: 767px) {
+    gap: 4px;
   }
 }
 </style>

@@ -1,30 +1,18 @@
 <template>
   <div class="EventCard">
-    <div class="EventCard-time">{{ timeText }}</div>
+    <div class="EventCard-time">{{ event.timeText }}</div>
     <div class="EventCard-content">
-      <h3 class="EventCard-title">{{ title }}</h3>
-      <p class="EventCard-desc">{{ desc }}</p>
-      <p class="EventCard-price">{{ price }}</p>
+      <h3 class="EventCard-title">{{ event.title }}</h3>
+      <p class="EventCard-desc">{{ event.desc }}</p>
+      <p class="EventCard-price">{{ event.price }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
 defineProps({
-  timeText: {
-    type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true,
-  },
-  desc: {
-    type: String,
-    required: true,
-  },
-  price: {
-    type: String,
+  event: {
+    type: Object,
     required: true,
   },
 })

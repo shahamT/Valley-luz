@@ -35,10 +35,16 @@ declare global {
   const formatEventTime: typeof import('../../utils/events.helpers').formatEventTime
   const formatMonthYear: typeof import('../../utils/date.helpers').formatMonthYear
   const generateCalendarDays: typeof import('../../utils/calendar.helpers').generateCalendarDays
+  const getAdditionalEventsCount: typeof import('../../utils/calendar-display.helpers').getAdditionalEventsCount
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
+  const getCategoryColor: typeof import('../../utils/calendar-display.helpers').getCategoryColor
   const getCurrentInstance: typeof import('../../node_modules/vue').getCurrentInstance
   const getCurrentScope: typeof import('../../node_modules/vue').getCurrentScope
   const getCurrentYearMonth: typeof import('../../utils/date.helpers').getCurrentYearMonth
+  const getDisplayEvents: typeof import('../../utils/calendar-display.helpers').getDisplayEvents
+  const getMoreEventsText: typeof import('../../utils/calendar-display.helpers').getMoreEventsText
+  const getNextMonth: typeof import('../../utils/date.helpers').getNextMonth
+  const getPrevMonth: typeof import('../../utils/date.helpers').getPrevMonth
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
   const getTodayDateString: typeof import('../../utils/date.helpers').getTodayDateString
   const h: typeof import('../../node_modules/vue').h
@@ -53,10 +59,14 @@ declare global {
   const isRef: typeof import('../../node_modules/vue').isRef
   const isShallow: typeof import('../../node_modules/vue').isShallow
   const isValidDateString: typeof import('../../utils/validation.helpers').isValidDateString
+  const isValidMonth: typeof import('../../utils/date.helpers').isValidMonth
   const isValidRouteDate: typeof import('../../utils/validation.helpers').isValidRouteDate
+  const isValidYear: typeof import('../../utils/date.helpers').isValidYear
   const isVue2: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue2
   const isVue3: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue3
+  const isWeekendDay: typeof import('../../utils/calendar-display.helpers').isWeekendDay
   const loadPayload: typeof import('../../node_modules/nuxt/dist/app/composables/payload').loadPayload
+  const logger: typeof import('../../utils/logger').logger
   const markRaw: typeof import('../../node_modules/vue').markRaw
   const navigateTo: typeof import('../../node_modules/nuxt/dist/app/composables/router').navigateTo
   const nextTick: typeof import('../../node_modules/vue').nextTick
@@ -114,6 +124,8 @@ declare global {
   const useAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').useAppConfig
   const useAsyncData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useAsyncData
   const useAttrs: typeof import('../../node_modules/vue').useAttrs
+  const useCategories: typeof import('../../composables/useCategories').useCategories
+  const useCategoriesStore: typeof import('../../stores/categories.store').useCategoriesStore
   const useCookie: typeof import('../../node_modules/nuxt/dist/app/composables/cookie').useCookie
   const useCssModule: typeof import('../../node_modules/vue').useCssModule
   const useCssVars: typeof import('../../node_modules/vue').useCssVars
@@ -146,6 +158,7 @@ declare global {
   const useRouter: typeof import('../../node_modules/nuxt/dist/app/composables/router').useRouter
   const useRuntimeConfig: typeof import('../../node_modules/nuxt/dist/app/nuxt').useRuntimeConfig
   const useRuntimeHook: typeof import('../../node_modules/nuxt/dist/app/composables/runtime-hook').useRuntimeHook
+  const useScreenWidth: typeof import('../../composables/useScreenWidth').useScreenWidth
   const useScript: typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs').useScript
   const useScriptClarity: typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs').useScriptClarity
   const useScriptCloudflareWebAnalytics: typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs').useScriptCloudflareWebAnalytics
@@ -241,10 +254,16 @@ declare module 'vue' {
     readonly formatEventTime: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventTime']>
     readonly formatMonthYear: UnwrapRef<typeof import('../../utils/date.helpers')['formatMonthYear']>
     readonly generateCalendarDays: UnwrapRef<typeof import('../../utils/calendar.helpers')['generateCalendarDays']>
+    readonly getAdditionalEventsCount: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getAdditionalEventsCount']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
+    readonly getCategoryColor: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getCategoryColor']>
     readonly getCurrentInstance: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentScope']>
     readonly getCurrentYearMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getCurrentYearMonth']>
+    readonly getDisplayEvents: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getDisplayEvents']>
+    readonly getMoreEventsText: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getMoreEventsText']>
+    readonly getNextMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getNextMonth']>
+    readonly getPrevMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevMonth']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
     readonly getTodayDateString: UnwrapRef<typeof import('../../utils/date.helpers')['getTodayDateString']>
     readonly h: UnwrapRef<typeof import('../../node_modules/vue')['h']>
@@ -259,10 +278,14 @@ declare module 'vue' {
     readonly isRef: UnwrapRef<typeof import('../../node_modules/vue')['isRef']>
     readonly isShallow: UnwrapRef<typeof import('../../node_modules/vue')['isShallow']>
     readonly isValidDateString: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidDateString']>
+    readonly isValidMonth: UnwrapRef<typeof import('../../utils/date.helpers')['isValidMonth']>
     readonly isValidRouteDate: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidRouteDate']>
+    readonly isValidYear: UnwrapRef<typeof import('../../utils/date.helpers')['isValidYear']>
     readonly isVue2: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue2']>
     readonly isVue3: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue3']>
+    readonly isWeekendDay: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['isWeekendDay']>
     readonly loadPayload: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['loadPayload']>
+    readonly logger: UnwrapRef<typeof import('../../utils/logger')['logger']>
     readonly markRaw: UnwrapRef<typeof import('../../node_modules/vue')['markRaw']>
     readonly navigateTo: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['navigateTo']>
     readonly nextTick: UnwrapRef<typeof import('../../node_modules/vue')['nextTick']>
@@ -320,6 +343,8 @@ declare module 'vue' {
     readonly useAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['useAppConfig']>
     readonly useAsyncData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useAsyncData']>
     readonly useAttrs: UnwrapRef<typeof import('../../node_modules/vue')['useAttrs']>
+    readonly useCategories: UnwrapRef<typeof import('../../composables/useCategories')['useCategories']>
+    readonly useCategoriesStore: UnwrapRef<typeof import('../../stores/categories.store')['useCategoriesStore']>
     readonly useCookie: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/cookie')['useCookie']>
     readonly useCssModule: UnwrapRef<typeof import('../../node_modules/vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('../../node_modules/vue')['useCssVars']>
@@ -352,6 +377,7 @@ declare module 'vue' {
     readonly useRouter: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['useRouter']>
     readonly useRuntimeConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['useRuntimeConfig']>
     readonly useRuntimeHook: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/runtime-hook')['useRuntimeHook']>
+    readonly useScreenWidth: UnwrapRef<typeof import('../../composables/useScreenWidth')['useScreenWidth']>
     readonly useScript: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs')['useScript']>
     readonly useScriptClarity: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs')['useScriptClarity']>
     readonly useScriptCloudflareWebAnalytics: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs')['useScriptCloudflareWebAnalytics']>

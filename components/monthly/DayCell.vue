@@ -2,56 +2,79 @@
   <div
     class="DayCell"
     :class="{ 
-      'DayCell--outside': isOutsideMonth,
-      'DayCell--no-events': eventsCount === 0 && !isOutsideMonth
+      'DayCell--outside': day.isOutsideMonth,
+      'DayCell--no-events': day.eventsCount === 0 && !day.isOutsideMonth,
+      'DayCell--weekend': isWeekend && !day.isOutsideMonth
     }"
-    @click="handleClick"
+    @click="!day.isOutsideMonth && handleClick()"
   >
-    <div class="DayCell-number">{{ dayNumber }}</div>
-    <div v-if="eventsCount > 0" class="DayCell-badge">
-      <UiIcon name="event_available" size="lg" color="var(--brand-light-green)" />
-    </div>
-    <div v-if="eventsCount > 0" class="DayCell-dots">
-      <span
-        v-for="i in Math.min(eventsCount, 4)"
-        :key="i"
-        class="DayCell-dot"
-      ></span>
-      <UiIcon
-        v-if="eventsCount > 4"
-        name="add"
-        size="xs"
-        color="var(--brand-dark-blue)"
-        class="DayCell-plusIcon"
-      />
+    <div class="DayCell-number">{{ day.dayNumber }}</div>
+    <div v-if="!day.isOutsideMonth && day.eventsCount > 0" class="DayCell-events">
+      <div
+        v-for="(event, index) in displayEvents"
+        :key="event.id || index"
+        class="DayCell-chip"
+        :class="{ 'DayCell-chip--more': event.isMore }"
+        :style="event.isMore ? {} : { backgroundColor: getEventChipColor(event.mainCategory) }"
+      >
+        <span class="DayCell-chipText" :class="{ 'DayCell-chipText--more': event.isMore }">
+          {{ event.isMore ? getMoreChipText() : (event.title || '') }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import {
+  getDisplayEvents,
+  getAdditionalEventsCount,
+  isWeekendDay,
+  getCategoryColor,
+  getMoreEventsText,
+} from '~/utils/calendar-display.helpers'
+
 const props = defineProps({
-  dayNumber: {
-    type: Number,
-    required: true,
-  },
-  isOutsideMonth: {
-    type: Boolean,
-    default: false,
-  },
-  eventsCount: {
-    type: Number,
-    default: 0,
-  },
-  dateString: {
-    type: String,
+  day: {
+    type: Object,
     required: true,
   },
 })
 
-const handleClick = () => {
-  if (!props.isOutsideMonth && props.eventsCount > 0) {
-    navigateTo(`/daily-view/${props.dateString}`)
+const categoriesStore = useCategoriesStore()
+
+const isMobile = useScreenWidth(920)
+
+const displayEvents = computed(() => {
+  if (props.day.isOutsideMonth || props.day.eventsCount === 0) {
+    return []
   }
+  return getDisplayEvents(props.day.events, props.day.eventsCount)
+})
+
+const additionalEventsCount = computed(() => {
+  return getAdditionalEventsCount(props.day.eventsCount)
+})
+
+const isWeekend = computed(() => {
+  if (props.day.isOutsideMonth) {
+    return false
+  }
+  return isWeekendDay(props.day.dateString)
+})
+
+const handleClick = () => {
+  if (props.day.eventsCount > 0) {
+    navigateTo(`/daily-view/${props.day.dateString}`)
+  }
+}
+
+const getEventChipColor = (mainCategory) => {
+  return getCategoryColor(mainCategory, categoriesStore.categories)
+}
+
+const getMoreChipText = () => {
+  return getMoreEventsText(additionalEventsCount.value, isMobile.value)
 }
 </script>
 
@@ -60,7 +83,7 @@ const handleClick = () => {
   background-color: var(--card-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--shadow-card);
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   min-height: var(--calendar-day-size);
   display: flex;
   flex-direction: column;
@@ -77,10 +100,8 @@ const handleClick = () => {
   &--outside {
     background-color: var(--calendar-day-outside-bg);
     opacity: 0.6;
-
-    &:hover {
-      background-color: var(--day-cell-hover-bg);
-    }
+    cursor: default;
+    pointer-events: none;
   }
 
   &--no-events {
@@ -90,6 +111,26 @@ const handleClick = () => {
       transform: none;
       box-shadow: var(--shadow-card);
       background-color: var(--card-bg);
+    }
+  }
+
+  &--weekend {
+    background-color: var(--weekend-day-bg);
+  }
+
+  &--weekend:not(&--no-events) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      background-color: var(--weekend-day-hover-bg);
+    }
+  }
+
+  &--weekend#{&}--no-events {
+    &:hover {
+      transform: none !important;
+      box-shadow: var(--shadow-card) !important;
+      background-color: var(--weekend-day-bg) !important;
     }
   }
 
@@ -103,35 +144,57 @@ const handleClick = () => {
     line-height: 1;
   }
 
-  &-badge {
+  &-events {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: calc(var(--spacing-sm) + 1.25rem);
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    bottom: var(--spacing-xs);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    overflow: hidden;
+  }
+
+  &-chip {
+    padding: 0 6px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    color: var(--chip-text-white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+
+    &--more {
+      background-color: var(--chip-more-bg);
+      color: var(--color-text);
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+    }
   }
 
-  &-dots {
-    position: absolute;
-    bottom: var(--spacing-md);
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-  }
+  &-chipText {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: inherit;
+    text-align: center;
+    line-height: 20px;
 
-  &-dot {
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background-color: var(--brand-dark-blue);
-  }
-
-  &-plusIcon {
-    margin-left: var(--spacing-xs);
+    &--more {
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+    }
   }
 }
 </style>

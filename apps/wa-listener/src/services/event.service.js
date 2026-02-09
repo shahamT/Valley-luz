@@ -10,6 +10,9 @@ import { sendEventConfirmation, CONFIRMATION_REASONS } from '../utils/messageSen
 import { deleteMediaFromCloudinary } from './cloudinary.service.js'
 import { ObjectId } from 'mongodb'
 
+// Get current year for date extraction
+const CURRENT_YEAR = new Date().getFullYear()
+
 /**
  * Validates search keys array structure
  * Ensures searchKeys is a non-empty array of non-empty strings
@@ -241,25 +244,39 @@ export async function callOpenAIForClassification(messageText, cloudinaryUrl) {
   try {
     const systemPrompt = `You are a message classification assistant. Analyze WhatsApp messages to determine if they describe an event, and extract search key phrases for finding similar events.
 
-CRITICAL DATE REQUIREMENT:
-- An event MUST have an ACTUAL, SPECIFIC date (e.g., "15 בינואר", "יום שני 20/01/2025", "ב-25 לחודש")
-- Relative dates like "מחר" (tomorrow), "מחרתיים" (day after tomorrow), "בשבוע הבא" (next week), "בחודש הבא" (next month) are NOT sufficient
-- The date must be identifiable as a specific calendar date, not relative to when the message was sent
-- If the message only contains relative dates without a way to determine the actual date, classify as NOT an event
-- If no date information is present at all, classify as NOT an event
+CRITICAL FILTERING RULES - STRICT ENFORCEMENT:
 
-NOT AN EVENT - EXCLUDE THESE:
-- Business advertisements with regular routine hours (e.g., "ג׳–ה׳ 17:00–21:00", "ימי ראשון-חמישי", recurring weekly schedules)
-- Messages that only show operating hours or business hours without a specific event date
-- Regular business operations, menus, or service advertisements
-- Messages that describe ongoing services rather than a one-time or specific-date event
-- If the message contains only recurring schedule patterns (like "every Monday", "weekdays", "weekends") without a specific date, classify as NOT an event
+REQUIREMENT 1: SPECIFIC DATE (MANDATORY)
+- An event MUST have an ACTUAL, SPECIFIC calendar date
+- Valid examples: "15 בינואר", "יום שני 20/01/2025", "ב-25 לחודש", "יום רביעי הקרוב 15/02"
+- INVALID (reject these):
+  * Relative dates without context: "מחר", "מחרתיים", "בשבוע הבא", "בחודש הבא"
+  * Recurring schedules: "ג׳–ה׳ 17:00–21:00", "ימי ראשון-חמישי", "כל יום שני"
+  * Business hours without specific date: "פתוח 9:00-18:00"
+
+DATE CHECKING PROCESS:
+1. FIRST: Check the message TEXT for a specific date
+2. If no date found in text AND an image is provided:
+   - Analyze the IMAGE using vision to look for dates
+   - Look for dates in posters, flyers, or text visible in the image
+   - Only accept dates that are clearly visible and readable in the image
+3. If no specific date is found in either text OR image, classify as NOT an event (reason: "no_specific_date")
+
+REQUIREMENT 2: EVENT NATURE (MANDATORY)
+- Must describe a specific gathering, activity, or happening
+- Must have a clear purpose/activity (party, concert, workshop, etc.)
+- INVALID (reject these):
+  * Business advertisements with routine hours
+  * Menus or product listings
+  * Ongoing services (not time-bound events)
+  * General announcements without event details
+- If it's not a specific event, classify as NOT an event (reason: "not_event" or "business_advertisement")
 
 Your task:
-1. Determine if the message describes an event (gathering, activity, happening with SPECIFIC date/time and usually a location)
-2. REJECT business advertisements, regular operating hours, or recurring schedules without specific dates
-3. Extract 3-5 key search phrases that would help find similar events in a database (only if it's an event)
-4. If not an event, provide a reason (e.g., "no_date", "business_advertisement", "recurring_hours", etc.)
+1. FIRST: Check for specific date - if missing, reject immediately
+2. SECOND: Verify it's an actual event (not business hours/advertisement)
+3. If both pass: Extract 3-5 search key phrases (location, event type, date references)
+4. If rejected: Provide clear reason ("no_specific_date", "business_advertisement", "not_event", etc.)
 
 Return ONLY valid JSON with this structure:
 {
@@ -289,16 +306,30 @@ Search key guidelines:
 
 Message Text: ${messageText || '(empty - analyze the image for all information)'}
 
-INSTRUCTIONS:
-1. Analyze the message text and image (if provided) to determine if this describes an event
-2. An event MUST have an ACTUAL, SPECIFIC date (not relative dates like "tomorrow" or "next week")
-3. REJECT business advertisements with regular routine hours (e.g., "ג׳–ה׳ 17:00–21:00", recurring weekly schedules)
-4. REJECT messages that only show operating hours or business hours without a specific event date
-5. Check if the message contains a specific calendar date that can be identified (not recurring schedules)
-6. If it only has relative dates or recurring hours without a specific date, classify as NOT an event
-7. If it's an event with a specific date, extract 3-5 key search phrases that would help find similar events
-8. If not an event, provide a reason (e.g., "no_date", "business_advertisement", "recurring_hours" if no specific date found)
-9. Return the classification result in JSON format.`
+INSTRUCTIONS - FOLLOW THIS ORDER:
+1. Check for SPECIFIC DATE (check BOTH text and image):
+   - FIRST: Check message TEXT for actual calendar dates (day + month, or full date)
+   - If no date found in text: Check the IMAGE carefully for dates
+     * Look for dates in posters, flyers, event announcements visible in the image
+     * Look for text showing specific dates (e.g., "15 בינואר", "20/01/2025", day + month)
+     * Only accept dates that are clearly visible and readable in the image
+   - Reject if only relative dates ("tomorrow", "next week") without context
+   - Reject if only recurring schedules ("every Monday", "weekdays")
+   - If no specific date found in text OR image, reject immediately (reason: "no_specific_date")
+
+2. Verify EVENT NATURE:
+   - Is it a specific gathering/activity with a date?
+   - Reject business hours, menus, ongoing services
+
+3. If both checks pass:
+   - Extract 3-5 search keys (location names, event type, date references)
+   - Return isEvent: true
+
+4. If rejected:
+   - Return isEvent: false
+   - Provide reason: "no_specific_date", "business_advertisement", "not_event", etc.
+
+5. Return JSON format only.`
         },
         {
           type: 'image_url',
@@ -418,24 +449,33 @@ EVENT OBJECT STRUCTURE (when status is "new_event" or "updated_event"):
 ALLOWED CATEGORIES (use only these IDs):
 ${categoriesText}
 
-DECISION RULES:
-- "new_event": The message describes a completely different event from all candidates
-- "existing_event": The message is the same event as one of the candidates (same event, same details, just a repost)
-- "updated_event": The message is the same event as one candidate but with updated information
+CRITICAL DECISION PROCESS - FOLLOW THIS EXACT ORDER:
 
-CRITICAL: When determining if an event is "updated_event" vs "existing_event", you MUST specifically check for changes in these key fields:
-1. PRICE: Compare the price/entrance fee. If the price has changed (e.g., was free now costs money, or price amount changed), it's an "updated_event"
-2. DATES: Compare the occurrence.startTime and occurrence.endTime. If the date or time has changed, it's an "updated_event"
-3. LINKS: Compare the urls array. If new links were added, removed, or changed, it's an "updated_event"
+STEP 1: VERIFY EVENT IDENTITY FIRST
+Before checking for updates, you MUST verify that the new message describes the SAME event as a candidate.
+Two events are the SAME event ONLY if ALL of these match:
+- Event title/name is the same (or very similar - same core event)
+- Location is the same (same city AND same venue/address if specified)
+- Event type/category is the same (same main category)
+- Date is the same OR within a few days (same event series/occurrence)
 
-If ANY of these three fields (price, dates, links) have changed compared to a candidate event, you MUST classify it as "updated_event", NOT "existing_event".
+If the new message describes a DIFFERENT event (different title, different location, different type, or different date range), classify as "new_event" immediately - DO NOT proceed to update checks.
 
-Only classify as "existing_event" if:
-- It's the exact same event
-- Price is the same (or both are null/0)
-- Dates are the same
-- Links are the same (or both have no links)
-- It's just a repost of the same information
+STEP 2: CHECK FOR UPDATES (only if same event confirmed)
+Only after confirming it's the SAME event, check if any information has changed:
+1. PRICE: If price/entrance fee changed (was free now costs money, or amount changed), it's "updated_event"
+2. DATES: If occurrence.startTime or occurrence.endTime changed, it's "updated_event"
+3. LINKS: If urls array changed (added, removed, or modified), it's "updated_event"
+4. LOCATION DETAILS: If location.addressLine1, addressLine2, or locationDetails changed, it's "updated_event"
+5. DESCRIPTION: If fullDescription or shortDescription changed significantly, it's "updated_event"
+
+If ANY of these fields changed, classify as "updated_event".
+If NONE of these fields changed, classify as "existing_event" (just a repost).
+
+DECISION SUMMARY:
+- "new_event": Different event (different title/location/type/date) OR no matching candidate
+- "existing_event": SAME event with NO changes to price/dates/links/location/description
+- "updated_event": SAME event with changes to price/dates/links/location/description
 
 For "existing_event":
 - Set matchedCandidateId to the _id of the matching candidate
@@ -464,48 +504,30 @@ TITLE AND DESCRIPTION RULES (CRITICAL):
 - fullDescription: May include all details (price, location, date) as it's the full description
 - Price information belongs ONLY in the price field, NOT in Title or shortDescription
 
-IMAGE ANALYSIS (SECONDARY SOURCE - USE WITH CAUTION):
-- Images are a SECONDARY source of information - the message text is PRIMARY
-- Only use information from the image if you are CERTAIN and CONFIDENT about what you see
+IMAGE ANALYSIS RULES:
+- Message text is PRIMARY source - always prioritize it
+- Image is SECONDARY - only use if text is clearly readable with high confidence
+- If image is unclear/blurry/ambiguous, ignore it completely
+- If text and image conflict, use message text
 - DO NOT guess or invent information from unclear images
-- DO NOT use image information if the text in the image is unclear, blurry, or ambiguous
-- If you cannot read text in the image with high confidence, ignore that information and rely only on the message text
-- Images may contain event posters, flyers, or promotional materials, but only extract information you can clearly see and read
-- When combining text and image:
-  - Message text is PRIMARY - use it as the main source
-  - Image is SECONDARY - only use it to fill gaps or add details that are clearly visible
-  - If information conflicts, prefer the message text
-  - Only use image information if you are CERTAIN about what you see (high confidence OCR)
-- If image text is unclear, partially visible, or ambiguous, ignore it and use only the message text
 
-PRICE RULES (CRITICAL):
-- price field represents ENTRANCE/ENTRY PRICE ONLY (the cost to enter/attend the event)
-- If you CANNOT determine whether there is an entrance price from the message, set price to null
-- If you can conclude that entrance is FREE, set price to 0 (zero)
-- If you can conclude that entrance COSTS MONEY, set price to the entrance fee amount as a number
-- IGNORE prices of items being sold at the event (food, merchandise, etc.) - these are NOT entrance prices
-- Only consider information about the cost to ENTER/ATTEND the event itself
-- If no entrance price information is described in the message, set price to null
-- If you cannot make a clear conclusion about entrance price, set price to null (do NOT guess)
-- JSON does not support undefined - use null for missing/unknown prices
+PRICE RULES:
+- price = ENTRANCE/ENTRY fee ONLY (cost to attend), NOT food/merchandise prices
+- If entrance price is explicitly stated: use that number (0 if free)
+- If unclear or not mentioned: set to null (do NOT guess)
 
-LOCATION ADDRESS RULES (CRITICAL - READ CAREFULLY):
-- Do NOT repeat information across address fields - each field should complement the others, not duplicate
-- City: Contains ONLY the actual city/town name (e.g., "חיפה", "תל אביב", "ירושלים", "רמת הגולן"). NOT a place name, NOT a venue name, NOT a neighborhood. CRITICAL: ONLY fill if the actual city name is EXPLICITLY STATED in the message/image text. DO NOT guess, infer, or assume the city based on venue names, addresses, or any other context. If the city name is not explicitly written in the message/image, set to empty string "". DO NOT fill with anything if you cannot find the exact city name in the source.
-- addressLine1: Contains ONLY a specific place/venue/business name (e.g., "Szold Art", "חוות הג'לבון", "לה רוסטיקה"). This is the NAME of the location, not an address. If no clear place name exists, set to undefined (do NOT fill with random text)
-- addressLine2: Contains ONLY a street address with street name and number (e.g., "רחוב הרצל 15", "שדרות בן גוריון 20", "כיכר רבין 1"). This must be an actual street address. If no street address exists, set to undefined (do NOT fill with place names, venue names, or any other text)
-- locationDetails: Contains ONLY practical navigation directions or location-specific instructions (e.g., "מיקום מדויק יישלח לרוכשים", "מתחם פתוח עם מחצלות", "ליד הכניסה הראשית"). This is for helping people FIND the location. Do NOT include casual messages, greetings, or non-navigation text. If no such directions exist, set to undefined (do NOT fill)
-- IMPORTANT: If a field doesn't have the exact type of information described above, set it to undefined. Do NOT fill fields with irrelevant or incorrect information just to have something there.
-- If location information is completely missing or unclear, set City to empty string "" and all other location fields to undefined
+LOCATION RULES:
+- City: ONLY actual city name (e.g., "חיפה", "תל אביב") - must be EXPLICITLY stated in message/image. If not found, set to "" (empty string). DO NOT guess from venue names.
+- addressLine1: Venue/place name only (e.g., "Szold Art", "חוות הג'לבון") - if not present, set to undefined
+- addressLine2: Street address only (e.g., "רחוב הרצל 15") - if not present, set to undefined
+- locationDetails: Navigation instructions only - if not present, set to undefined
+- DO NOT fill fields with guessed or inferred information
 
-STRICT DATA EXTRACTION RULES (CRITICAL):
-- ONLY extract information that is EXPLICITLY stated in the message text or clearly visible in the image
-- DO NOT invent, assume, or infer information that is not directly present in the source
-- DO NOT use common phrases or templates unless they are actually in the message/image
-- DO NOT guess city names based on venue names or partial addresses
-- DO NOT invent navigation instructions or location details that aren't in the message
-- If information is missing or unclear, leave fields empty/null/undefined rather than guessing
-- When in doubt, leave the field empty/null/undefined - it's better to have incomplete data than incorrect data
+DATA EXTRACTION RULES:
+- ONLY extract information EXPLICITLY stated in message/image
+- DO NOT invent, assume, or infer missing information
+- If unclear or missing, leave field empty/null/undefined
+- Incomplete data is better than incorrect data
 
 Return the complete response object in JSON format.`
 
@@ -537,15 +559,30 @@ ${messageText || '(empty - analyze the image for all information)'}
 CANDIDATE EVENTS:
 ${candidatesText}
 
-INSTRUCTIONS:
-1. Compare the new message to each candidate event
-2. Pay special attention to PRICE, DATES, and LINKS when comparing
-3. If price, dates, or links have changed compared to a candidate, classify as "updated_event"
-4. If it's the same event with no changes to price/dates/links, classify as "existing_event"
-5. If it's a completely different event, classify as "new_event"
-6. If it's existing_event or updated_event, provide the matchedCandidateId
-7. If it's new_event or updated_event, extract and return the complete event object
-8. Return the result in JSON format.`
+INSTRUCTIONS - FOLLOW THIS EXACT ORDER:
+1. FIRST: For each candidate, verify if it's the SAME event by checking:
+   - Is the event title/name the same or very similar?
+   - Is the location the same (same city and venue if specified)?
+   - Is the event type/category the same?
+   - Is the date the same or within a few days?
+   
+2. If it's NOT the same event (different title/location/type/date), move to next candidate or classify as "new_event"
+
+3. If it IS the same event, THEN check for changes:
+   - Has price changed?
+   - Have dates/times changed?
+   - Have links changed?
+   - Has location details changed?
+   - Has description changed significantly?
+
+4. Classification:
+   - Same event + changes = "updated_event"
+   - Same event + no changes = "existing_event"
+   - Different event = "new_event"
+
+5. If existing_event or updated_event, provide the matchedCandidateId
+6. If new_event or updated_event, extract and return the complete event object
+7. Return the result in JSON format.`
         },
         {
           type: 'image_url',
@@ -564,15 +601,30 @@ ${messageText || '(empty)'}
 CANDIDATE EVENTS:
 ${candidatesText}
 
-INSTRUCTIONS:
-1. Compare the new message to each candidate event
-2. Pay special attention to PRICE, DATES, and LINKS when comparing
-3. If price, dates, or links have changed compared to a candidate, classify as "updated_event"
-4. If it's the same event with no changes to price/dates/links, classify as "existing_event"
-5. If it's a completely different event, classify as "new_event"
-6. If it's existing_event or updated_event, provide the matchedCandidateId
-7. If it's new_event or updated_event, extract and return the complete event object
-8. Return the result in JSON format.`
+INSTRUCTIONS - FOLLOW THIS EXACT ORDER:
+1. FIRST: For each candidate, verify if it's the SAME event by checking:
+   - Is the event title/name the same or very similar?
+   - Is the location the same (same city and venue if specified)?
+   - Is the event type/category the same?
+   - Is the date the same or within a few days?
+   
+2. If it's NOT the same event (different title/location/type/date), move to next candidate or classify as "new_event"
+
+3. If it IS the same event, THEN check for changes:
+   - Has price changed?
+   - Have dates/times changed?
+   - Have links changed?
+   - Has location details changed?
+   - Has description changed significantly?
+
+4. Classification:
+   - Same event + changes = "updated_event"
+   - Same event + no changes = "existing_event"
+   - Different event = "new_event"
+
+5. If existing_event or updated_event, provide the matchedCandidateId
+6. If new_event or updated_event, extract and return the complete event object
+7. Return the result in JSON format.`
     }
 
     const response = await openai.chat.completions.create({
@@ -666,27 +718,23 @@ EVENT OBJECT STRUCTURE (same as input):
 ALLOWED CATEGORIES (use only these IDs):
 ${categoriesText}
 
+CURRENT YEAR: ${CURRENT_YEAR}
+- The current year is ${CURRENT_YEAR}
+- When validating dates, if the raw message does NOT specify a year (e.g., "24 בפברואר", "יום שני 15/02"), the date should use the current year ${CURRENT_YEAR}
+- Only accept a different year if it is EXPLICITLY stated in the message or image (e.g., "2024", "2025", "שנה הבאה")
+- If occurrence.startTime has a year that doesn't match the current year and no year was specified in the message, correct it to use ${CURRENT_YEAR}
+
 VALIDATION RULES:
-1. Compare EVERY field in the event object to the raw message text and image
-2. For each field, verify that the information is EXPLICITLY stated in the source
-3. If a field contains information NOT found in the raw message/image:
-   - Remove or correct that field
-   - Add a correction entry explaining what was wrong
-4. Pay special attention to:
-   - Title and shortDescription: Must NOT contain price information - remove any price mentions from these fields
-   - location.City: CRITICAL - Follow these steps EXACTLY:
-     1. FIRST: Search the RAW MESSAGE TEXT for the city name word-for-word
-     2. If found in message text, keep it
-     3. If NOT found in message text, check the image ONLY if it's clearly visible
-     4. If the city name in the event object does NOT appear in the message text AND is not clearly visible in the image, set to empty string ""
-     5. DO NOT keep any city name that was guessed, inferred, or hallucinated
-     6. Example: If event has City="שדרות" but "שדרות" is not in the message text, set to "" even if something else appears in the image
-   - location.addressLine1: Must be explicitly stated place name
-   - location.addressLine2: Must be explicitly stated street address
-   - location.locationDetails: Must be explicitly stated in message/image, DO NOT invent phrases
-   - price: Must be explicitly stated entrance price, not inferred
-5. If critical fields (Title, categories, occurrence.startTime) are missing or cannot be corrected, return null for event
-6. For non-critical fields (price, location details), if not in source, set to null/undefined
+1. Compare EVERY field to raw message/image - verify it's EXPLICITLY stated
+2. If field contains information NOT in source: remove/correct it and add to corrections list
+3. Special checks:
+   - Title/shortDescription: Remove any price mentions (price belongs only in price field)
+   - location.City: Search RAW MESSAGE TEXT first. If city name not found word-for-word in message, check image. If still not found, set to "" (empty string). DO NOT keep guessed city names.
+   - location.addressLine1/addressLine2/locationDetails: Must be explicitly stated, otherwise set to undefined
+   - price: Must be explicitly stated entrance price, otherwise set to null
+   - occurrence.startTime: Verify the year matches the current year ${CURRENT_YEAR} if no year was specified in the message
+4. If critical fields (Title, categories, occurrence.startTime) cannot be corrected, return null for event
+5. For non-critical fields, set to null/undefined if not in source
 
 CORRECTION EXAMPLES:
 - If Title or shortDescription contains price information (e.g., "חינם", "₪50", "ללא תשלום"), remove it - price belongs only in the price field
@@ -845,6 +893,12 @@ REQUIRED EVENT STRUCTURE (return this exact structure):
 ALLOWED CATEGORIES (use only these IDs):
 ${categoriesText}
 
+CURRENT YEAR: ${CURRENT_YEAR}
+- The current year is ${CURRENT_YEAR}
+- When extracting dates, if the message does NOT specify a year (e.g., "24 בפברואר", "יום שני 15/02"), you MUST assume the current year is ${CURRENT_YEAR}
+- Only use a different year if it is EXPLICITLY stated in the message or image (e.g., "2024", "2025", "שנה הבאה")
+- For dates without year specification, always use ${CURRENT_YEAR} as the year
+
 RULES:
 - Return ONLY valid JSON (no markdown, no code blocks)
 - All text fields (Title, descriptions) must be in Hebrew
@@ -860,19 +914,12 @@ TITLE AND DESCRIPTION RULES (CRITICAL):
 - fullDescription: May include all details (price, location, date) as it's the full description
 - Price information belongs ONLY in the price field, NOT in Title or shortDescription
 
-IMAGE ANALYSIS (SECONDARY SOURCE - USE WITH CAUTION):
-- Images are a SECONDARY source of information - the message text is PRIMARY
-- Only use information from the image if you are CERTAIN and CONFIDENT about what you see
+IMAGE ANALYSIS RULES:
+- Message text is PRIMARY source - always prioritize it
+- Image is SECONDARY - only use if text is clearly readable with high confidence
+- If image is unclear/blurry/ambiguous, ignore it completely
+- If text and image conflict, use message text
 - DO NOT guess or invent information from unclear images
-- DO NOT use image information if the text in the image is unclear, blurry, or ambiguous
-- If you cannot read text in the image with high confidence, ignore that information and rely only on the message text
-- Images may contain event posters, flyers, or promotional materials, but only extract information you can clearly see and read
-- When combining text and image:
-  - Message text is PRIMARY - use it as the main source
-  - Image is SECONDARY - only use it to fill gaps or add details that are clearly visible
-  - If information conflicts, prefer the message text
-  - Only use image information if you are CERTAIN about what you see (high confidence OCR)
-- If image text is unclear, partially visible, or ambiguous, ignore it and use only the message text
 
 PRICE RULES (CRITICAL):
 - price field represents ENTRANCE/ENTRY PRICE ONLY (the cost to enter/attend the event)
@@ -898,14 +945,11 @@ LOCATION ADDRESS RULES (CRITICAL - READ CAREFULLY):
 - IMPORTANT: If you cannot find the exact text in the raw message/image, set the field to undefined (not null, use undefined in JSON which becomes null). If a field doesn't have the exact type of information described above, set it to undefined. Do NOT fill fields with irrelevant or incorrect information just to have something there.
 - If location information is completely missing or unclear, set City to empty string "" and all other location fields to undefined
 
-STRICT DATA EXTRACTION RULES (CRITICAL):
-- ONLY extract information that is EXPLICITLY stated in the message text or clearly visible in the image
-- DO NOT invent, assume, or infer information that is not directly present in the source
-- DO NOT use common phrases or templates unless they are actually in the message/image
-- DO NOT guess city names based on venue names or partial addresses
-- DO NOT invent navigation instructions or location details that aren't in the message
-- If information is missing or unclear, leave fields empty/null/undefined rather than guessing
-- When in doubt, leave the field empty/null/undefined - it's better to have incomplete data than incorrect data
+DATA EXTRACTION RULES:
+- ONLY extract information EXPLICITLY stated in message/image
+- DO NOT invent, assume, or infer missing information
+- If unclear or missing, leave field empty/null/undefined
+- Incomplete data is better than incorrect data
 
 Return the event object directly (no wrapper, no isEvent field).`
 

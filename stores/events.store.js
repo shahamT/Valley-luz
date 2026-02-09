@@ -6,8 +6,8 @@ export const useEventsStore = defineStore('events', () => {
   const query = useEvents()
 
   const events = computed(() => query.data.value || [])
-  const isLoading = computed(() => query.isLoading.value)
-  const isError = computed(() => query.isError.value)
+  const isLoading = query.isLoading
+  const isError = query.isError
 
   return {
     events,

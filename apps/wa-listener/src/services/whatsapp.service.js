@@ -9,7 +9,7 @@ import { serializeMessage, processMessage, isMessageTypeAllowed } from './messag
 import { uploadMessageMedia } from './media.service.js'
 import { printGroupMetadata, listAllGroups } from './group.service.js'
 import { insertEventDocument, findEventBySignature } from './mongo.service.js'
-import { processEventPipeline } from './event.service.js'
+import { queueMessage } from './queue.service.js'
 import { computeMessageSignature } from '../utils/messageHelpers.js'
 import { deleteMediaFromCloudinary } from './cloudinary.service.js'
 
@@ -165,19 +165,15 @@ export async function initializeClient() {
         const eventDoc = await insertEventDocument(rawMessage, cloudinaryUrl, cloudinaryData, messageSignature)
         
         if (eventDoc && eventDoc._id) {
-          // Fire-and-forget event processing pipeline
-          processEventPipeline(
+          // Add message to processing queue (processes sequentially)
+          queueMessage(
             eventDoc._id,
             rawMessage,
             cloudinaryUrl,
             cloudinaryData,
             message,
             client
-          ).catch((pipelineError) => {
-            // Already handled in processEventPipeline, but catch here as extra safety
-            const errorMsg = pipelineError instanceof Error ? pipelineError.message : String(pipelineError)
-            logger.error(LOG_PREFIXES.WHATSAPP, `Event pipeline error (non-blocking): ${errorMsg}`)
-          })
+          )
         } else {
           // If document insertion failed but we uploaded media, clean it up
           if (cloudinaryResult?.cloudinaryData?.public_id) {

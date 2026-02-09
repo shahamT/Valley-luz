@@ -9,8 +9,10 @@
         />
       </div>
       <div class="DailyView-content">
-        <div v-if="eventsStore.isLoading">{{ UI_TEXT.loading }}</div>
-        <div v-else-if="eventsStore.isError">{{ UI_TEXT.error }}</div>
+        <UiLoadingSpinner v-if="isLoading" :message="UI_TEXT.loading" />
+        <div v-else-if="isError" class="DailyView-error">
+          <p>{{ UI_TEXT.error }}</p>
+        </div>
         <DailyEventList v-else :events="transformedEvents" />
       </div>
     </div>
@@ -18,21 +20,29 @@
 </template>
 
 <script setup>
-import { getTodayDateString } from '~/utils/date.helpers'
 import { UI_TEXT } from '~/consts/calendar.const'
-import { isValidRouteDate } from '~/utils/validation.helpers'
+import { getTodayDateString } from '~/utils/date.helpers'
 import { formatDateForDisplay, transformEventForCard } from '~/utils/events.helpers'
 import { eventsService } from '~/utils/events.service'
+import { isValidRouteDate } from '~/utils/validation.helpers'
 
 const route = useRoute()
 const eventsStore = useEventsStore()
+const categoriesStore = useCategoriesStore()
+
+const isLoading = computed(() => {
+  return unref(eventsStore.isLoading) || unref(categoriesStore.isLoading)
+})
+
+const isError = computed(() => {
+  return unref(eventsStore.isError) || unref(categoriesStore.isError)
+})
 
 const dateParam = computed(() => {
   const param = route.params.date
   if (param && isValidRouteDate(param)) {
     return param
   }
-  // Fallback to today's date if invalid
   return getTodayDateString()
 })
 
@@ -73,6 +83,14 @@ const goToMonthly = () => {
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+  }
+
+  &-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-text-light);
   }
 }
 </style>

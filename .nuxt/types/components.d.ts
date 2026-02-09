@@ -23,7 +23,9 @@ interface _GlobalComponents {
   'MonthlyDayCell': typeof import("../../components/monthly/DayCell.vue").default
   'MonthlyMonthCalendar': typeof import("../../components/monthly/MonthCalendar.vue").default
   'MonthlyWeekdayRow': typeof import("../../components/monthly/WeekdayRow.vue").default
+  'UiCategoryPill': typeof import("../../components/ui/CategoryPill.vue").default
   'UiIcon': typeof import("../../components/ui/Icon.vue").default
+  'UiLoadingSpinner': typeof import("../../components/ui/LoadingSpinner.vue").default
   'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
   'UiMonthYearPicker': typeof import("../../components/ui/MonthYearPicker.vue").default
   'UiMonthYearPopup': typeof import("../../components/ui/MonthYearPopup.vue").default
@@ -60,7 +62,9 @@ interface _GlobalComponents {
   'LazyMonthlyDayCell': LazyComponent<typeof import("../../components/monthly/DayCell.vue").default>
   'LazyMonthlyMonthCalendar': LazyComponent<typeof import("../../components/monthly/MonthCalendar.vue").default>
   'LazyMonthlyWeekdayRow': LazyComponent<typeof import("../../components/monthly/WeekdayRow.vue").default>
+  'LazyUiCategoryPill': LazyComponent<typeof import("../../components/ui/CategoryPill.vue").default>
   'LazyUiIcon': LazyComponent<typeof import("../../components/ui/Icon.vue").default>
+  'LazyUiLoadingSpinner': LazyComponent<typeof import("../../components/ui/LoadingSpinner.vue").default>
   'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>
   'LazyUiMonthYearPicker': LazyComponent<typeof import("../../components/ui/MonthYearPicker.vue").default>
   'LazyUiMonthYearPopup': LazyComponent<typeof import("../../components/ui/MonthYearPopup.vue").default>

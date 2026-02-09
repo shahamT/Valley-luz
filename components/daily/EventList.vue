@@ -4,10 +4,7 @@
       <DailyEventCard
         v-for="event in events"
         :key="event.id"
-        :time-text="event.timeText"
-        :title="event.title"
-        :desc="event.desc"
-        :price="event.price"
+        :event="event"
       />
     </div>
   </div>
@@ -40,27 +37,27 @@ defineProps({
     padding-right: var(--scrollbar-padding);
     min-height: 0;
     direction: ltr; // Force scrollbar to right side
-    
+
     /* Custom scrollbar styling - reserve space for scrollbar */
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
-    
+
     &::-webkit-scrollbar {
       width: var(--scrollbar-width);
     }
-    
+
     &::-webkit-scrollbar-track {
       background: var(--scrollbar-track-bg);
       border-radius: var(--scrollbar-border-radius);
       margin: var(--scrollbar-margin);
     }
-    
+
     &::-webkit-scrollbar-thumb {
       background: var(--scrollbar-thumb-bg);
       border-radius: var(--scrollbar-border-radius);
     }
-    
+
     &::-webkit-scrollbar-thumb:hover {
       background: var(--scrollbar-thumb-hover-bg);
     }
