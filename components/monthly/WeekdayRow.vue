@@ -15,7 +15,7 @@
 import { HEBREW_WEEKDAYS } from '~/consts/dates.const'
 import { WEEKEND_DAYS } from '~/consts/calendar.const'
 
-const SHORT_WEEKDAYS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']
+const SHORT_WEEKDAYS = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"]
 
 const isMobile = useScreenWidth(768)
 

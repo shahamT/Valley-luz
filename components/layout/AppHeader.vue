@@ -2,48 +2,90 @@
   <header class="AppHeader">
     <div class="AppHeader-container">
       <slot name="center">
-        <div v-if="showMonthYear" class="AppHeader-monthNav">
-          <button class="AppHeader-navButton" @click="$emit('prev-month')" aria-label="Previous month">
-            <UiIcon name="chevron_right" size="md" />
-          </button>
-          <div class="AppHeader-monthTriggerWrapper">
+        <ClientOnly>
+          <div v-if="showMonthYear" class="AppHeader-monthNav">
             <button 
-              ref="monthTriggerButtonRef"
-              class="AppHeader-monthTrigger" 
-              @click="toggleMonthYearPicker" 
-              aria-label="Select month and year"
+              class="AppHeader-navButton" 
+              :class="{ 'AppHeader-navButton--disabled': isCurrentMonth }"
+              :disabled="isCurrentMonth"
+              @click="$emit('prev-month')" 
+              aria-label="Previous month"
             >
-              <UiIcon name="expand_more" size="sm" class="AppHeader-chevron" />
-              <span class="AppHeader-month">{{ monthYear }}</span>
+              <UiIcon name="chevron_right" size="md" />
             </button>
-            <UiMonthYearPopup
-              v-if="isMonthYearPickerOpen && !isMobile"
-              :current-date="currentDate"
-              :trigger-element="monthTriggerButtonRef"
-              @close="closeMonthYearPicker"
-              @select="handleMonthYearSelect"
-              @year-change="handleYearChange"
-            />
-            <UiMonthYearModal
-              v-if="isMonthYearPickerOpen && isMobile"
-              :current-date="currentDate"
-              @close="closeMonthYearPicker"
-              @select="handleMonthYearSelect"
-              @year-change="handleYearChange"
-            />
+            <div class="AppHeader-monthTriggerWrapper">
+              <button 
+                ref="monthTriggerButtonRef"
+                class="AppHeader-monthTrigger" 
+                @click="toggleMonthYearPicker" 
+                aria-label="Select month and year"
+              >
+                <span class="AppHeader-month">{{ monthYear }}</span>
+                <UiIcon name="expand_more" size="sm" class="AppHeader-chevron" />
+              </button>
+              <UiMonthYearPopup
+                v-if="isMonthYearPickerOpen && !isMobile"
+                :current-date="currentDate"
+                :trigger-element="monthTriggerButtonRef"
+                @close="closeMonthYearPicker"
+                @select="handleMonthYearSelect"
+                @year-change="handleYearChange"
+              />
+              <UiMonthYearModal
+                v-if="isMonthYearPickerOpen && isMobile"
+                :current-date="currentDate"
+                @close="closeMonthYearPicker"
+                @select="handleMonthYearSelect"
+                @year-change="handleYearChange"
+              />
+            </div>
+            <button class="AppHeader-navButton" @click="$emit('next-month')" aria-label="Next month">
+              <UiIcon name="chevron_left" size="md" />
+            </button>
           </div>
-          <button class="AppHeader-navButton" @click="$emit('next-month')" aria-label="Next month">
-            <UiIcon name="chevron_left" size="md" />
-          </button>
-        </div>
+          <template #fallback>
+            <div v-if="showMonthYear" class="AppHeader-monthNav">
+              <button 
+                class="AppHeader-navButton" 
+                @click="$emit('prev-month')" 
+                aria-label="Previous month"
+              >
+                <UiIcon name="chevron_right" size="md" />
+              </button>
+              <div class="AppHeader-monthTriggerWrapper">
+                <button 
+                  class="AppHeader-monthTrigger" 
+                  aria-label="Select month and year"
+                >
+                  <span class="AppHeader-month">{{ monthYear }}</span>
+                  <UiIcon name="expand_more" size="sm" class="AppHeader-chevron" />
+                </button>
+              </div>
+              <button class="AppHeader-navButton" @click="$emit('next-month')" aria-label="Next month">
+                <UiIcon name="chevron_left" size="md" />
+              </button>
+            </div>
+          </template>
+        </ClientOnly>
       </slot>
-      <img src="/logos/valleyluz-logo.png" alt="Valley Luz" class="AppHeader-logo" />
+      <img 
+        v-if="!isMobile" 
+        src="/logos/valleyluz-logo.png" 
+        alt="Valley Luz" 
+        class="AppHeader-logo" 
+      />
+      <img 
+        v-else 
+        src="/logos/valleyluz-icon.svg" 
+        alt="Valley Luz" 
+        class="AppHeader-logo AppHeader-logo--icon" 
+      />
     </div>
   </header>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   showMonthYear: {
@@ -69,6 +111,16 @@ const isMonthYearPickerOpen = ref(false)
 const monthTriggerButtonRef = ref(null)
 
 const isMobile = useScreenWidth(768)
+
+const isCurrentMonth = computed(() => {
+  if (typeof window === 'undefined') {
+    return false
+  }
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+  return props.currentDate.year === currentYear && props.currentDate.month === currentMonth
+})
 
 const toggleMonthYearPicker = () => {
   isMonthYearPickerOpen.value = !isMonthYearPickerOpen.value
@@ -124,7 +176,7 @@ const handleYearChange = ({ year }) => {
   &-monthNav {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     position: absolute;
     left: 50%;
     top: 50%;
@@ -132,26 +184,26 @@ const handleYearChange = ({ year }) => {
   }
 
   &-navButton {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     border: none;
-    background-color: var(--color-background);
+    background-color: var(--weekend-day-bg);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--color-text);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    box-shadow: var(--shadow-sm);
+    color: var(--brand-dark-green);
+    transition: background-color 0.2s ease;
 
-    &:hover {
-      background-color: var(--day-cell-hover-bg);
-      transform: scale(1.05);
+    &:hover:not(:disabled) {
+      background-color: #D4E8C4;
     }
 
-    &:active {
-      transform: scale(0.95);
+    &--disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
     }
   }
 
@@ -163,26 +215,30 @@ const handleYearChange = ({ year }) => {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    background: none;
+    background-color: var(--weekend-day-bg);
     border: none;
+    border-radius: 999px;
     cursor: pointer;
-    padding: 0;
-    transition: opacity 0.2s ease;
-    color: var(--brand-dark-blue);
+    padding: var(--spacing-xs) var(--spacing-md);
+    transition: background-color 0.2s ease;
+    color: var(--brand-dark-green);
+    width: 12rem;
+    height: 34px;
+    justify-content: center;
 
     &:hover {
-      opacity: 0.7;
+      background-color: #D4E8C4;
     }
   }
 
   &-chevron {
-    color: var(--brand-dark-blue);
+    color: var(--brand-dark-green);
   }
 
   &-month {
     font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--brand-dark-blue);
+    font-weight: 700;
+    color: var(--brand-dark-green);
   }
 }
 </style>

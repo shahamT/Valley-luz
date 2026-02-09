@@ -178,6 +178,10 @@ const getMoreChipText = () => {
       text-overflow: clip;
       white-space: normal;
     }
+
+    @media (max-width: 768px) {
+      text-overflow: clip;
+    }
   }
 
   &-chipText {
@@ -194,6 +198,10 @@ const getMoreChipText = () => {
       overflow: visible;
       text-overflow: clip;
       white-space: normal;
+    }
+
+    @media (max-width: 768px) {
+      text-overflow: clip;
     }
   }
 }

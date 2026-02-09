@@ -114,6 +114,7 @@ const selectMonth = (month) => {
     font-size: var(--font-size-xs);
     font-weight: 600;
     color: var(--color-text-light);
+    text-align: center;
   }
 
   &-yearGrid {

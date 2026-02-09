@@ -39,6 +39,7 @@ defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
 
 <style lang="scss">
 .AppShell {
+  min-height: 100vh;
   background-color: var(--color-background);
   background-image: linear-gradient(
     135deg,
