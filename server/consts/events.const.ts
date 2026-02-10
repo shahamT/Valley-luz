@@ -32,7 +32,7 @@ export const EVENT_CATEGORIES = {
     color: '#F59E0B',
   },
   sport: {
-    label: 'ספורט',
+    label: 'ספורט ותנועה',
     color: '#DC2626',
   },
   fair: {

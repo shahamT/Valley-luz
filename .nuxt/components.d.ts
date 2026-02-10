@@ -18,6 +18,9 @@ export const EventModal: typeof import("../components/EventModal.vue").default
 export const ControlsTopControls: typeof import("../components/controls/TopControls.vue").default
 export const DailyEventCard: typeof import("../components/daily/EventCard.vue").default
 export const DailyEventList: typeof import("../components/daily/EventList.vue").default
+export const DailyKanbanColumn: typeof import("../components/daily/KanbanColumn.vue").default
+export const DailyKanbanEventCard: typeof import("../components/daily/KanbanEventCard.vue").default
+export const DailyKanbanView: typeof import("../components/daily/KanbanView.vue").default
 export const LayoutAppHeader: typeof import("../components/layout/AppHeader.vue").default
 export const LayoutAppShell: typeof import("../components/layout/AppShell.vue").default
 export const MonthlyDayCell: typeof import("../components/monthly/DayCell.vue").default
@@ -58,6 +61,9 @@ export const LazyEventModal: LazyComponent<typeof import("../components/EventMod
 export const LazyControlsTopControls: LazyComponent<typeof import("../components/controls/TopControls.vue").default>
 export const LazyDailyEventCard: LazyComponent<typeof import("../components/daily/EventCard.vue").default>
 export const LazyDailyEventList: LazyComponent<typeof import("../components/daily/EventList.vue").default>
+export const LazyDailyKanbanColumn: LazyComponent<typeof import("../components/daily/KanbanColumn.vue").default>
+export const LazyDailyKanbanEventCard: LazyComponent<typeof import("../components/daily/KanbanEventCard.vue").default>
+export const LazyDailyKanbanView: LazyComponent<typeof import("../components/daily/KanbanView.vue").default>
 export const LazyLayoutAppHeader: LazyComponent<typeof import("../components/layout/AppHeader.vue").default>
 export const LazyLayoutAppShell: LazyComponent<typeof import("../components/layout/AppShell.vue").default>
 export const LazyMonthlyDayCell: LazyComponent<typeof import("../components/monthly/DayCell.vue").default>

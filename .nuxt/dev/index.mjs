@@ -2148,7 +2148,22 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1c76c-8nmWXmSwKnt+ycI23qyRS/WHK9k\"",
+    "mtime": "2026-02-10T16:44:39.077Z",
+    "size": 116588,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"7177a-f9oPNO0IO4YtdBVcnN84wj420b0\"",
+    "mtime": "2026-02-10T16:44:39.077Z",
+    "size": 464762,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2981,7 +2996,7 @@ const EVENT_CATEGORIES = {
     color: "#F59E0B"
   },
   sport: {
-    label: "\u05E1\u05E4\u05D5\u05E8\u05D8",
+    label: "\u05E1\u05E4\u05D5\u05E8\u05D8 \u05D5\u05EA\u05E0\u05D5\u05E2\u05D4",
     color: "#DC2626"
   },
   fair: {

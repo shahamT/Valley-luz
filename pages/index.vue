@@ -37,10 +37,15 @@ import { eventsService } from '~/utils/events.service'
 
 const eventsStore = useEventsStore()
 const categoriesStore = useCategoriesStore()
+const calendarStore = useCalendarStore()
 
-const selectedCategories = ref([])
+const selectedCategories = computed(() => {
+  return calendarStore.selectedCategories || []
+})
 
-const currentDate = ref(getCurrentYearMonth())
+const currentDate = computed(() => {
+  return calendarStore.currentDate?.value || getCurrentYearMonth()
+})
 
 const currentYear = computed(() => currentDate.value.year)
 const currentMonth = computed(() => currentDate.value.month)
@@ -58,32 +63,27 @@ const monthYearDisplay = computed(() => {
 })
 
 const handlePrevMonth = () => {
-  currentDate.value = getPrevMonth(currentYear.value, currentMonth.value)
+  calendarStore.setCurrentDate(getPrevMonth(currentYear.value, currentMonth.value))
 }
 
 const handleNextMonth = () => {
-  currentDate.value = getNextMonth(currentYear.value, currentMonth.value)
+  calendarStore.setCurrentDate(getNextMonth(currentYear.value, currentMonth.value))
 }
 
 const handleMonthYearSelect = ({ year, month }) => {
-  currentDate.value = { year, month }
+  calendarStore.setCurrentDate({ year, month })
 }
 
 const handleYearChange = ({ year }) => {
-  currentDate.value = { ...currentDate.value, year }
+  calendarStore.setCurrentDate({ ...currentDate.value, year })
 }
 
 const handleToggleCategory = (categoryId) => {
-  const index = selectedCategories.value.indexOf(categoryId)
-  if (index > -1) {
-    selectedCategories.value.splice(index, 1)
-  } else {
-    selectedCategories.value.push(categoryId)
-  }
+  calendarStore.toggleCategory(categoryId)
 }
 
 const handleResetFilter = () => {
-  selectedCategories.value = []
+  calendarStore.resetFilter()
 }
 
 const filteredEvents = computed(() => {

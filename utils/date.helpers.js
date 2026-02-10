@@ -1,5 +1,5 @@
-import { HEBREW_MONTHS } from '~/consts/dates.const'
-import { formatDateToYYYYMMDD } from './events.helpers'
+import { HEBREW_MONTHS, HEBREW_WEEKDAYS } from '~/consts/dates.const'
+import { formatDateToYYYYMMDD, parseDateString } from './events.helpers'
 
 /**
  * Gets today's date as YYYY-MM-DD string
@@ -85,4 +85,67 @@ export function isValidMonth(month) {
  */
 export function isValidYear(year) {
   return Number.isInteger(year) && year >= 1900 && year <= 2100
+}
+
+/**
+ * Gets the next day as YYYY-MM-DD string
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {string} Next day in YYYY-MM-DD format
+ */
+export function getNextDay(dateString) {
+  const date = new Date(dateString + 'T00:00:00')
+  date.setDate(date.getDate() + 1)
+  return formatDateToYYYYMMDD(date)
+}
+
+/**
+ * Gets the previous day as YYYY-MM-DD string
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {string} Previous day in YYYY-MM-DD format
+ */
+export function getPrevDay(dateString) {
+  const date = new Date(dateString + 'T00:00:00')
+  date.setDate(date.getDate() - 1)
+  return formatDateToYYYYMMDD(date)
+}
+
+/**
+ * Checks if a date string is today
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {boolean} True if date is today
+ */
+export function isToday(dateString) {
+  return dateString === getTodayDateString()
+}
+
+/**
+ * Formats date for kanban column header (e.g., "יום שני, 25 בפברואר")
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {string} Formatted date string
+ */
+export function formatKanbanDateHeader(dateString) {
+  const date = parseDateString(dateString)
+  const weekday = HEBREW_WEEKDAYS[date.getDay()]
+  const day = date.getDate()
+  const month = HEBREW_MONTHS[date.getMonth()]
+  return `${weekday}, ${day} ב${month}`
+}
+
+/**
+ * Gets array of 3 date strings for kanban view
+ * @param {string} centerDate - Center date in YYYY-MM-DD format
+ * @returns {string[]} Array of 3 date strings [earlier, center, later] (RTL: right to left)
+ */
+export function getThreeDaysForView(centerDate) {
+  if (isToday(centerDate)) {
+    // If viewing today: show [today, tomorrow, day+2]
+    const tomorrow = getNextDay(centerDate)
+    const dayAfterTomorrow = getNextDay(tomorrow)
+    return [centerDate, tomorrow, dayAfterTomorrow]
+  } else {
+    // If viewing future date: show [day-1, center, day+1]
+    const prevDay = getPrevDay(centerDate)
+    const nextDay = getNextDay(centerDate)
+    return [prevDay, centerDate, nextDay]
+  }
 }

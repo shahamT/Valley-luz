@@ -54,6 +54,7 @@ declare global {
   const formatEventLocation: typeof import('../../utils/events.helpers').formatEventLocation
   const formatEventPrice: typeof import('../../utils/events.helpers').formatEventPrice
   const formatEventTime: typeof import('../../utils/events.helpers').formatEventTime
+  const formatKanbanDateHeader: typeof import('../../utils/date.helpers').formatKanbanDateHeader
   const formatMonthYear: typeof import('../../utils/date.helpers').formatMonthYear
   const generateCalendarDays: typeof import('../../utils/calendar.helpers').generateCalendarDays
   const getAdditionalEventsCount: typeof import('../../utils/calendar-display.helpers').getAdditionalEventsCount
@@ -64,9 +65,12 @@ declare global {
   const getCurrentYearMonth: typeof import('../../utils/date.helpers').getCurrentYearMonth
   const getDisplayEvents: typeof import('../../utils/calendar-display.helpers').getDisplayEvents
   const getMoreEventsText: typeof import('../../utils/calendar-display.helpers').getMoreEventsText
+  const getNextDay: typeof import('../../utils/date.helpers').getNextDay
   const getNextMonth: typeof import('../../utils/date.helpers').getNextMonth
+  const getPrevDay: typeof import('../../utils/date.helpers').getPrevDay
   const getPrevMonth: typeof import('../../utils/date.helpers').getPrevMonth
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
+  const getThreeDaysForView: typeof import('../../utils/date.helpers').getThreeDaysForView
   const getTodayDateString: typeof import('../../utils/date.helpers').getTodayDateString
   const h: typeof import('../../node_modules/vue').h
   const hasInjectionContext: typeof import('../../node_modules/vue').hasInjectionContext
@@ -82,6 +86,7 @@ declare global {
   const isReadonly: typeof import('../../node_modules/vue').isReadonly
   const isRef: typeof import('../../node_modules/vue').isRef
   const isShallow: typeof import('../../node_modules/vue').isShallow
+  const isToday: typeof import('../../utils/date.helpers').isToday
   const isValidDateString: typeof import('../../utils/validation.helpers').isValidDateString
   const isValidMonth: typeof import('../../utils/date.helpers').isValidMonth
   const isValidRouteDate: typeof import('../../utils/validation.helpers').isValidRouteDate
@@ -203,6 +208,7 @@ declare global {
   const useBroadcastChannel: typeof import('../../node_modules/@vueuse/core').useBroadcastChannel
   const useBrowserLocation: typeof import('../../node_modules/@vueuse/core').useBrowserLocation
   const useCached: typeof import('../../node_modules/@vueuse/core').useCached
+  const useCalendarStore: typeof import('../../stores/calendar.store').useCalendarStore
   const useCategories: typeof import('../../composables/useCategories').useCategories
   const useCategoriesStore: typeof import('../../stores/categories.store').useCategoriesStore
   const useClipboard: typeof import('../../node_modules/@vueuse/core').useClipboard
@@ -497,6 +503,7 @@ declare module 'vue' {
     readonly formatEventLocation: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocation']>
     readonly formatEventPrice: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventPrice']>
     readonly formatEventTime: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventTime']>
+    readonly formatKanbanDateHeader: UnwrapRef<typeof import('../../utils/date.helpers')['formatKanbanDateHeader']>
     readonly formatMonthYear: UnwrapRef<typeof import('../../utils/date.helpers')['formatMonthYear']>
     readonly generateCalendarDays: UnwrapRef<typeof import('../../utils/calendar.helpers')['generateCalendarDays']>
     readonly getAdditionalEventsCount: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getAdditionalEventsCount']>
@@ -507,9 +514,12 @@ declare module 'vue' {
     readonly getCurrentYearMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getCurrentYearMonth']>
     readonly getDisplayEvents: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getDisplayEvents']>
     readonly getMoreEventsText: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getMoreEventsText']>
+    readonly getNextDay: UnwrapRef<typeof import('../../utils/date.helpers')['getNextDay']>
     readonly getNextMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getNextMonth']>
+    readonly getPrevDay: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevDay']>
     readonly getPrevMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevMonth']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
+    readonly getThreeDaysForView: UnwrapRef<typeof import('../../utils/date.helpers')['getThreeDaysForView']>
     readonly getTodayDateString: UnwrapRef<typeof import('../../utils/date.helpers')['getTodayDateString']>
     readonly h: UnwrapRef<typeof import('../../node_modules/vue')['h']>
     readonly hasInjectionContext: UnwrapRef<typeof import('../../node_modules/vue')['hasInjectionContext']>
@@ -525,6 +535,7 @@ declare module 'vue' {
     readonly isReadonly: UnwrapRef<typeof import('../../node_modules/vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('../../node_modules/vue')['isRef']>
     readonly isShallow: UnwrapRef<typeof import('../../node_modules/vue')['isShallow']>
+    readonly isToday: UnwrapRef<typeof import('../../utils/date.helpers')['isToday']>
     readonly isValidDateString: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidDateString']>
     readonly isValidMonth: UnwrapRef<typeof import('../../utils/date.helpers')['isValidMonth']>
     readonly isValidRouteDate: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidRouteDate']>
@@ -646,6 +657,7 @@ declare module 'vue' {
     readonly useBroadcastChannel: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useBroadcastChannel']>
     readonly useBrowserLocation: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useBrowserLocation']>
     readonly useCached: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useCached']>
+    readonly useCalendarStore: UnwrapRef<typeof import('../../stores/calendar.store')['useCalendarStore']>
     readonly useCategories: UnwrapRef<typeof import('../../composables/useCategories')['useCategories']>
     readonly useCategoriesStore: UnwrapRef<typeof import('../../stores/categories.store')['useCategoriesStore']>
     readonly useClipboard: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useClipboard']>
