@@ -24,14 +24,12 @@
         <div v-else-if="isError" class="DailyView-error">
           <p>{{ UI_TEXT.error }}</p>
         </div>
-        <DailyKanbanView
+        <DailyKanbanCarousel
           v-else
-          :dates="threeDays"
+          :visible-days="visibleDays"
           :events-by-date="eventsByDate"
-          :is-prev-disabled="isPrevDisabled"
-          :center-index="centerIndex"
-          @prev="handlePrevDay"
-          @next="handleNextDay"
+          :current-date="dateParam"
+          @date-change="handleDateChange"
         />
       </div>
     </div>
@@ -40,8 +38,8 @@
 
 <script setup>
 import { UI_TEXT } from '~/consts/calendar.const'
-import { getTodayDateString, formatMonthYear, getPrevMonth, getNextMonth, getThreeDaysForView, isToday, getNextDay, getPrevDay } from '~/utils/date.helpers'
-import { formatDateForDisplay, transformEventForCard, parseDateString } from '~/utils/events.helpers'
+import { getTodayDateString, formatMonthYear, getPrevMonth, getNextMonth, isToday, getNextDay, getPrevDay } from '~/utils/date.helpers'
+import { formatDateForDisplay, transformEventForCard, parseDateString, formatDateToYYYYMMDD } from '~/utils/events.helpers'
 import { eventsService } from '~/utils/events.service'
 import { isValidRouteDate } from '~/utils/validation.helpers'
 
@@ -86,26 +84,36 @@ const monthYearDisplay = computed(() => {
   return formatMonthYear(headerDate.value.year, headerDate.value.month)
 })
 
-const threeDays = computed(() => {
-  return getThreeDaysForView(dateParam.value)
-})
-
-const centerIndex = computed(() => {
-  if (isToday(dateParam.value)) {
-    return 1 // Tomorrow is center when viewing today
+// Virtual window: 5 days total (current + 2 before + 2 after)
+const visibleDays = computed(() => {
+  const centerDate = parseDateString(dateParam.value)
+  const today = getTodayDateString()
+  const days = []
+  
+  // Always show 5 slots: [date-2, date-1, date, date+1, date+2]
+  for (let i = -2; i <= 2; i++) {
+    const date = new Date(centerDate)
+    date.setDate(centerDate.getDate() + i)
+    const dateString = formatDateToYYYYMMDD(date)
+    
+    // If date is before today, set to null (empty slot)
+    if (dateString < today) {
+      days.push(null)
+    } else {
+      days.push(dateString)
+    }
   }
-  return 1 // URL date is center
-})
-
-const isPrevDisabled = computed(() => {
-  return isToday(dateParam.value)
+  
+  return days
 })
 
 const eventsByDate = computed(() => {
   const result = {}
   const categories = selectedCategories.value
   
-  threeDays.value.forEach((date) => {
+  // Only calculate events for non-null dates in visibleDays
+  visibleDays.value.forEach((date) => {
+    if (!date) return // Skip null dates
     const eventsForDate = eventsService.getEventsForDate(eventsStore.events, date)
     
     let filteredEvents = eventsForDate.map(({ event, occurrence }, index) => ({
@@ -163,24 +171,9 @@ const handleResetFilter = () => {
   calendarStore.resetFilter()
 }
 
-const handlePrevDay = () => {
-  if (isPrevDisabled.value) {
-    return
-  }
-  const prevDate = getPrevDay(dateParam.value)
-  navigateTo(`/daily-view/${prevDate}`)
-}
-
-const handleNextDay = () => {
-  if (isToday(dateParam.value)) {
-    // When viewing today, jump 2 days ahead (to day+2)
-    const nextDate = getNextDay(getNextDay(dateParam.value))
-    navigateTo(`/daily-view/${nextDate}`)
-  } else {
-    // Normal navigation: move to next day
-    const nextDate = getNextDay(dateParam.value)
-    navigateTo(`/daily-view/${nextDate}`)
-  }
+const handleDateChange = (newDate) => {
+  // Update URL when carousel slide changes
+  navigateTo(`/daily-view/${newDate}`)
 }
 </script>
 
@@ -205,8 +198,7 @@ const handleNextDay = () => {
 
   &-content {
     grid-row: 2;
-    min-height: 0;
-    overflow: hidden;
+    overflow: visible; // Allow content to determine height
   }
 
   &-error {

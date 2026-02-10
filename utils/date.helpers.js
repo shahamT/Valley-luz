@@ -119,6 +119,19 @@ export function isToday(dateString) {
 }
 
 /**
+ * Checks if a date is before today
+ * @param {Date} date - Date object to check
+ * @returns {boolean} True if date is before today
+ */
+export function isBeforeToday(date) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const checkDate = new Date(date)
+  checkDate.setHours(0, 0, 0, 0)
+  return checkDate < today
+}
+
+/**
  * Formats date for kanban column header (e.g., "יום שני, 25 בפברואר")
  * @param {string} dateString - Date string in YYYY-MM-DD format
  * @returns {string} Formatted date string

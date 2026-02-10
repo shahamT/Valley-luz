@@ -18,6 +18,7 @@ interface _GlobalComponents {
   'ControlsTopControls': typeof import("../../components/controls/TopControls.vue").default
   'DailyEventCard': typeof import("../../components/daily/EventCard.vue").default
   'DailyEventList': typeof import("../../components/daily/EventList.vue").default
+  'DailyKanbanCarousel': typeof import("../../components/daily/KanbanCarousel.vue").default
   'DailyKanbanColumn': typeof import("../../components/daily/KanbanColumn.vue").default
   'DailyKanbanEventCard': typeof import("../../components/daily/KanbanEventCard.vue").default
   'DailyKanbanView': typeof import("../../components/daily/KanbanView.vue").default
@@ -61,6 +62,7 @@ interface _GlobalComponents {
   'LazyControlsTopControls': LazyComponent<typeof import("../../components/controls/TopControls.vue").default>
   'LazyDailyEventCard': LazyComponent<typeof import("../../components/daily/EventCard.vue").default>
   'LazyDailyEventList': LazyComponent<typeof import("../../components/daily/EventList.vue").default>
+  'LazyDailyKanbanCarousel': LazyComponent<typeof import("../../components/daily/KanbanCarousel.vue").default>
   'LazyDailyKanbanColumn': LazyComponent<typeof import("../../components/daily/KanbanColumn.vue").default>
   'LazyDailyKanbanEventCard': LazyComponent<typeof import("../../components/daily/KanbanEventCard.vue").default>
   'LazyDailyKanbanView': LazyComponent<typeof import("../../components/daily/KanbanView.vue").default>

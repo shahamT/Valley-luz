@@ -78,6 +78,7 @@ declare global {
   const inject: typeof import('../../node_modules/vue').inject
   const injectHead: typeof import('../../node_modules/nuxt/dist/app/composables/head').injectHead
   const injectLocal: typeof import('../../node_modules/@vueuse/core').injectLocal
+  const isBeforeToday: typeof import('../../utils/date.helpers').isBeforeToday
   const isDefined: typeof import('../../node_modules/@vueuse/core').isDefined
   const isNuxtError: typeof import('../../node_modules/nuxt/dist/app/composables/error').isNuxtError
   const isPrerendered: typeof import('../../node_modules/nuxt/dist/app/composables/payload').isPrerendered
@@ -527,6 +528,7 @@ declare module 'vue' {
     readonly inject: UnwrapRef<typeof import('../../node_modules/vue')['inject']>
     readonly injectHead: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/head')['injectHead']>
     readonly injectLocal: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['injectLocal']>
+    readonly isBeforeToday: UnwrapRef<typeof import('../../utils/date.helpers')['isBeforeToday']>
     readonly isDefined: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['isDefined']>
     readonly isNuxtError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['isNuxtError']>
     readonly isPrerendered: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['isPrerendered']>

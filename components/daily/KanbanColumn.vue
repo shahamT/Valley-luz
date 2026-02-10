@@ -1,5 +1,5 @@
 <template>
-  <div class="KanbanColumn" :class="{ 'KanbanColumn--center': isCenter }">
+  <div class="KanbanColumn">
     <div class="KanbanColumn-header">
       <h2 class="KanbanColumn-title">{{ formattedDate }}</h2>
     </div>
@@ -28,10 +28,6 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  isCenter: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 const formattedDate = computed(() => {
@@ -44,7 +40,8 @@ const formattedDate = computed(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  height: 100%;
+  width: 100%;
+  max-width: 100%;
   background-color: rgba(255, 255, 255, 0.7);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -65,11 +62,9 @@ const formattedDate = computed(() => {
   }
 
   &-events {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    flex: none; // Don't stretch, size based on content
+    overflow: visible; // Allow content to determine height
     padding: var(--spacing-md);
-    min-height: 0;
   }
 
   &-empty {

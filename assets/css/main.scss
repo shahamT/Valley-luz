@@ -1,3 +1,8 @@
 @use './variables.scss' as *;
 @use './setup.scss' as *;
 @use './typography.scss' as *;
+
+// Swiper carousel styles
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';

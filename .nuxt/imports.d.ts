@@ -36,7 +36,7 @@ export { useEvents } from '../composables/useEvents';
 export { useScreenWidth } from '../composables/useScreenWidth';
 export { getDisplayEvents, getAdditionalEventsCount, isWeekendDay, getCategoryColor, getMoreEventsText } from '../utils/calendar-display.helpers';
 export { generateCalendarDays } from '../utils/calendar.helpers';
-export { getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, formatKanbanDateHeader, getThreeDaysForView } from '../utils/date.helpers';
+export { getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, isBeforeToday, formatKanbanDateHeader, getThreeDaysForView } from '../utils/date.helpers';
 export { formatDateToYYYYMMDD, parseDateString, formatDateForDisplay, formatEventTime, formatEventPrice, formatEventLocation, transformEventForCard } from '../utils/events.helpers';
 export { eventsService } from '../utils/events.service';
 export { logger } from '../utils/logger';
