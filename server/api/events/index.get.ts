@@ -67,9 +67,23 @@ export default defineEventHandler(async (event) => {
     const { db } = await getMongoConnection()
     const collection = db.collection(collectionName)
 
+    // Only fetch events with start date later than 5 days before the first day of current month
+    const now = new Date()
+    const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const cutoff = new Date(firstDayOfCurrentMonth)
+    cutoff.setDate(cutoff.getDate() - 5)
+    const cutoffISO = cutoff.toISOString()
+
+    // Support both BSON Date and ISO string storage for startTime
     const query = {
       isActive: true,
       event: { $ne: null },
+      $or: [
+        { 'event.occurrence.startTime': { $gt: cutoff } },
+        { 'event.occurrence.startTime': { $gt: cutoffISO } },
+        { 'event.occurrences.startTime': { $gt: cutoff } },
+        { 'event.occurrences.startTime': { $gt: cutoffISO } },
+      ],
     }
 
     const documents = await collection.find(query).toArray()

@@ -17,6 +17,33 @@
           @toggle-category="handleToggleCategory"
           @reset-filter="handleResetFilter"
         />
+        <div class="DailyView-dayNav">
+          <button
+            type="button"
+            class="DailyView-dayNavButton"
+            :class="{ 'DailyView-dayNavButton--disabled': isTodayOrPast }"
+            :disabled="isTodayOrPast"
+            aria-label="Previous day"
+            @click="handlePrevDay"
+          >
+            <UiIcon name="chevron_right" size="md" />
+          </button>
+          <button
+            type="button"
+            class="DailyView-backToMonthly"
+            @click="handleBackToMonthly"
+          >
+            חזרה לתצוגה חודשית
+          </button>
+          <button
+            type="button"
+            class="DailyView-dayNavButton"
+            aria-label="Next day"
+            @click="handleNextDay"
+          >
+            <UiIcon name="chevron_left" size="md" />
+          </button>
+        </div>
         <div class="DailyView-separator"></div>
       </div>
       <div class="DailyView-content">
@@ -29,6 +56,8 @@
           :visible-days="visibleDays"
           :events-by-date="eventsByDate"
           :current-date="dateParam"
+          :today="today"
+          :slide-to-date-request="slideToDateRequest"
           @date-change="handleDateChange"
         />
       </div>
@@ -37,6 +66,7 @@
 </template>
 
 <script setup>
+import { storeToRefs } from 'pinia'
 import { UI_TEXT } from '~/consts/calendar.const'
 import { getTodayDateString, formatMonthYear, getPrevMonth, getNextMonth, isToday, getNextDay, getPrevDay } from '~/utils/date.helpers'
 import { formatDateForDisplay, transformEventForCard, parseDateString, formatDateToYYYYMMDD } from '~/utils/events.helpers'
@@ -47,10 +77,7 @@ const route = useRoute()
 const eventsStore = useEventsStore()
 const categoriesStore = useCategoriesStore()
 const calendarStore = useCalendarStore()
-
-const selectedCategories = computed(() => {
-  return calendarStore.selectedCategories || []
-})
+const { selectedCategories } = storeToRefs(calendarStore)
 
 const isLoading = computed(() => {
   return unref(eventsStore.isLoading) || unref(categoriesStore.isLoading)
@@ -80,40 +107,58 @@ const headerDate = computed(() => {
   }
 })
 
+watch(headerDate, (newHeaderDate) => {
+  calendarStore.setCurrentDate(newHeaderDate)
+}, { immediate: true })
+
 const monthYearDisplay = computed(() => {
   return formatMonthYear(headerDate.value.year, headerDate.value.month)
 })
 
-// Virtual window: 5 days total (current + 2 before + 2 after)
+// Virtual window: 11 days total (current + 4 before + 4 after); all dates rendered, past ones shown disabled
 const visibleDays = computed(() => {
   const centerDate = parseDateString(dateParam.value)
-  const today = getTodayDateString()
   const days = []
-  
-  // Always show 5 slots: [date-2, date-1, date, date+1, date+2]
-  for (let i = -2; i <= 2; i++) {
+  for (let i = -4; i <= 4; i++) {
     const date = new Date(centerDate)
     date.setDate(centerDate.getDate() + i)
-    const dateString = formatDateToYYYYMMDD(date)
-    
-    // If date is before today, set to null (empty slot)
-    if (dateString < today) {
-      days.push(null)
-    } else {
-      days.push(dateString)
-    }
+    days.push(formatDateToYYYYMMDD(date))
   }
-  
   return days
 })
+
+const today = computed(() => getTodayDateString())
+
+const slideToDateRequest = ref(null)
+
+const isTodayOrPast = computed(() => {
+  return dateParam.value <= today.value
+})
+
+const handlePrevDay = () => {
+  if (isTodayOrPast.value) return
+  const targetDate = getPrevDay(dateParam.value)
+  if (visibleDays.value.includes(targetDate)) {
+    slideToDateRequest.value = targetDate
+  } else {
+    navigateTo(`/daily-view/${targetDate}`)
+  }
+}
+
+const handleNextDay = () => {
+  const targetDate = getNextDay(dateParam.value)
+  if (visibleDays.value.includes(targetDate)) {
+    slideToDateRequest.value = targetDate
+  } else {
+    navigateTo(`/daily-view/${targetDate}`)
+  }
+}
 
 const eventsByDate = computed(() => {
   const result = {}
   const categories = selectedCategories.value
   
-  // Only calculate events for non-null dates in visibleDays
   visibleDays.value.forEach((date) => {
-    if (!date) return // Skip null dates
     const eventsForDate = eventsService.getEventsForDate(eventsStore.events, date)
     
     let filteredEvents = eventsForDate.map(({ event, occurrence }, index) => ({
@@ -142,25 +187,43 @@ const eventsByDate = computed(() => {
   return result
 })
 
+// Target date for daily view when changing month: first day of month, or today if that month is current
+function getDailyTargetDateForMonth(year, month) {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+  if (year === currentYear && month === currentMonth) {
+    return getTodayDateString()
+  }
+  const monthPadded = String(month).padStart(2, '0')
+  return `${year}-${monthPadded}-01`
+}
+
 const handlePrevMonth = () => {
   const newDate = getPrevMonth(headerDate.value.year, headerDate.value.month)
   calendarStore.setCurrentDate(newDate)
-  navigateTo('/')
+  const targetDate = getDailyTargetDateForMonth(newDate.year, newDate.month)
+  navigateTo(`/daily-view/${targetDate}`)
 }
 
 const handleNextMonth = () => {
   const newDate = getNextMonth(headerDate.value.year, headerDate.value.month)
   calendarStore.setCurrentDate(newDate)
-  navigateTo('/')
+  const targetDate = getDailyTargetDateForMonth(newDate.year, newDate.month)
+  navigateTo(`/daily-view/${targetDate}`)
 }
 
 const handleMonthYearSelect = ({ year, month }) => {
   calendarStore.setCurrentDate({ year, month })
-  navigateTo('/')
+  const targetDate = getDailyTargetDateForMonth(year, month)
+  navigateTo(`/daily-view/${targetDate}`)
 }
 
 const handleYearChange = ({ year }) => {
-  calendarStore.setCurrentDate({ ...headerDate.value, year })
+  const newDate = { ...headerDate.value, year }
+  calendarStore.setCurrentDate(newDate)
+  const targetDate = getDailyTargetDateForMonth(newDate.year, newDate.month)
+  navigateTo(`/daily-view/${targetDate}`)
 }
 
 const handleToggleCategory = (categoryId) => {
@@ -174,6 +237,12 @@ const handleResetFilter = () => {
 const handleDateChange = (newDate) => {
   // Update URL when carousel slide changes
   navigateTo(`/daily-view/${newDate}`)
+  slideToDateRequest.value = null
+}
+
+const handleBackToMonthly = () => {
+  calendarStore.setCurrentDate(headerDate.value)
+  navigateTo('/')
 }
 </script>
 
@@ -187,6 +256,60 @@ const handleDateChange = (newDate) => {
 
   &-header {
     grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  &-dayNav {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
+  }
+
+  &-dayNavButton {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--weekend-day-bg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-dark-green);
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover:not(:disabled) {
+      background-color: var(--weekend-day-hover-bg);
+    }
+
+    &:disabled,
+    &--disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  &-backToMonthly {
+    justify-self: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--brand-dark-green);
+    background-color: var(--weekend-day-bg);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--weekend-day-hover-bg);
+    }
   }
 
   &-separator {
@@ -198,7 +321,8 @@ const handleDateChange = (newDate) => {
 
   &-content {
     grid-row: 2;
-    overflow: visible; // Allow content to determine height
+    overflow-x: hidden; // Prevent carousel wrapper from causing horizontal overflow
+    overflow-y: visible; // Allow content to determine height
   }
 
   &-error {

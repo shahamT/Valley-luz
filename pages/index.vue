@@ -24,13 +24,19 @@
         <div v-else-if="isError" class="MonthlyView-error">
           <p>{{ UI_TEXT.error }}</p>
         </div>
-        <MonthlyMonthCalendar v-else :date="currentDate" :events="filteredEvents" />
+        <MonthlyMonthCalendar
+          v-else
+          :key="`${currentDate.year}-${currentDate.month}`"
+          :date="currentDate"
+          :events="filteredEvents"
+        />
       </div>
     </div>
   </LayoutAppShell>
 </template>
 
 <script setup>
+import { storeToRefs } from 'pinia'
 import { UI_TEXT } from '~/consts/calendar.const'
 import { formatMonthYear, getCurrentYearMonth, getPrevMonth, getNextMonth } from '~/utils/date.helpers'
 import { eventsService } from '~/utils/events.service'
@@ -38,17 +44,10 @@ import { eventsService } from '~/utils/events.service'
 const eventsStore = useEventsStore()
 const categoriesStore = useCategoriesStore()
 const calendarStore = useCalendarStore()
+const { currentDate, selectedCategories } = storeToRefs(calendarStore)
 
-const selectedCategories = computed(() => {
-  return calendarStore.selectedCategories || []
-})
-
-const currentDate = computed(() => {
-  return calendarStore.currentDate?.value || getCurrentYearMonth()
-})
-
-const currentYear = computed(() => currentDate.value.year)
-const currentMonth = computed(() => currentDate.value.month)
+const currentYear = computed(() => currentDate.value?.year ?? getCurrentYearMonth().year)
+const currentMonth = computed(() => currentDate.value?.month ?? getCurrentYearMonth().month)
 
 const isLoading = computed(() => {
   return unref(eventsStore.isLoading) || unref(categoriesStore.isLoading)
@@ -63,11 +62,11 @@ const monthYearDisplay = computed(() => {
 })
 
 const handlePrevMonth = () => {
-  calendarStore.setCurrentDate(getPrevMonth(currentYear.value, currentMonth.value))
+  calendarStore.setCurrentDate(getPrevMonth(currentDate.value.year, currentDate.value.month))
 }
 
 const handleNextMonth = () => {
-  calendarStore.setCurrentDate(getNextMonth(currentYear.value, currentMonth.value))
+  calendarStore.setCurrentDate(getNextMonth(currentDate.value.year, currentDate.value.month))
 }
 
 const handleMonthYearSelect = ({ year, month }) => {

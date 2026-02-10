@@ -21,11 +21,10 @@
     </div>
     <div class="KanbanView-columns">
       <DailyKanbanColumn
-        v-for="(date, index) in dates"
+        v-for="date in dates"
         :key="date"
         :date="date"
         :events="eventsByDate[date] || []"
-        :is-center="index === centerIndex"
       />
     </div>
   </div>
@@ -44,10 +43,6 @@ const props = defineProps({
   isPrevDisabled: {
     type: Boolean,
     default: false,
-  },
-  centerIndex: {
-    type: Number,
-    default: 1,
   },
 })
 
@@ -97,6 +92,7 @@ defineEmits(['prev', 'next'])
     transition: background-color 0.2s ease;
     flex-shrink: 0;
 
+    // TODO: consider adding --nav-button-hover or reusing existing green token
     &:hover:not(:disabled) {
       background-color: #D4E8C4;
     }
@@ -105,11 +101,6 @@ defineEmits(['prev', 'next'])
       opacity: 0.4;
       cursor: not-allowed;
       pointer-events: none;
-    }
-
-    &--spacer {
-      width: 34px;
-      flex-shrink: 0;
     }
   }
 }

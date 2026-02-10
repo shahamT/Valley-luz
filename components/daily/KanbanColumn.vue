@@ -1,5 +1,5 @@
 <template>
-  <div class="KanbanColumn">
+  <div class="KanbanColumn" :class="{ 'KanbanColumn--disabled': isDisabled }">
     <div class="KanbanColumn-header">
       <h2 class="KanbanColumn-title">{{ formattedDate }}</h2>
     </div>
@@ -28,6 +28,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  isDisabled: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const formattedDate = computed(() => {
@@ -45,6 +49,12 @@ const formattedDate = computed(() => {
   background-color: rgba(255, 255, 255, 0.7);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+
+  &--disabled {
+    opacity: 0.55;
+    pointer-events: none;
+    filter: saturate(0.7);
+  }
 
   &-header {
     background-color: var(--brand-dark-green);

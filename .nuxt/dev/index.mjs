@@ -2148,7 +2148,22 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1c98d-I3vD7pXha5OEk24F3JWmT4cOEY0\"",
+    "mtime": "2026-02-10T19:24:27.636Z",
+    "size": 117133,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"71f56-p5yYsiOnhV2qQipZqof6d40wiuo\"",
+    "mtime": "2026-02-10T19:24:27.636Z",
+    "size": 466774,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -3027,6 +3042,10 @@ const EVENT_CATEGORIES = {
   kids: {
     label: "\u05D9\u05DC\u05D3\u05D9\u05DD",
     color: "#FBBF24"
+  },
+  politics: {
+    label: "\u05E4\u05D5\u05DC\u05D9\u05D8\u05D9\u05E7\u05D4",
+    color: "#4338CA"
   }
 };
 
@@ -3111,9 +3130,20 @@ const index_get = defineEventHandler(async (event) => {
   try {
     const { db } = await getMongoConnection();
     const collection = db.collection(collectionName);
+    const now = /* @__PURE__ */ new Date();
+    const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const cutoff = new Date(firstDayOfCurrentMonth);
+    cutoff.setDate(cutoff.getDate() - 5);
+    const cutoffISO = cutoff.toISOString();
     const query = {
       isActive: true,
-      event: { $ne: null }
+      event: { $ne: null },
+      $or: [
+        { "event.occurrence.startTime": { $gt: cutoff } },
+        { "event.occurrence.startTime": { $gt: cutoffISO } },
+        { "event.occurrences.startTime": { $gt: cutoff } },
+        { "event.occurrences.startTime": { $gt: cutoffISO } }
+      ]
     };
     const documents = await collection.find(query).toArray();
     const transformedEvents = documents.map((doc) => {

@@ -1,12 +1,14 @@
 <template>
   <div
     class="DayCell"
-    :class="{ 
+    :class="{
       'DayCell--outside': day.isOutsideMonth,
-      'DayCell--no-events': day.eventsCount === 0 && !day.isOutsideMonth,
+      'DayCell--past': isPast,
+      'DayCell--today': isToday,
+      'DayCell--no-events': day.eventsCount === 0 && !day.isOutsideMonth && !isPast,
       'DayCell--weekend': isWeekend && !day.isOutsideMonth
     }"
-    @click="!day.isOutsideMonth && handleClick()"
+    @click="!day.isOutsideMonth && !isPast && handleClick()"
   >
     <div class="DayCell-number">{{ day.dayNumber }}</div>
     <div v-if="!day.isOutsideMonth && day.eventsCount > 0" class="DayCell-events">
@@ -26,6 +28,7 @@
 </template>
 
 <script setup>
+import { getTodayDateString } from '~/utils/date.helpers'
 import {
   getDisplayEvents,
   getAdditionalEventsCount,
@@ -39,6 +42,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+})
+
+const isPast = computed(() => {
+  return !props.day.isOutsideMonth && props.day.dateString < getTodayDateString()
+})
+
+const isToday = computed(() => {
+  return !props.day.isOutsideMonth && props.day.dateString === getTodayDateString()
 })
 
 const categoriesStore = useCategoriesStore()
@@ -102,6 +113,29 @@ const getMoreChipText = () => {
     opacity: 0.6;
     cursor: default;
     pointer-events: none;
+  }
+
+  &--past {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+
+    &:hover {
+      transform: none;
+      box-shadow: var(--shadow-card);
+      background-color: var(--card-bg);
+    }
+  }
+
+  &--past#{&}--weekend {
+    &:hover {
+      background-color: var(--weekend-day-bg);
+    }
+  }
+
+  &--today .DayCell-number {
+    color: var(--brand-light-green);
+    font-weight: 700;
   }
 
   &--no-events {

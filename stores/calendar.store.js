@@ -2,6 +2,11 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getCurrentYearMonth } from '~/utils/date.helpers'
 
+/**
+ * Shared view/filter state for both monthly and daily views:
+ * category filter (selectedCategories) and selected month (currentDate).
+ */
+
 export const useCalendarStore = defineStore('calendar', () => {
   const selectedCategories = ref([])
   const currentDate = ref(getCurrentYearMonth())

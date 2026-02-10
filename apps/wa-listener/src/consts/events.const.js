@@ -79,6 +79,10 @@ export const EVENT_CATEGORIES = {
     label: 'ילדים',
     color: '#FBBF24',
   },
+  politics: {
+    label: 'פוליטיקה',
+    color: '#4338CA',
+  },
 }
 
 /**
