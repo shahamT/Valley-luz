@@ -1,9 +1,22 @@
 <template>
   <header class="AppHeader">
     <div class="AppHeader-container">
-      <slot name="center">
-        <ClientOnly>
-          <div v-if="showMonthYear" class="AppHeader-monthNav">
+      <img
+        v-if="!isMobile"
+        src="/logos/valleyluz-logo.png"
+        alt="Valley Luz"
+        class="AppHeader-logo"
+      />
+      <img
+        v-else
+        src="/logos/valleyluz-icon.svg"
+        alt="Valley Luz"
+        class="AppHeader-logo AppHeader-logo--icon"
+      />
+      <div class="AppHeader-center">
+        <slot name="center">
+          <ClientOnly>
+            <div v-if="showMonthYear" class="AppHeader-monthNav">
             <button 
               class="AppHeader-navButton" 
               :class="{ 'AppHeader-navButton--disabled': isCurrentMonth }"
@@ -68,18 +81,7 @@
           </template>
         </ClientOnly>
       </slot>
-      <img 
-        v-if="!isMobile" 
-        src="/logos/valleyluz-logo.png" 
-        alt="Valley Luz" 
-        class="AppHeader-logo" 
-      />
-      <img 
-        v-else 
-        src="/logos/valleyluz-icon.svg" 
-        alt="Valley Luz" 
-        class="AppHeader-logo AppHeader-logo--icon" 
-      />
+      </div>
     </div>
   </header>
 </template>
@@ -155,32 +157,41 @@ const handleYearChange = ({ year }) => {
     max-width: var(--content-max-width);
     width: 100%;
     margin: 0 auto;
-    padding: 0;
-    position: relative;
+    padding-inline: var(--spacing-3xl);
     height: 100%;
     display: flex;
     align-items: center;
+    gap: var(--spacing-md);
   }
 
   &-logo {
     height: 2rem;
     width: auto;
     object-fit: contain;
-    position: absolute;
-    left: var(--spacing-xl);
-    top: 50%;
-    transform: translateY(-50%);
+    flex-shrink: 0;
     direction: ltr;
+  }
+
+  &-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+  }
+
+  [dir='rtl'] &-logo {
+    order: 2;
+  }
+
+  [dir='rtl'] &-center {
+    order: 1;
   }
 
   &-monthNav {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
   }
 
   &-navButton {

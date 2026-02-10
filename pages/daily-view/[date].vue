@@ -1,65 +1,43 @@
 <template>
-  <LayoutAppShell
-    :show-month-year="true"
-    :month-year="monthYearDisplay"
-    :current-date="headerDate"
-    @prev-month="handlePrevMonth"
-    @next-month="handleNextMonth"
-    @select-month-year="handleMonthYearSelect"
-    @year-change="handleYearChange"
-  >
+  <LayoutAppShell :show-month-year="false">
     <div class="DailyView">
       <div class="DailyView-header">
-        <ControlsTopControls
-          mode="month"
-          :categories="categoriesStore.categories"
-          :selected-categories="selectedCategories"
+        <ControlsCalendarViewHeader
+          view-mode="day"
+          :month-year="monthYearDisplay"
+          :current-date="headerDate"
+          @select-month-year="handleMonthYearSelect"
+          @year-change="handleYearChange"
+          @view-change="handleViewChange"
           @toggle-category="handleToggleCategory"
           @reset-filter="handleResetFilter"
         />
-        <div class="DailyView-dayNav">
-          <button
-            type="button"
-            class="DailyView-dayNavButton"
-            :class="{ 'DailyView-dayNavButton--disabled': isTodayOrPast }"
-            :disabled="isTodayOrPast"
-            aria-label="Previous day"
-            @click="handlePrevDay"
-          >
-            <UiIcon name="chevron_right" size="md" />
-          </button>
-          <button
-            type="button"
-            class="DailyView-backToMonthly"
-            @click="handleBackToMonthly"
-          >
-            חזרה לתצוגה חודשית
-          </button>
-          <button
-            type="button"
-            class="DailyView-dayNavButton"
-            aria-label="Next day"
-            @click="handleNextDay"
-          >
-            <UiIcon name="chevron_left" size="md" />
-          </button>
-        </div>
-        <div class="DailyView-separator"></div>
       </div>
       <div class="DailyView-content">
-        <UiLoadingSpinner v-if="isLoading" :message="UI_TEXT.loading" />
-        <div v-else-if="isError" class="DailyView-error">
-          <p>{{ UI_TEXT.error }}</p>
-        </div>
-        <DailyKanbanCarousel
-          v-else
-          :visible-days="visibleDays"
-          :events-by-date="eventsByDate"
-          :current-date="dateParam"
-          :today="today"
-          :slide-to-date-request="slideToDateRequest"
-          @date-change="handleDateChange"
-        />
+        <CalendarViewContent
+          view-mode="day"
+          :prev-disabled="isTodayOrPast"
+          prev-aria-label="Previous day"
+          next-aria-label="Next day"
+          @prev="handlePrevDay"
+          @next="handleNextDay"
+        >
+          <template #day>
+            <UiLoadingSpinner v-if="isLoading" :message="UI_TEXT.loading" />
+            <div v-else-if="isError" class="DailyView-error">
+              <p>{{ UI_TEXT.error }}</p>
+            </div>
+            <DailyKanbanCarousel
+              v-else
+              :visible-days="visibleDays"
+              :events-by-date="eventsByDate"
+              :current-date="dateParam"
+              :today="today"
+              :slide-to-date-request="slideToDateRequest"
+              @date-change="handleDateChange"
+            />
+          </template>
+        </CalendarViewContent>
       </div>
     </div>
   </LayoutAppShell>
@@ -244,6 +222,10 @@ const handleBackToMonthly = () => {
   calendarStore.setCurrentDate(headerDate.value)
   navigateTo('/')
 }
+
+const handleViewChange = ({ view }) => {
+  if (view === 'month') handleBackToMonthly()
+}
 </script>
 
 <style lang="scss">
@@ -253,6 +235,7 @@ const handleBackToMonthly = () => {
   height: 100%;
   gap: var(--spacing-md);
   min-height: 0;
+  min-width: 0;
 
   &-header {
     grid-row: 1;
@@ -261,68 +244,10 @@ const handleBackToMonthly = () => {
     gap: var(--spacing-sm);
   }
 
-  &-dayNav {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: var(--spacing-md);
-    width: 100%;
-  }
-
-  &-dayNavButton {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: none;
-    background-color: var(--weekend-day-bg);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--brand-dark-green);
-    transition: background-color 0.2s ease;
-    flex-shrink: 0;
-
-    &:hover:not(:disabled) {
-      background-color: var(--weekend-day-hover-bg);
-    }
-
-    &:disabled,
-    &--disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-  }
-
-  &-backToMonthly {
-    justify-self: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--brand-dark-green);
-    background-color: var(--weekend-day-bg);
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: var(--weekend-day-hover-bg);
-    }
-  }
-
-  &-separator {
-    width: 100%;
-    height: 1px;
-    background-color: var(--brand-light-green);
-    margin-top: var(--spacing-md);
-  }
-
   &-content {
     grid-row: 2;
-    overflow-x: hidden; // Prevent carousel wrapper from causing horizontal overflow
-    overflow-y: visible; // Allow content to determine height
+    min-height: 0;
+    min-width: 0;
   }
 
   &-error {

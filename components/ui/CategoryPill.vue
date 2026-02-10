@@ -37,10 +37,10 @@ const pillStyle = computed(() => {
     }
   }
   return {
-    backgroundColor: 'var(--color-background)',
-    opacity: 0.8,
+    backgroundColor: 'var(--light-bg)',
     color: 'var(--color-text-light)',
     borderColor: categoryColor,
+    opacity: 1,
   }
 })
 </script>

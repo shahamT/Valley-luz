@@ -46,7 +46,7 @@ const formattedDate = computed(() => {
   min-width: 0;
   width: 100%;
   max-width: 100%;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
 
@@ -57,9 +57,14 @@ const formattedDate = computed(() => {
   }
 
   &-header {
+    height: 52px;
+    padding-block: 0;
+    padding-inline: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: var(--brand-dark-green);
     color: var(--chip-text-white);
-    padding: var(--spacing-md);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 

@@ -32,15 +32,17 @@ const isWeekendDay = (index) => {
 .WeekdayRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  align-items: center;
+  height: 52px;
+  padding-block: 0;
   gap: var(--spacing-md);
-  margin-bottom: calc(var(--spacing-md) - 4px); // Reduced by padding-top amount to maintain visual spacing
 
   &-day {
     text-align: center;
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-light);
-    padding: var(--spacing-sm);
+    padding-block: 0;
 
     &--weekend {
       color: var(--brand-dark-green);

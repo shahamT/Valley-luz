@@ -15,4 +15,12 @@ export const UI_TEXT = {
   noEvents: 'אין אירועים',
   notFound: 'הדף המבוקש לא נמצא',
   eventsCount: (count) => `${count} אירועים`,
+  viewMonthly: 'חודשי',
+  viewDaily: 'יומי',
+  filterButtonLabel: 'סינון',
+  categoriesFilter: 'קטגוריות',
+  categoriesFilterTitle: 'קטגוריות',
+  hoursFilter: 'שעות',
+  hoursFilterAll: 'כל שעה',
+  resetFilter: 'איפוס פילטר',
 }

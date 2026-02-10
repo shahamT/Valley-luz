@@ -73,7 +73,7 @@ const handleYearChange = (data) => {
     padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-    background-color: var(--color-background);
+    background-color: var(--light-bg, #f2fbf8);
   }
 
   &-header {

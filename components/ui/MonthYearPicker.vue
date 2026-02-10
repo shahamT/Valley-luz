@@ -85,6 +85,10 @@ const selectYear = (year) => {
   localYear.value = year
   emit('update:year', year)
   emit('year-change', year)
+  if (year === currentYear && localMonth.value < currentMonth) {
+    localMonth.value = currentMonth
+    emit('update:month', currentMonth)
+  }
 }
 
 const selectMonth = (month) => {
@@ -102,6 +106,9 @@ const selectMonth = (month) => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  background-color: var(--light-bg, #f2fbf8);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
 
   &-yearSection,
   &-monthSection {
@@ -127,7 +134,7 @@ const selectMonth = (month) => {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    background-color: var(--color-background);
+    background-color: var(--light-bg, #f2fbf8);
     color: var(--color-text);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -135,21 +142,20 @@ const selectMonth = (month) => {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
     &:hover {
-      background-color: var(--brand-dark-green);
-      border-color: var(--brand-dark-green);
-      color: var(--color-background);
-      transform: translateY(-1px);
+      background-color: color-mix(in srgb, var(--brand-dark-green) 18%, var(--light-bg, #f2fbf8));
+      border-color: color-mix(in srgb, var(--brand-dark-green) 30%, var(--color-border));
     }
 
     &--active {
-      background-color: var(--brand-light-green);
-      color: var(--color-background);
-      border-color: var(--brand-light-green);
+      background-color: var(--brand-dark-green);
+      color: var(--chip-text-white);
+      border-color: var(--brand-dark-green);
       font-weight: 600;
 
       &:hover {
         background-color: var(--brand-dark-green);
         border-color: var(--brand-dark-green);
+        color: var(--chip-text-white);
       }
     }
   }
@@ -168,7 +174,7 @@ const selectMonth = (month) => {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    background-color: var(--color-background);
+    background-color: var(--light-bg, #f2fbf8);
     color: var(--color-text);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -176,21 +182,20 @@ const selectMonth = (month) => {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 
     &:hover:not(:disabled) {
-      background-color: var(--brand-dark-green);
-      border-color: var(--brand-dark-green);
-      color: var(--color-background);
-      transform: translateY(-1px);
+      background-color: color-mix(in srgb, var(--brand-dark-green) 18%, var(--light-bg, #f2fbf8));
+      border-color: color-mix(in srgb, var(--brand-dark-green) 30%, var(--color-border));
     }
 
     &--active {
-      background-color: var(--brand-light-green);
-      color: var(--color-background);
-      border-color: var(--brand-light-green);
+      background-color: var(--brand-dark-green);
+      color: var(--chip-text-white);
+      border-color: var(--brand-dark-green);
       font-weight: 600;
 
       &:hover {
         background-color: var(--brand-dark-green);
         border-color: var(--brand-dark-green);
+        color: var(--chip-text-white);
       }
     }
 

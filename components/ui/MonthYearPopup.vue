@@ -58,7 +58,7 @@ onClickOutside(
   left: 50%;
   transform: translateX(-50%);
   margin-top: 8px;
-  background-color: var(--color-background);
+  background-color: var(--light-bg, #f2fbf8);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-lg);

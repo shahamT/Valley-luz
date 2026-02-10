@@ -14,7 +14,10 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 interface _GlobalComponents {
+  'CalendarViewContent': typeof import("../../components/CalendarViewContent.vue").default
   'EventModal': typeof import("../../components/EventModal.vue").default
+  'ControlsCalendarViewHeader': typeof import("../../components/controls/CalendarViewHeader.vue").default
+  'ControlsCalendarViewNav': typeof import("../../components/controls/CalendarViewNav.vue").default
   'ControlsTopControls': typeof import("../../components/controls/TopControls.vue").default
   'DailyEventCard': typeof import("../../components/daily/EventCard.vue").default
   'DailyEventList': typeof import("../../components/daily/EventList.vue").default
@@ -26,8 +29,14 @@ interface _GlobalComponents {
   'LayoutAppShell': typeof import("../../components/layout/AppShell.vue").default
   'MonthlyDayCell': typeof import("../../components/monthly/DayCell.vue").default
   'MonthlyMonthCalendar': typeof import("../../components/monthly/MonthCalendar.vue").default
+  'MonthlyMonthCarousel': typeof import("../../components/monthly/MonthCarousel.vue").default
   'MonthlyWeekdayRow': typeof import("../../components/monthly/WeekdayRow.vue").default
+  'UiCalendarNavArrow': typeof import("../../components/ui/CalendarNavArrow.vue").default
+  'UiCategoriesModal': typeof import("../../components/ui/CategoriesModal.vue").default
+  'UiCategoriesPopup': typeof import("../../components/ui/CategoriesPopup.vue").default
   'UiCategoryPill': typeof import("../../components/ui/CategoryPill.vue").default
+  'UiFilterModal': typeof import("../../components/ui/FilterModal.vue").default
+  'UiFilterPopup': typeof import("../../components/ui/FilterPopup.vue").default
   'UiIcon': typeof import("../../components/ui/Icon.vue").default
   'UiLoadingSpinner': typeof import("../../components/ui/LoadingSpinner.vue").default
   'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
@@ -58,7 +67,10 @@ interface _GlobalComponents {
   'Html': typeof import("../../node_modules/nuxt/dist/head/runtime/components").Html
   'Body': typeof import("../../node_modules/nuxt/dist/head/runtime/components").Body
   'NuxtIsland': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island").default
+  'LazyCalendarViewContent': LazyComponent<typeof import("../../components/CalendarViewContent.vue").default>
   'LazyEventModal': LazyComponent<typeof import("../../components/EventModal.vue").default>
+  'LazyControlsCalendarViewHeader': LazyComponent<typeof import("../../components/controls/CalendarViewHeader.vue").default>
+  'LazyControlsCalendarViewNav': LazyComponent<typeof import("../../components/controls/CalendarViewNav.vue").default>
   'LazyControlsTopControls': LazyComponent<typeof import("../../components/controls/TopControls.vue").default>
   'LazyDailyEventCard': LazyComponent<typeof import("../../components/daily/EventCard.vue").default>
   'LazyDailyEventList': LazyComponent<typeof import("../../components/daily/EventList.vue").default>
@@ -70,8 +82,14 @@ interface _GlobalComponents {
   'LazyLayoutAppShell': LazyComponent<typeof import("../../components/layout/AppShell.vue").default>
   'LazyMonthlyDayCell': LazyComponent<typeof import("../../components/monthly/DayCell.vue").default>
   'LazyMonthlyMonthCalendar': LazyComponent<typeof import("../../components/monthly/MonthCalendar.vue").default>
+  'LazyMonthlyMonthCarousel': LazyComponent<typeof import("../../components/monthly/MonthCarousel.vue").default>
   'LazyMonthlyWeekdayRow': LazyComponent<typeof import("../../components/monthly/WeekdayRow.vue").default>
+  'LazyUiCalendarNavArrow': LazyComponent<typeof import("../../components/ui/CalendarNavArrow.vue").default>
+  'LazyUiCategoriesModal': LazyComponent<typeof import("../../components/ui/CategoriesModal.vue").default>
+  'LazyUiCategoriesPopup': LazyComponent<typeof import("../../components/ui/CategoriesPopup.vue").default>
   'LazyUiCategoryPill': LazyComponent<typeof import("../../components/ui/CategoryPill.vue").default>
+  'LazyUiFilterModal': LazyComponent<typeof import("../../components/ui/FilterModal.vue").default>
+  'LazyUiFilterPopup': LazyComponent<typeof import("../../components/ui/FilterPopup.vue").default>
   'LazyUiIcon': LazyComponent<typeof import("../../components/ui/Icon.vue").default>
   'LazyUiLoadingSpinner': LazyComponent<typeof import("../../components/ui/LoadingSpinner.vue").default>
   'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>

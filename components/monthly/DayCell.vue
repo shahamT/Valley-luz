@@ -91,7 +91,7 @@ const getMoreChipText = () => {
 
 <style lang="scss">
 .DayCell {
-  background-color: var(--card-bg);
+  background-color: var(--light-bg);
   border-radius: var(--card-radius);
   box-shadow: var(--shadow-card);
   padding: var(--spacing-sm);
@@ -123,7 +123,7 @@ const getMoreChipText = () => {
     &:hover {
       transform: none;
       box-shadow: var(--shadow-card);
-      background-color: var(--card-bg);
+      background-color: var(--light-bg);
     }
   }
 
@@ -144,7 +144,7 @@ const getMoreChipText = () => {
     &:hover {
       transform: none;
       box-shadow: var(--shadow-card);
-      background-color: var(--card-bg);
+      background-color: var(--light-bg);
     }
   }
 

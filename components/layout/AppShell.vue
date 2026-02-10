@@ -52,6 +52,7 @@ defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
     width: 100%;
     margin: 0 auto;
     padding: var(--spacing-xl);
+    padding-inline: var(--spacing-3xl);
     padding-top: calc(var(--header-height) + var(--spacing-xl));
     display: flex;
     flex-direction: column;

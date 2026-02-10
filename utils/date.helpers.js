@@ -70,6 +70,17 @@ export function getNextMonth(year, month) {
 }
 
 /**
+ * Returns true if month a is strictly before month b (a < b)
+ * @param {{ year: number, month: number }} a - First month (month 1-12)
+ * @param {{ year: number, month: number }} b - Second month (month 1-12)
+ * @returns {boolean}
+ */
+export function isMonthBefore(a, b) {
+  if (!a || !b) return false
+  return a.year < b.year || (a.year === b.year && a.month < b.month)
+}
+
+/**
  * Validates if a month is valid (1-12)
  * @param {number} month - Month to validate
  * @returns {boolean} True if month is valid
