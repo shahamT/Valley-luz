@@ -70,5 +70,10 @@ const pillStyle = computed(() => {
     font-weight: 500;
     white-space: nowrap;
   }
+
+  @media (max-width: 768px) {
+    font-size: var(--font-size-md);
+    padding: 0.5rem var(--pill-padding-x);
+  }
 }
 </style>

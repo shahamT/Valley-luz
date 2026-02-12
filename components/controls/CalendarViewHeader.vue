@@ -5,18 +5,36 @@
       :month-year="monthYear"
       :current-date="currentDate"
       :selected-categories-count="selectedCategories?.length ?? 0"
+      :hours-filter-label="hoursFilterLabel"
+      :filter-button-label="filterButtonLabel"
+      :is-filter-active="isFilterActive"
+      :prev-disabled="prevDisabled"
+      :prev-aria-label="prevAriaLabel"
+      :next-aria-label="nextAriaLabel"
       @select-month-year="$emit('select-month-year', $event)"
       @year-change="$emit('year-change', $event)"
       @view-change="$emit('view-change', $event)"
-      @click-hours="$emit('click-hours')"
-      @toggle-category="$emit('toggle-category', $event)"
-      @reset-filter="$emit('reset-filter')"
+      @prev="$emit('prev')"
+      @next="$emit('next')"
     />
   </header>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
+import { UI_TEXT, MINUTES_PER_DAY } from '~/consts/calendar.const'
+import { formatMinutesToTime } from '~/utils/date.helpers'
+
+defineOptions({ name: 'CalendarViewHeader' })
+
+defineEmits([
+  'select-month-year',
+  'year-change',
+  'view-change',
+  'prev',
+  'next',
+])
 
 const props = defineProps({
   viewMode: {
@@ -35,19 +53,62 @@ const props = defineProps({
       month: new Date().getMonth() + 1,
     }),
   },
+  prevDisabled: {
+    type: Boolean,
+    default: false,
+  },
+  prevAriaLabel: {
+    type: String,
+    default: 'Previous',
+  },
+  nextAriaLabel: {
+    type: String,
+    default: 'Next',
+  },
 })
 
-defineEmits([
-  'select-month-year',
-  'year-change',
-  'view-change',
-  'toggle-category',
-  'reset-filter',
-  'click-hours',
-])
-
+// data
+const { categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
-const { selectedCategories } = storeToRefs(calendarStore)
+const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calendarStore)
+
+// computed
+const isTimeFilterActive = computed(() => {
+  return timeFilterStart.value !== 0 || timeFilterEnd.value !== MINUTES_PER_DAY
+})
+
+const isFilterActive = computed(() => {
+  return selectedCategories.value.length > 0 || isTimeFilterActive.value
+})
+
+const hoursFilterLabel = computed(() => {
+  const start = timeFilterStart.value
+  const end = timeFilterEnd.value
+  if (start === 0 && end === MINUTES_PER_DAY) {
+    return UI_TEXT.hoursFilterAll
+  }
+  return `${formatMinutesToTime(start)}–${formatMinutesToTime(end)}`
+})
+
+const filterButtonLabel = computed(() => {
+  if (!isFilterActive.value) {
+    return UI_TEXT.filterButtonLabel
+  }
+  const parts = []
+  const cats = categories.value ?? {}
+  const ids = selectedCategories.value
+  if (ids.length > 0) {
+    if (ids.length === 1 && cats[ids[0]]?.label) {
+      parts.push(cats[ids[0]].label)
+    } else {
+      parts.push(UI_TEXT.categoriesCountLabel(ids.length))
+    }
+  }
+  if (isTimeFilterActive.value) {
+    parts.push(hoursFilterLabel.value)
+  }
+  return parts.length ? parts.join(', ') : UI_TEXT.filterButtonLabel
+})
 </script>
 
 <style lang="scss">

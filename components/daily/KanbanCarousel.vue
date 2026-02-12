@@ -2,8 +2,8 @@
   <section class="KanbanCarousel">
     <swiper
       ref="swiperRef"
-      :slides-per-view="3"
-      :space-between="24"
+      :slides-per-view="slidesPerView"
+      :space-between="spaceBetween"
       :centered-slides="true"
       :speed="600"
       :allow-touch-move="true"
@@ -16,6 +16,7 @@
       @swiper="onSwiperReady"
       @slide-change="handleSlideChange"
       @slide-change-transition-end="handleSlideChangeTransitionEnd"
+      :breakpoints="swiperBreakpoints"
       class="KanbanCarousel-swiper"
     >
       <swiper-slide
@@ -36,6 +37,20 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
+
+const slidesPerView = 3
+const spaceBetween = 24
+
+const swiperBreakpoints = {
+  0: {
+    slidesPerView: 1.15,
+    spaceBetween: 8,
+  },
+  769: {
+    slidesPerView: 3,
+    spaceBetween: 24,
+  },
+}
 
 const props = defineProps({
   visibleDays: {
@@ -187,10 +202,8 @@ watch(
 }
 
 // Swiper RTL and styling overrides
-// Wrapper width = 11 slides × (container - 2 gaps) / 3 so each slide = (container - 2*spacing-lg) / 3
 .KanbanCarousel-swiper {
   .swiper-wrapper {
-    width: calc(11 * (100% - 2 * var(--spacing-lg)) / 3) !important;
     align-items: flex-start; // Align to top, not stretch
     padding-bottom: var(--spacing-lg); // Prevent shadow cropping
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -198,10 +211,26 @@ watch(
 
   .swiper-slide {
     height: auto; // Let height be based on content
-    // Each slide = 1/11 of wrapper = (container - 2*spacing-lg) / 3
-    width: calc(100% / 11) !important;
     box-sizing: border-box;
     flex-shrink: 0;
+  }
+
+  // Desktop: 3 slides per view
+  @media (min-width: 769px) {
+    .swiper-wrapper {
+      width: calc(11 * (100% - 2 * var(--spacing-lg)) / 3) !important;
+    }
+
+    .swiper-slide {
+      width: calc(100% / 11) !important;
+    }
+  }
+
+  // Mobile: slides managed by slidesPerView prop (1.15)
+  @media (max-width: 768px) {
+    .swiper-slide {
+      width: auto !important;
+    }
   }
 
   // Hide default navigation/pagination

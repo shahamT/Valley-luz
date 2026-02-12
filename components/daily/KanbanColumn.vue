@@ -10,7 +10,7 @@
         :event="event"
       />
       <div v-if="events.length === 0" class="KanbanColumn-empty">
-        אין אירועים
+        {{ UI_TEXT.noEvents }}
       </div>
     </div>
   </div>
@@ -18,6 +18,7 @@
 
 <script setup>
 import { formatKanbanDateHeader } from '~/utils/date.helpers'
+import { UI_TEXT } from '~/consts/calendar.const'
 
 const props = defineProps({
   date: {

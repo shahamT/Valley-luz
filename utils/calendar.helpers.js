@@ -1,5 +1,5 @@
-import { formatDateToYYYYMMDD } from './events.helpers'
 import { DAYS_PER_WEEK } from '~/consts/calendar.const'
+import { formatDateToYYYYMMDD } from './date.helpers'
 
 /**
  * Generates calendar grid days for a given month/year

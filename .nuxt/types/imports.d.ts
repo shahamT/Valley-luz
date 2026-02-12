@@ -49,12 +49,12 @@ declare global {
   const effectScope: typeof import('../../node_modules/vue').effectScope
   const eventsService: typeof import('../../utils/events.service').eventsService
   const extendRef: typeof import('../../node_modules/@vueuse/core').extendRef
-  const formatDateForDisplay: typeof import('../../utils/events.helpers').formatDateForDisplay
-  const formatDateToYYYYMMDD: typeof import('../../utils/events.helpers').formatDateToYYYYMMDD
+  const formatDateToYYYYMMDD: typeof import('../../utils/date.helpers').formatDateToYYYYMMDD
   const formatEventLocation: typeof import('../../utils/events.helpers').formatEventLocation
   const formatEventPrice: typeof import('../../utils/events.helpers').formatEventPrice
   const formatEventTime: typeof import('../../utils/events.helpers').formatEventTime
   const formatKanbanDateHeader: typeof import('../../utils/date.helpers').formatKanbanDateHeader
+  const formatMinutesToTime: typeof import('../../utils/date.helpers').formatMinutesToTime
   const formatMonthYear: typeof import('../../utils/date.helpers').formatMonthYear
   const generateCalendarDays: typeof import('../../utils/calendar.helpers').generateCalendarDays
   const getAdditionalEventsCount: typeof import('../../utils/calendar-display.helpers').getAdditionalEventsCount
@@ -70,7 +70,6 @@ declare global {
   const getPrevDay: typeof import('../../utils/date.helpers').getPrevDay
   const getPrevMonth: typeof import('../../utils/date.helpers').getPrevMonth
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
-  const getThreeDaysForView: typeof import('../../utils/date.helpers').getThreeDaysForView
   const getTodayDateString: typeof import('../../utils/date.helpers').getTodayDateString
   const h: typeof import('../../node_modules/vue').h
   const hasInjectionContext: typeof import('../../node_modules/vue').hasInjectionContext
@@ -91,6 +90,7 @@ declare global {
   const isToday: typeof import('../../utils/date.helpers').isToday
   const isValidDateString: typeof import('../../utils/validation.helpers').isValidDateString
   const isValidMonth: typeof import('../../utils/date.helpers').isValidMonth
+  const isValidMonthYear: typeof import('../../utils/validation.helpers').isValidMonthYear
   const isValidRouteDate: typeof import('../../utils/validation.helpers').isValidRouteDate
   const isValidYear: typeof import('../../utils/date.helpers').isValidYear
   const isVue2: typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi').isVue2
@@ -125,7 +125,9 @@ declare global {
   const onUnmounted: typeof import('../../node_modules/vue').onUnmounted
   const onUpdated: typeof import('../../node_modules/vue').onUpdated
   const onWatcherCleanup: typeof import('../../node_modules/vue').onWatcherCleanup
-  const parseDateString: typeof import('../../utils/events.helpers').parseDateString
+  const parseCategories: typeof import('../../utils/validation.helpers').parseCategories
+  const parseDateString: typeof import('../../utils/date.helpers').parseDateString
+  const parseTimeFilter: typeof import('../../utils/validation.helpers').parseTimeFilter
   const pausableWatch: typeof import('../../node_modules/@vueuse/core').pausableWatch
   const prefetchComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').prefetchComponents
   const preloadComponents: typeof import('../../node_modules/nuxt/dist/app/composables/preload').preloadComponents
@@ -154,6 +156,7 @@ declare global {
   const reloadNuxtApp: typeof import('../../node_modules/nuxt/dist/app/composables/chunk').reloadNuxtApp
   const requestIdleCallback: typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback').requestIdleCallback
   const resolveComponent: typeof import('../../node_modules/vue').resolveComponent
+  const serializeCategories: typeof import('../../utils/validation.helpers').serializeCategories
   const setInterval: typeof import('../../node_modules/nuxt/dist/app/compat/interval').setInterval
   const setPageLayout: typeof import('../../node_modules/nuxt/dist/app/composables/router').setPageLayout
   const setResponseStatus: typeof import('../../node_modules/nuxt/dist/app/composables/ssr').setResponseStatus
@@ -210,9 +213,10 @@ declare global {
   const useBroadcastChannel: typeof import('../../node_modules/@vueuse/core').useBroadcastChannel
   const useBrowserLocation: typeof import('../../node_modules/@vueuse/core').useBrowserLocation
   const useCached: typeof import('../../node_modules/@vueuse/core').useCached
+  const useCalendarNavigation: typeof import('../../composables/useCalendarNavigation').useCalendarNavigation
   const useCalendarStore: typeof import('../../stores/calendar.store').useCalendarStore
+  const useCalendarViewData: typeof import('../../composables/useCalendarViewData').useCalendarViewData
   const useCategories: typeof import('../../composables/useCategories').useCategories
-  const useCategoriesStore: typeof import('../../stores/categories.store').useCategoriesStore
   const useClipboard: typeof import('../../node_modules/@vueuse/core').useClipboard
   const useClipboardItems: typeof import('../../node_modules/@vueuse/core').useClipboardItems
   const useCloned: typeof import('../../node_modules/@vueuse/core').useCloned
@@ -247,10 +251,10 @@ declare global {
   const useElementVisibility: typeof import('../../node_modules/@vueuse/core').useElementVisibility
   const useError: typeof import('../../node_modules/nuxt/dist/app/composables/error').useError
   const useEventBus: typeof import('../../node_modules/@vueuse/core').useEventBus
+  const useEventFilters: typeof import('../../composables/useEventFilters').useEventFilters
   const useEventListener: typeof import('../../node_modules/@vueuse/core').useEventListener
   const useEventSource: typeof import('../../node_modules/@vueuse/core').useEventSource
   const useEvents: typeof import('../../composables/useEvents').useEvents
-  const useEventsStore: typeof import('../../stores/events.store').useEventsStore
   const useEyeDropper: typeof import('../../node_modules/@vueuse/core').useEyeDropper
   const useFavicon: typeof import('../../node_modules/@vueuse/core').useFavicon
   const useFetch: typeof import('../../node_modules/nuxt/dist/app/composables/fetch').useFetch
@@ -406,6 +410,7 @@ declare global {
   const useTransitionState: typeof import('../../node_modules/vue').useTransitionState
   const useUiStore: typeof import('../../stores/ui.store').useUiStore
   const useUrlSearchParams: typeof import('../../node_modules/@vueuse/core').useUrlSearchParams
+  const useUrlState: typeof import('../../composables/useUrlState').useUrlState
   const useUserMedia: typeof import('../../node_modules/@vueuse/core').useUserMedia
   const useVModel: typeof import('../../node_modules/@vueuse/core').useVModel
   const useVModels: typeof import('../../node_modules/@vueuse/core').useVModels
@@ -500,12 +505,12 @@ declare module 'vue' {
     readonly effectScope: UnwrapRef<typeof import('../../node_modules/vue')['effectScope']>
     readonly eventsService: UnwrapRef<typeof import('../../utils/events.service')['eventsService']>
     readonly extendRef: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['extendRef']>
-    readonly formatDateForDisplay: UnwrapRef<typeof import('../../utils/events.helpers')['formatDateForDisplay']>
-    readonly formatDateToYYYYMMDD: UnwrapRef<typeof import('../../utils/events.helpers')['formatDateToYYYYMMDD']>
+    readonly formatDateToYYYYMMDD: UnwrapRef<typeof import('../../utils/date.helpers')['formatDateToYYYYMMDD']>
     readonly formatEventLocation: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocation']>
     readonly formatEventPrice: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventPrice']>
     readonly formatEventTime: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventTime']>
     readonly formatKanbanDateHeader: UnwrapRef<typeof import('../../utils/date.helpers')['formatKanbanDateHeader']>
+    readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/date.helpers')['formatMinutesToTime']>
     readonly formatMonthYear: UnwrapRef<typeof import('../../utils/date.helpers')['formatMonthYear']>
     readonly generateCalendarDays: UnwrapRef<typeof import('../../utils/calendar.helpers')['generateCalendarDays']>
     readonly getAdditionalEventsCount: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getAdditionalEventsCount']>
@@ -521,7 +526,6 @@ declare module 'vue' {
     readonly getPrevDay: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevDay']>
     readonly getPrevMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevMonth']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
-    readonly getThreeDaysForView: UnwrapRef<typeof import('../../utils/date.helpers')['getThreeDaysForView']>
     readonly getTodayDateString: UnwrapRef<typeof import('../../utils/date.helpers')['getTodayDateString']>
     readonly h: UnwrapRef<typeof import('../../node_modules/vue')['h']>
     readonly hasInjectionContext: UnwrapRef<typeof import('../../node_modules/vue')['hasInjectionContext']>
@@ -542,6 +546,7 @@ declare module 'vue' {
     readonly isToday: UnwrapRef<typeof import('../../utils/date.helpers')['isToday']>
     readonly isValidDateString: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidDateString']>
     readonly isValidMonth: UnwrapRef<typeof import('../../utils/date.helpers')['isValidMonth']>
+    readonly isValidMonthYear: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidMonthYear']>
     readonly isValidRouteDate: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidRouteDate']>
     readonly isValidYear: UnwrapRef<typeof import('../../utils/date.helpers')['isValidYear']>
     readonly isVue2: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/vue-demi')['isVue2']>
@@ -576,7 +581,9 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('../../node_modules/vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('../../node_modules/vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('../../node_modules/vue')['onWatcherCleanup']>
-    readonly parseDateString: UnwrapRef<typeof import('../../utils/events.helpers')['parseDateString']>
+    readonly parseCategories: UnwrapRef<typeof import('../../utils/validation.helpers')['parseCategories']>
+    readonly parseDateString: UnwrapRef<typeof import('../../utils/date.helpers')['parseDateString']>
+    readonly parseTimeFilter: UnwrapRef<typeof import('../../utils/validation.helpers')['parseTimeFilter']>
     readonly pausableWatch: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['pausableWatch']>
     readonly prefetchComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['prefetchComponents']>
     readonly preloadComponents: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/preload')['preloadComponents']>
@@ -605,6 +612,7 @@ declare module 'vue' {
     readonly reloadNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/chunk')['reloadNuxtApp']>
     readonly requestIdleCallback: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/idle-callback')['requestIdleCallback']>
     readonly resolveComponent: UnwrapRef<typeof import('../../node_modules/vue')['resolveComponent']>
+    readonly serializeCategories: UnwrapRef<typeof import('../../utils/validation.helpers')['serializeCategories']>
     readonly setInterval: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/compat/interval')['setInterval']>
     readonly setPageLayout: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['setPageLayout']>
     readonly setResponseStatus: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/ssr')['setResponseStatus']>
@@ -661,9 +669,10 @@ declare module 'vue' {
     readonly useBroadcastChannel: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useBroadcastChannel']>
     readonly useBrowserLocation: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useBrowserLocation']>
     readonly useCached: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useCached']>
+    readonly useCalendarNavigation: UnwrapRef<typeof import('../../composables/useCalendarNavigation')['useCalendarNavigation']>
     readonly useCalendarStore: UnwrapRef<typeof import('../../stores/calendar.store')['useCalendarStore']>
+    readonly useCalendarViewData: UnwrapRef<typeof import('../../composables/useCalendarViewData')['useCalendarViewData']>
     readonly useCategories: UnwrapRef<typeof import('../../composables/useCategories')['useCategories']>
-    readonly useCategoriesStore: UnwrapRef<typeof import('../../stores/categories.store')['useCategoriesStore']>
     readonly useClipboard: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useClipboard']>
     readonly useClipboardItems: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useClipboardItems']>
     readonly useCloned: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useCloned']>
@@ -698,10 +707,10 @@ declare module 'vue' {
     readonly useElementVisibility: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useElementVisibility']>
     readonly useError: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/error')['useError']>
     readonly useEventBus: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEventBus']>
+    readonly useEventFilters: UnwrapRef<typeof import('../../composables/useEventFilters')['useEventFilters']>
     readonly useEventListener: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEventListener']>
     readonly useEventSource: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEventSource']>
     readonly useEvents: UnwrapRef<typeof import('../../composables/useEvents')['useEvents']>
-    readonly useEventsStore: UnwrapRef<typeof import('../../stores/events.store')['useEventsStore']>
     readonly useEyeDropper: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEyeDropper']>
     readonly useFavicon: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useFavicon']>
     readonly useFetch: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/fetch')['useFetch']>
@@ -857,6 +866,7 @@ declare module 'vue' {
     readonly useTransitionState: UnwrapRef<typeof import('../../node_modules/vue')['useTransitionState']>
     readonly useUiStore: UnwrapRef<typeof import('../../stores/ui.store')['useUiStore']>
     readonly useUrlSearchParams: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useUrlSearchParams']>
+    readonly useUrlState: UnwrapRef<typeof import('../../composables/useUrlState')['useUrlState']>
     readonly useUserMedia: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useUserMedia']>
     readonly useVModel: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useVModel']>
     readonly useVModels: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useVModels']>

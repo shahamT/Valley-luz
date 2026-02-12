@@ -16,6 +16,10 @@
 </template>
 
 <script setup>
+/**
+ * Month-nav emits (prev-month, next-month, select-month-year, year-change) are for future use
+ * when show-month-year=true. Current routes pass show-month-year=false and use CalendarViewHeader.
+ */
 const props = defineProps({
   showMonthYear: {
     type: Boolean,
@@ -53,9 +57,13 @@ defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
     margin: 0 auto;
     padding: var(--spacing-xl);
     padding-inline: var(--spacing-3xl);
-    padding-top: calc(var(--header-height) + var(--spacing-xl));
     display: flex;
     flex-direction: column;
+
+    @media (max-width: 768px) {
+      padding-inline: 1rem;
+      padding-block: var(--spacing-md);
+    }
   }
 }
 </style>

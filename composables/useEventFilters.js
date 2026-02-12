@@ -1,0 +1,85 @@
+import { storeToRefs } from 'pinia'
+import { eventsService } from '~/utils/events.service'
+import { transformEventForCard } from '~/utils/events.helpers'
+
+/**
+ * Composable for filtering events by categories and time range
+ * Centralizes all event filtering logic used across monthly and daily views
+ *
+ * @param {import('vue').Ref<Array>} events - Reactive ref containing all events data (Event shape per types/events.d.ts)
+ * @returns {{ getFilteredEventsForMonth: Function, getFilteredEventsForDate: Function, getFilteredEventsByDate: Function }}
+ */
+export const useEventFilters = (events) => {
+  const calendarStore = useCalendarStore()
+  const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calendarStore)
+
+  /**
+   * Get events filtered by categories and time range for a specific month
+   * @param {number} year - The year
+   * @param {number} month - The month (1-12)
+   * @returns {Array} Filtered events
+   */
+  const getFilteredEventsForMonth = (year, month) => {
+    let allEvents = events.value
+    
+    if (selectedCategories.value.length > 0) {
+      allEvents = eventsService.filterEventsByCategories(allEvents, selectedCategories.value)
+    }
+    
+    return eventsService.filterEventsByTimeRangeForMonth(
+      allEvents,
+      year,
+      month,
+      timeFilterStart.value,
+      timeFilterEnd.value
+    )
+  }
+
+  /**
+   * Get filtered event occurrences for a specific date
+   * @param {string} dateString - Date in YYYY-MM-DD format
+   * @returns {Array} Array of {event, occurrence} pairs filtered and transformed
+   */
+  const getFilteredEventsForDate = (dateString) => {
+    const categories = selectedCategories.value
+    const startMin = timeFilterStart.value
+    const endMin = timeFilterEnd.value
+
+    let pairs = eventsService.getEventsForDate(events.value, dateString)
+
+    if (categories.length > 0) {
+      pairs = pairs.filter(({ event }) => eventsService.eventMatchesCategories(event, categories))
+    }
+
+    return eventsService.filterEventOccurrencesByTimeRange(pairs, startMin, endMin)
+  }
+
+  /**
+   * Get filtered events by date for multiple dates (used in daily view carousel)
+   * Returns transformed event cards with timeText, title, desc, price for display
+   * @param {Array<string>} dates - Array of date strings in YYYY-MM-DD format
+   * @returns {Object} Map of date string to array of transformed event card objects
+   */
+  const getFilteredEventsByDate = (dates) => {
+    const result = {}
+
+    dates.forEach((date) => {
+      const pairs = getFilteredEventsForDate(date)
+
+      result[date] = pairs.map(({ event, occurrence }, index) => ({
+        ...transformEventForCard(event, occurrence),
+        id: `${event.id}-${index}`,
+        eventId: event.id,
+        mainCategory: event.mainCategory,
+      }))
+    })
+
+    return result
+  }
+
+  return {
+    getFilteredEventsForMonth,
+    getFilteredEventsForDate,
+    getFilteredEventsByDate,
+  }
+}

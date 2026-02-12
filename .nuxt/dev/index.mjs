@@ -3031,6 +3031,18 @@ const EVENT_CATEGORIES = {
   politics: {
     label: "\u05E4\u05D5\u05DC\u05D9\u05D8\u05D9\u05E7\u05D4",
     color: "#4338CA"
+  },
+  open_day: {
+    label: "\u05D9\u05D5\u05DD \u05E4\u05EA\u05D5\u05D7",
+    color: "#84CC16"
+  },
+  studies: {
+    label: "\u05DC\u05D9\u05DE\u05D5\u05D3\u05D9\u05DD",
+    color: "#2563EB"
+  },
+  technology: {
+    label: "\u05D8\u05DB\u05E0\u05D5\u05DC\u05D5\u05D2\u05D9\u05D4",
+    color: "#0EA5E9"
   }
 };
 
@@ -3138,7 +3150,7 @@ const index_get = defineEventHandler(async (event) => {
         console.error("[EventsAPI] Error transforming document:", error instanceof Error ? error.message : String(error));
         return null;
       }
-    }).filter((event2) => event2 !== null);
+    }).filter((transformedEvent) => transformedEvent !== null);
     return transformedEvents;
   } catch (error) {
     console.error("[EventsAPI] Error fetching events:", error instanceof Error ? error.message : String(error));

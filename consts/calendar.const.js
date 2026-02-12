@@ -7,6 +7,26 @@ export const MAX_REGULAR_CHIPS = 2
 export const WEEKEND_DAYS = [5, 6] // Friday (5) and Saturday (6)
 export const MORE_EVENTS_TEXT = (count) => `עוד ${count} אירועים...`
 
+// Time filter: minutes in a day (24 * 60)
+export const MINUTES_PER_DAY = 24 * 60
+
+// Daily carousel configuration
+export const DAILY_CAROUSEL_DAYS_RANGE = 4 // Number of days on each side of the center date (total: 2*range + 1 = 9 days)
+
+// Time filter slider step (in minutes)
+export const TIME_SLIDER_STEP = 15
+
+// Predefined time filter presets (id, label, startMinutes, endMinutes, icon for UiIcon)
+// "all" must be first - represents no time filter, selected when 0 to MINUTES_PER_DAY
+export const TIME_FILTER_PRESETS = [
+  { id: 'all', label: 'כל שעה', startMinutes: 0, endMinutes: MINUTES_PER_DAY, icon: 'schedule' },
+  { id: 'morning', label: 'בוקר', startMinutes: 6 * 60, endMinutes: 12 * 60, icon: 'partly_cloudy_day' },
+  { id: 'noon', label: 'צהריים', startMinutes: 11 * 60, endMinutes: 14 * 60, icon: 'wb_sunny' },
+  { id: 'afternoon', label: 'אחר הצהריים', startMinutes: 12 * 60, endMinutes: 18 * 60, icon: 'wb_twilight' },
+  { id: 'evening', label: 'ערב', startMinutes: 17 * 60, endMinutes: 21 * 60, icon: 'nights_stay' },
+  { id: 'night', label: 'לילה', startMinutes: 20 * 60, endMinutes: 24 * 60, icon: 'dark_mode' },
+]
+
 // UI text constants
 export const UI_TEXT = {
   loading: 'טוען אירועים...',
@@ -22,5 +42,6 @@ export const UI_TEXT = {
   categoriesFilterTitle: 'קטגוריות',
   hoursFilter: 'שעות',
   hoursFilterAll: 'כל שעה',
-  resetFilter: 'איפוס פילטר',
+  resetFilter: 'ניקוי',
+  categoriesCountLabel: (count) => `${count} קטגוריות`,
 }

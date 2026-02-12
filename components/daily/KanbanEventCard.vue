@@ -14,6 +14,8 @@
 <script setup>
 import { getCategoryColor } from '~/utils/calendar-display.helpers'
 
+defineOptions({ name: 'KanbanEventCard' })
+
 const props = defineProps({
   event: {
     type: Object,
@@ -21,10 +23,12 @@ const props = defineProps({
   },
 })
 
-const categoriesStore = useCategoriesStore()
+// data
+const { categories } = useCalendarViewData()
 
+// computed
 const categoryColor = computed(() => {
-  return getCategoryColor(props.event.mainCategory, categoriesStore.categories)
+  return getCategoryColor(props.event.mainCategory, categories.value)
 })
 </script>
 

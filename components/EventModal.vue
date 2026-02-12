@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Event detail flow not yet wired. Wire DayCell/KanbanEventCard clicks to openEventModal and display full event details. -->
   <div v-if="isEventModalShowing" class="EventModal" @click.self="closeModal">
     <div class="EventModal-content">
       <div class="EventModal-header">

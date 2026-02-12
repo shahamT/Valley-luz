@@ -1,4 +1,5 @@
-import { formatDateToYYYYMMDD } from './events.helpers'
+import { MINUTES_PER_DAY } from '~/consts/calendar.const'
+import { formatDateToYYYYMMDD } from './date.helpers'
 
 /**
  * Events Service
@@ -120,6 +121,19 @@ export const eventsService = {
   },
 
   /**
+   * Checks if an event matches any of the given category IDs
+   * @param {Object} event - Event object with categories array
+   * @param {Array} categoryIds - Array of category IDs to match
+   * @returns {boolean} True if event matches at least one category
+   */
+  eventMatchesCategories(event, categoryIds) {
+    if (!event.categories || !Array.isArray(event.categories)) {
+      return false
+    }
+    return event.categories.some((categoryId) => categoryIds.includes(categoryId))
+  },
+
+  /**
    * Filters events by category IDs (checks all categories in event)
    * @param {Array} events - Array of events
    * @param {Array} categoryIds - Array of category IDs to filter by
@@ -130,11 +144,81 @@ export const eventsService = {
       return events
     }
 
-    return events.filter((event) => {
-      if (!event.categories || !Array.isArray(event.categories)) {
-        return false
-      }
-      return event.categories.some((categoryId) => categoryIds.includes(categoryId))
+    return events.filter((event) => this.eventMatchesCategories(event, categoryIds))
+  },
+
+  /**
+   * Get occurrence time as minutes from midnight (local time). All-day or no time = 0–1440.
+   * @param {Object} occurrence - Occurrence with startTime, endTime, hasTime
+   * @returns {{ startMinutes: number, endMinutes: number }}
+   */
+  getOccurrenceMinutesOfDay(occurrence) {
+    if (!occurrence.hasTime || !occurrence.startTime) {
+      return { startMinutes: 0, endMinutes: MINUTES_PER_DAY }
+    }
+    const startDate = new Date(occurrence.startTime)
+    const startMinutes = startDate.getHours() * 60 + startDate.getMinutes()
+    if (!occurrence.endTime) {
+      return { startMinutes, endMinutes: startMinutes }
+    }
+    const endDate = new Date(occurrence.endTime)
+    const endMinutes = endDate.getHours() * 60 + endDate.getMinutes()
+    return { startMinutes, endMinutes }
+  },
+
+  /**
+   * Check if an occurrence's time overlaps a range [rangeStart, rangeEnd) (minutes from midnight).
+   * Overlap when occurrenceStart < rangeEnd && occurrenceEnd > rangeStart.
+   * @param {Object} occurrence
+   * @param {number} rangeStartMinutes
+   * @param {number} rangeEndMinutes
+   * @returns {boolean}
+   */
+  occurrenceOverlapsTimeRange(occurrence, rangeStartMinutes, rangeEndMinutes) {
+    const { startMinutes, endMinutes } = this.getOccurrenceMinutesOfDay(occurrence)
+    return startMinutes < rangeEndMinutes && endMinutes > rangeStartMinutes
+  },
+
+  /**
+   * Filter events to those that have at least one occurrence in the given month overlapping the time range.
+   * No filter when startMinutes === 0 && endMinutes === 1440 (returns events unchanged).
+   * @param {Array} events - Array of events
+   * @param {number} year
+   * @param {number} month - 1-indexed
+   * @param {number} startMinutes
+   * @param {number} endMinutes
+   * @returns {Array}
+   */
+  filterEventsByTimeRangeForMonth(events, year, month, startMinutes, endMinutes) {
+    if (startMinutes === 0 && endMinutes === MINUTES_PER_DAY) {
+      return events
+    }
+    const activeEvents = this.getActiveEvents(events)
+    return activeEvents.filter((event) => {
+      if (!event.occurrences) return false
+      return event.occurrences.some((occurrence) => {
+        if (!occurrence.startTime) return false
+        const d = new Date(occurrence.startTime)
+        if (d.getFullYear() !== year || d.getMonth() + 1 !== month) return false
+        return this.occurrenceOverlapsTimeRange(occurrence, startMinutes, endMinutes)
+      })
     })
+  },
+
+  /**
+   * Filter { event, occurrence } pairs to those whose occurrence overlaps the time range.
+   * No filter when startMinutes === 0 && endMinutes === 1440 (returns pairs unchanged).
+   * @param {Array} pairs - Array of { event, occurrence }
+   * @param {number} startMinutes
+   * @param {number} endMinutes
+   * @returns {Array}
+   */
+  filterEventOccurrencesByTimeRange(pairs, startMinutes, endMinutes) {
+    if (startMinutes === 0 && endMinutes === MINUTES_PER_DAY) {
+      return pairs
+    }
+    return pairs.filter(({ occurrence }) =>
+      this.occurrenceOverlapsTimeRange(occurrence, startMinutes, endMinutes)
+    )
   },
 }

@@ -54,13 +54,13 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  slideToMonthRequest: {
-    type: Object,
-    default: null,
-  },
   todayMonth: {
     type: Object,
     required: true,
+  },
+  slideToMonthRequest: {
+    type: Object,
+    default: null,
   },
 })
 
@@ -69,6 +69,7 @@ const emit = defineEmits(['month-change'])
 const swiperRef = ref(null)
 const swiperInstance = ref(null)
 const activeIndexRef = ref(1)
+const isProgrammaticSlideRef = ref(false)
 
 const firstValidIndex = computed(() => {
   return props.visibleMonths.findIndex((m) => !isMonthBefore(m, props.todayMonth))
@@ -98,7 +99,13 @@ const handleSlideChange = (swiper) => {
   const activeIndex = swiper.activeIndex
   const activeMonth = props.visibleMonths[activeIndex]
 
-  if (activeMonth && isMonthBefore(activeMonth, props.todayMonth) && firstValidIndex.value >= 0) {
+  // Skip snap-back when slide was triggered by store update; only snap on user swipe
+  if (
+    !isProgrammaticSlideRef.value &&
+    activeMonth &&
+    isMonthBefore(activeMonth, props.todayMonth) &&
+    firstValidIndex.value >= 0
+  ) {
     swiper.slideTo(firstValidIndex.value)
     return
   }
@@ -111,11 +118,16 @@ const handleSlideChange = (swiper) => {
 const handleSlideChangeTransitionEnd = (swiper) => {
   const activeIndex = swiper.activeIndex
   const activeMonth = props.visibleMonths[activeIndex]
+  const wasProgrammatic = isProgrammaticSlideRef.value
 
+  isProgrammaticSlideRef.value = false
   activeIndexRef.value = activeIndex
-  if (activeMonth) {
+
+  // Only emit on user swipe; store already has correct value for programmatic slides
+  if (activeMonth && !wasProgrammatic) {
     emit('month-change', { year: activeMonth.year, month: activeMonth.month })
   }
+
   const allow = firstValidIndex.value >= 0 && activeIndex > firstValidIndex.value
   swiper.allowSlidePrev = allow
   swiper.params.allowSlidePrev = allow
@@ -128,6 +140,7 @@ watch(
     if (!swiper) return
     const newIndex = props.visibleMonths.findIndex((m) => isSameMonth(m, props.currentDate))
     if (newIndex >= 0 && newIndex !== swiper.activeIndex) {
+      isProgrammaticSlideRef.value = true
       swiper.slideTo(newIndex, 0)
     }
   }
@@ -135,13 +148,12 @@ watch(
 
 watch(
   () => props.slideToMonthRequest,
-  (requested) => {
-    if (!requested) return
-    const index = props.visibleMonths.findIndex((m) => isSameMonth(m, requested))
-    if (index < 0) return
+  (requestedMonth) => {
+    if (!requestedMonth) return
     const swiper = swiperInstance.value
     if (!swiper) return
-    if (index !== swiper.activeIndex) {
+    const index = props.visibleMonths.findIndex((m) => isSameMonth(m, requestedMonth))
+    if (index >= 0 && index !== swiper.activeIndex) {
       swiper.slideTo(index)
     }
   }

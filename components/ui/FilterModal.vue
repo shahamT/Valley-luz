@@ -15,76 +15,20 @@
             <UiIcon name="close" size="md" />
           </button>
         </div>
-        <div
-          class="FilterModal-tabs"
-          role="tablist"
-          aria-label="סינון"
-        >
-          <button
-            type="button"
-            role="tab"
-            :aria-selected="activeTab === 'categories'"
-            :class="{ 'FilterModal-tab--active': activeTab === 'categories' }"
-            class="FilterModal-tab"
-            @click="activeTab = 'categories'"
-          >
-            {{ categoriesTabLabel }}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            :aria-selected="activeTab === 'hours'"
-            :class="{ 'FilterModal-tab--active': activeTab === 'hours' }"
-            class="FilterModal-tab"
-            @click="activeTab = 'hours'"
-          >
-            {{ hoursTabLabel }}
-          </button>
-        </div>
-        <div class="FilterModal-panels">
-          <div
-            v-show="activeTab === 'categories'"
-            role="tabpanel"
-            class="FilterModal-panel FilterModal-panel--categories"
-          >
-            <button
-              class="FilterModal-resetButton"
-              :class="{ 'FilterModal-resetButton--disabled': !hasSelectedCategories }"
-              :disabled="!hasSelectedCategories"
-              @click="handleCategoriesReset"
-            >
-              {{ resetButtonText }}
-            </button>
-            <UiCategoryPill
-              v-for="(category, categoryId) in categoriesList"
-              :key="categoryId"
-              :category="category"
-              :category-id="categoryId"
-              :is-selected="selectedCategoriesList.includes(categoryId)"
-              @click="$emit('toggle-category', categoryId)"
-            />
-          </div>
-          <div
-            v-show="activeTab === 'hours'"
-            role="tabpanel"
-            class="FilterModal-panel FilterModal-panel--hours"
-          >
-            <p class="FilterModal-hoursPlaceholder">
-              {{ hoursFilterLabel }}
-            </p>
-          </div>
-        </div>
+        <UiFilterPanel
+          :selected-categories-count="selectedCategoriesCount"
+          :hours-filter-label="hoursFilterLabel"
+          :on-close="handleClose"
+        />
       </div>
     </div>
   </Teleport>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { storeToRefs } from 'pinia'
 import { UI_TEXT } from '~/consts/calendar.const'
 
-const props = defineProps({
+defineProps({
   selectedCategoriesCount: {
     type: Number,
     default: 0,
@@ -95,34 +39,11 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'toggle-category', 'reset-filter', 'click-hours'])
-
-const activeTab = ref('categories')
-
-const categoriesStore = useCategoriesStore()
-const calendarStore = useCalendarStore()
-const { selectedCategories } = storeToRefs(calendarStore)
+const emit = defineEmits(['close'])
 
 const title = UI_TEXT.filterButtonLabel
-const resetButtonText = UI_TEXT.resetFilter
-const categoriesTabLabel = computed(
-  () => `${UI_TEXT.categoriesFilter} (${props.selectedCategoriesCount})`
-)
-const hoursTabLabel = computed(() => `${UI_TEXT.hoursFilter} (${props.hoursFilterLabel})`)
-
-const selectedCategoriesList = computed(() => selectedCategories?.value ?? [])
-const categoriesList = computed(() => categoriesStore?.categories ?? {})
-
-const hasSelectedCategories = computed(() => {
-  return selectedCategoriesList.value.length > 0
-})
 
 const handleClose = () => {
-  emit('close')
-}
-
-const handleCategoriesReset = () => {
-  emit('reset-filter')
   emit('close')
 }
 </script>
@@ -144,24 +65,40 @@ const handleCategoriesReset = () => {
   &-content {
     position: relative;
     width: 100%;
-    min-width: 360px;
+    min-width: 420px;
     max-width: var(--modal-max-width);
     max-height: 100%;
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+    padding: 0;
     display: flex;
     flex-direction: column;
     background-color: var(--light-bg, #f2fbf8);
     margin: var(--spacing-lg);
+
+    @media (max-width: 768px) {
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 0;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
   }
 
   &-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--color-border);
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &-title {
@@ -192,8 +129,9 @@ const handleCategoriesReset = () => {
   &-tabs {
     display: flex;
     gap: 0;
-    margin-bottom: var(--spacing-md);
-    border-bottom: 1px solid var(--color-border);
+    background-color: var(--light-bg);
+    border-bottom: 2px solid var(--color-border);
+    overflow: hidden;
   }
 
   &-tab {
@@ -202,24 +140,28 @@ const handleCategoriesReset = () => {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-light);
-    background: none;
+    background-color: transparent;
     border: none;
     border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
     cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 
     &:hover {
       color: var(--color-text);
     }
 
     &--active {
-      color: var(--brand-dark-green);
+      background-color: var(--brand-dark-green);
+      color: var(--chip-text-white);
       border-bottom-color: var(--brand-dark-green);
     }
   }
 
   &-panels {
-    min-height: 2rem;
+    padding: var(--spacing-lg);
+    min-height: 320px;
+    overflow-y: auto;
   }
 
   &-panel {
@@ -236,10 +178,28 @@ const handleCategoriesReset = () => {
     }
   }
 
-  &-hoursPlaceholder {
-    margin: 0;
+  &-footer {
+    padding: var(--spacing-lg);
+    padding-top: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  &-clearAllButton {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-sm);
-    color: var(--color-text-light);
+    font-weight: 600;
+    color: var(--color-text);
+    background-color: transparent;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      border-color: var(--brand-dark-green);
+      color: var(--brand-dark-green);
+    }
   }
 
   &-resetButton {

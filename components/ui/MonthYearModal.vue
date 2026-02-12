@@ -6,7 +6,7 @@
     >
       <div class="MonthYearModal-content">
         <div class="MonthYearModal-header">
-          <h2 class="MonthYearModal-title">בחר חודש ושנה</h2>
+          <h2 class="MonthYearModal-title">בחרו חודש ושנה</h2>
           <button
             class="MonthYearModal-closeButton"
             @click="handleClose"
@@ -83,6 +83,11 @@ const handleYearChange = (data) => {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--color-border);
+
+    @media (max-width: 768px) {
+      margin-bottom: var(--spacing-sm);
+      padding-bottom: var(--spacing-sm);
+    }
   }
 
   &-title {

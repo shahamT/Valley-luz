@@ -12,15 +12,14 @@
 </template>
 
 <script setup>
-import { HEBREW_WEEKDAYS } from '~/consts/dates.const'
+import { HEBREW_WEEKDAYS, HEBREW_WEEKDAYS_SHORT } from '~/consts/dates.const'
 import { WEEKEND_DAYS } from '~/consts/calendar.const'
+import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
-const SHORT_WEEKDAYS = ["א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ש'"]
-
-const isMobile = useScreenWidth(768)
+const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 
 const weekdays = computed(() => {
-  return isMobile.value ? SHORT_WEEKDAYS : HEBREW_WEEKDAYS
+  return isMobile.value ? HEBREW_WEEKDAYS_SHORT : HEBREW_WEEKDAYS
 })
 
 const isWeekendDay = (index) => {

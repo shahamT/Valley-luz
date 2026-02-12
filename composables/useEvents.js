@@ -15,21 +15,21 @@ export const useEvents = () => {
       if (isLoading) {
         logger.info(LOG_PREFIX, 'Fetching events...')
       }
-    }, { immediate: true })
+    })
 
     // Log when data is loaded
     watch(data, (events) => {
       if (events && Array.isArray(events) && events.length > 0) {
         logger.info(LOG_PREFIX, `${events.length} events were fetched:`, events)
       }
-    }, { immediate: true })
+    })
 
     // Log errors
     watch(error, (err) => {
       if (err) {
         logger.error(LOG_PREFIX, `Error: ${err.message || 'Failed to fetch events'}`)
       }
-    }, { immediate: true })
+    })
   }
 
   return {

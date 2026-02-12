@@ -83,11 +83,16 @@ const isMonthDisabled = (month) => {
 
 const selectYear = (year) => {
   localYear.value = year
-  emit('update:year', year)
-  emit('year-change', year)
+  
+  // Check if month needs adjustment for selected year
   if (year === currentYear && localMonth.value < currentMonth) {
     localMonth.value = currentMonth
-    emit('update:month', currentMonth)
+    // Emit complete select event to update both year and month together
+    emit('select', year, currentMonth)
+  } else {
+    // Year change doesn't require month adjustment
+    emit('update:year', year)
+    emit('year-change', year)
   }
 }
 
@@ -115,13 +120,21 @@ const selectMonth = (month) => {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+
+    @media (max-width: 768px) {
+      gap: var(--spacing-md);
+    }
   }
 
   &-label {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-light);
     text-align: center;
+
+    @media (max-width: 768px) {
+      font-size: var(--font-size-md);
+    }
   }
 
   &-yearGrid {
@@ -132,18 +145,18 @@ const selectMonth = (month) => {
 
   &-yearButton {
     padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--color-border);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     background-color: var(--light-bg, #f2fbf8);
-    color: var(--color-text);
+    color: var(--color-text-light);
     font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
-    &:hover {
-      background-color: color-mix(in srgb, var(--brand-dark-green) 18%, var(--light-bg, #f2fbf8));
-      border-color: color-mix(in srgb, var(--brand-dark-green) 30%, var(--color-border));
+    &:hover:not(.MonthYearPicker-yearButton--active) {
+      color: var(--color-text);
+      border-color: var(--brand-dark-green);
     }
 
     &--active {
@@ -151,12 +164,11 @@ const selectMonth = (month) => {
       color: var(--chip-text-white);
       border-color: var(--brand-dark-green);
       font-weight: 600;
+    }
 
-      &:hover {
-        background-color: var(--brand-dark-green);
-        border-color: var(--brand-dark-green);
-        color: var(--chip-text-white);
-      }
+    @media (max-width: 768px) {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-md);
     }
   }
 
@@ -172,18 +184,18 @@ const selectMonth = (month) => {
 
   &-monthButton {
     padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--color-border);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     background-color: var(--light-bg, #f2fbf8);
-    color: var(--color-text);
+    color: var(--color-text-light);
     font-size: var(--font-size-sm);
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
-    &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--brand-dark-green) 18%, var(--light-bg, #f2fbf8));
-      border-color: color-mix(in srgb, var(--brand-dark-green) 30%, var(--color-border));
+    &:hover:not(:disabled):not(.MonthYearPicker-monthButton--active) {
+      color: var(--color-text);
+      border-color: var(--brand-dark-green);
     }
 
     &--active {
@@ -191,18 +203,17 @@ const selectMonth = (month) => {
       color: var(--chip-text-white);
       border-color: var(--brand-dark-green);
       font-weight: 600;
-
-      &:hover {
-        background-color: var(--brand-dark-green);
-        border-color: var(--brand-dark-green);
-        color: var(--chip-text-white);
-      }
     }
 
     &--disabled {
       opacity: 0.4;
       cursor: not-allowed;
       pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-md);
     }
   }
 }

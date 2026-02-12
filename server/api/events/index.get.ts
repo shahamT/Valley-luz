@@ -97,7 +97,7 @@ export default defineEventHandler(async (event) => {
           return null
         }
       })
-      .filter((event) => event !== null)
+      .filter((transformedEvent) => transformedEvent !== null)
 
     return transformedEvents
   } catch (error) {

@@ -27,23 +27,16 @@ const props = defineProps({
   },
   events: {
     type: Array,
-    default: () => [],
+    required: true,
   },
 })
 
-const categoriesStore = useCategoriesStore()
-const eventsStore = useEventsStore()
-
-const eventsToUse = computed(() => {
-  return props.events.length > 0 ? props.events : eventsStore.events
-})
-
 const eventCountsMap = computed(() => {
-  return eventsService.getEventCountsByDate(eventsToUse.value, props.date.year, props.date.month)
+  return eventsService.getEventCountsByDate(props.events, props.date.year, props.date.month)
 })
 
 const eventsMap = computed(() => {
-  return eventsService.getEventsByDate(eventsToUse.value, props.date.year, props.date.month)
+  return eventsService.getEventsByDate(props.events, props.date.year, props.date.month)
 })
 
 const calendarDays = computed(() => {

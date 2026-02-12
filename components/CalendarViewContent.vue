@@ -71,6 +71,10 @@ defineEmits(['prev', 'next'])
     position: absolute;
     top: 12px;
     z-index: 1;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   &-navArrow--prev {

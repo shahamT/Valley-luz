@@ -83,6 +83,18 @@ export const EVENT_CATEGORIES = {
     label: 'פוליטיקה',
     color: '#4338CA',
   },
+  open_day: {
+    label: 'יום פתוח',
+    color: '#84CC16',
+  },
+  studies: {
+    label: 'לימודים',
+    color: '#2563EB',
+  },
+  technology: {
+    label: 'טכנולוגיה',
+    color: '#0EA5E9',
+  },
 }
 
 /**

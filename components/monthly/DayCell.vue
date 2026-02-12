@@ -36,6 +36,9 @@ import {
   getCategoryColor,
   getMoreEventsText,
 } from '~/utils/calendar-display.helpers'
+import { DAY_CELL_BREAKPOINT } from '~/consts/ui.const'
+
+defineOptions({ name: 'DayCell' })
 
 const props = defineProps({
   day: {
@@ -44,6 +47,11 @@ const props = defineProps({
   },
 })
 
+// data
+const { categories } = useCalendarViewData()
+const isMobile = useScreenWidth(DAY_CELL_BREAKPOINT)
+
+// computed
 const isPast = computed(() => {
   return !props.day.isOutsideMonth && props.day.dateString < getTodayDateString()
 })
@@ -51,10 +59,6 @@ const isPast = computed(() => {
 const isToday = computed(() => {
   return !props.day.isOutsideMonth && props.day.dateString === getTodayDateString()
 })
-
-const categoriesStore = useCategoriesStore()
-
-const isMobile = useScreenWidth(920)
 
 const displayEvents = computed(() => {
   if (props.day.isOutsideMonth || props.day.eventsCount === 0) {
@@ -74,6 +78,7 @@ const isWeekend = computed(() => {
   return isWeekendDay(props.day.dateString)
 })
 
+// methods
 const handleClick = () => {
   if (props.day.eventsCount > 0) {
     navigateTo(`/daily-view/${props.day.dateString}`)
@@ -81,7 +86,7 @@ const handleClick = () => {
 }
 
 const getEventChipColor = (mainCategory) => {
-  return getCategoryColor(mainCategory, categoriesStore.categories)
+  return getCategoryColor(mainCategory, categories.value)
 }
 
 const getMoreChipText = () => {
@@ -101,6 +106,10 @@ const getMoreChipText = () => {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   position: relative;
+
+  @media (max-width: 768px) {
+    padding-inline: 0.25rem;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -176,6 +185,10 @@ const getMoreChipText = () => {
     font-weight: 600;
     color: var(--color-text-light);
     line-height: 1;
+
+    @media (max-width: 768px) {
+      right: 0.25rem;
+    }
   }
 
   &-events {
@@ -188,6 +201,11 @@ const getMoreChipText = () => {
     flex-direction: column;
     gap: 0.25rem;
     overflow: hidden;
+
+    @media (max-width: 768px) {
+      left: 0.25rem;
+      right: 0.25rem;
+    }
   }
 
   &-chip {
@@ -214,6 +232,9 @@ const getMoreChipText = () => {
     }
 
     @media (max-width: 768px) {
+      font-size: 0.5625rem;
+      padding: 0 4px;
+      min-height: 18px;
       text-overflow: clip;
     }
   }
@@ -235,6 +256,7 @@ const getMoreChipText = () => {
     }
 
     @media (max-width: 768px) {
+      line-height: 18px;
       text-overflow: clip;
     }
   }

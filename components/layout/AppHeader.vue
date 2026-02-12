@@ -88,6 +88,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
 const props = defineProps({
   showMonthYear: {
@@ -112,7 +113,7 @@ const emit = defineEmits(['prev-month', 'next-month', 'select-month-year', 'year
 const isMonthYearPickerOpen = ref(false)
 const monthTriggerButtonRef = ref(null)
 
-const isMobile = useScreenWidth(768)
+const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 
 const isCurrentMonth = computed(() => {
   if (typeof window === 'undefined') {
@@ -144,10 +145,8 @@ const handleYearChange = ({ year }) => {
 
 <style lang="scss">
 .AppHeader {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   height: var(--header-height);
   background-color: var(--color-background);
   z-index: 1000;
@@ -162,6 +161,10 @@ const handleYearChange = ({ year }) => {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
+
+    @media (max-width: 768px) {
+      padding-inline: 1rem;
+    }
   }
 
   &-logo {

@@ -6,11 +6,14 @@
           view-mode="month"
           :month-year="monthYearDisplay"
           :current-date="currentDate"
+          :prev-disabled="isCurrentMonth"
+          prev-aria-label="Previous month"
+          next-aria-label="Next month"
           @select-month-year="handleMonthYearSelect"
           @year-change="handleYearChange"
           @view-change="handleViewChange"
-          @toggle-category="handleToggleCategory"
-          @reset-filter="handleResetFilter"
+          @prev="handlePrevMonth"
+          @next="handleNextMonth"
         />
       </div>
       <div class="MonthlyView-calendar">
@@ -23,7 +26,7 @@
           @next="handleNextMonth"
         >
           <template #month>
-            <UiLoadingSpinner v-if="isLoading" :message="UI_TEXT.loading" />
+            <UiLoadingSpinner v-if="isLoading && !events?.length" :message="UI_TEXT.loading" />
             <div v-else-if="isError" class="MonthlyView-error">
               <p>{{ UI_TEXT.error }}</p>
             </div>
@@ -32,8 +35,8 @@
               :visible-months="visibleMonths"
               :current-date="currentDate"
               :filtered-events="filteredEvents"
-              :slide-to-month-request="slideToMonthRequest"
               :today-month="todayMonth"
+              :slide-to-month-request="slideToMonthRequest"
               @month-change="handleMonthChange"
             />
           </template>
@@ -44,26 +47,43 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { UI_TEXT } from '~/consts/calendar.const'
-import { formatMonthYear, getCurrentYearMonth, getPrevMonth, getNextMonth, getTodayDateString } from '~/utils/date.helpers'
-import { eventsService } from '~/utils/events.service'
+import { formatMonthYear, getCurrentYearMonth, getPrevMonth, getNextMonth } from '~/utils/date.helpers'
 
-const eventsStore = useEventsStore()
-const categoriesStore = useCategoriesStore()
+// SEO metadata
+useHead({
+  title: 'יומן Valley Luz - תצוגה חודשית',
+})
+
+useSeoMeta({
+  description: 'יומן אירועים חודשי של Valley Luz - צפייה בכל האירועים והפעילויות החודשיות',
+  ogTitle: 'יומן Valley Luz - תצוגה חודשית',
+  ogDescription: 'יומן אירועים חודשי של Valley Luz',
+})
+
+// Get events and categories data with loading/error states
+const { events, isLoading, isError } = useCalendarViewData()
+
 const calendarStore = useCalendarStore()
-const { currentDate, selectedCategories } = storeToRefs(calendarStore)
+const { currentDate } = storeToRefs(calendarStore)
+
+const { getFilteredEventsForMonth } = useEventFilters(events)
+const { switchToDailyView } = useCalendarNavigation()
+
+// Initialize URL state sync (with month sync enabled for monthly view)
+const { initializeFromUrl, startUrlSync } = useUrlState({ syncMonth: true })
+
+onMounted(() => {
+  // Initialize store from URL params first
+  initializeFromUrl()
+  // Start watching store and syncing to URL
+  startUrlSync()
+})
 
 const currentYear = computed(() => currentDate.value?.year ?? getCurrentYearMonth().year)
 const currentMonth = computed(() => currentDate.value?.month ?? getCurrentYearMonth().month)
-
-const isLoading = computed(() => {
-  return unref(eventsStore.isLoading) || unref(categoriesStore.isLoading)
-})
-
-const isError = computed(() => {
-  return unref(eventsStore.isError) || unref(categoriesStore.isError)
-})
 
 const monthYearDisplay = computed(() => {
   return formatMonthYear(currentYear.value, currentMonth.value)
@@ -91,11 +111,29 @@ const visibleMonths = computed(() => {
 const slideToMonthRequest = ref(null)
 
 const handlePrevMonth = () => {
-  slideToMonthRequest.value = getPrevMonth(currentDate.value.year, currentDate.value.month)
+  const targetMonth = getPrevMonth(currentDate.value.year, currentDate.value.month)
+  const isInVisibleMonths = visibleMonths.value.some(
+    m => m.year === targetMonth.year && m.month === targetMonth.month
+  )
+  
+  if (isInVisibleMonths) {
+    slideToMonthRequest.value = targetMonth
+  } else {
+    calendarStore.setCurrentDate(targetMonth)
+  }
 }
 
 const handleNextMonth = () => {
-  slideToMonthRequest.value = getNextMonth(currentDate.value.year, currentDate.value.month)
+  const targetMonth = getNextMonth(currentDate.value.year, currentDate.value.month)
+  const isInVisibleMonths = visibleMonths.value.some(
+    m => m.year === targetMonth.year && m.month === targetMonth.month
+  )
+  
+  if (isInVisibleMonths) {
+    slideToMonthRequest.value = targetMonth
+  } else {
+    calendarStore.setCurrentDate(targetMonth)
+  }
 }
 
 const handleMonthChange = (payload) => {
@@ -113,33 +151,11 @@ const handleYearChange = ({ year }) => {
 
 const handleViewChange = ({ view }) => {
   if (view !== 'day') return
-  const now = new Date()
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() + 1
-  const date = currentDate.value
-  const targetDate =
-    date.year === currentYear && date.month === currentMonth
-      ? getTodayDateString()
-      : `${date.year}-${String(date.month).padStart(2, '0')}-01`
-  navigateTo(`/daily-view/${targetDate}`)
-}
-
-const handleToggleCategory = (categoryId) => {
-  calendarStore.toggleCategory(categoryId)
-}
-
-const handleResetFilter = () => {
-  calendarStore.resetFilter()
+  switchToDailyView(currentDate.value)
 }
 
 const filteredEvents = computed(() => {
-  const allEvents = eventsStore.events
-  
-  if (selectedCategories.value.length === 0) {
-    return allEvents
-  }
-  
-  return eventsService.filterEventsByCategories(allEvents, selectedCategories.value)
+  return getFilteredEventsForMonth(currentYear.value, currentMonth.value)
 })
 </script>
 

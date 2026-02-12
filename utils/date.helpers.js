@@ -1,5 +1,40 @@
 import { HEBREW_MONTHS, HEBREW_WEEKDAYS } from '~/consts/dates.const'
-import { formatDateToYYYYMMDD, parseDateString } from './events.helpers'
+
+/**
+ * Format a Date object to YYYY-MM-DD string
+ * @param {Date} date - Date object to format
+ * @returns {string} Formatted date string
+ */
+export function formatDateToYYYYMMDD(date) {
+  if (!(date instanceof Date) || isNaN(date)) {
+    throw new Error('Invalid date provided to formatDateToYYYYMMDD')
+  }
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * Parse a date string in YYYY-MM-DD format to a Date object
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {Date} Parsed date object
+ */
+export function parseDateString(dateString) {
+  if (!dateString || typeof dateString !== 'string') {
+    throw new Error('Invalid date string provided to parseDateString')
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    throw new Error('Date string must be in YYYY-MM-DD format')
+  }
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  // Validate that the parsed date matches the input (catches invalid dates like Feb 31)
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    throw new Error(`Invalid date: ${dateString}`)
+  }
+  return date
+}
 
 /**
  * Gets today's date as YYYY-MM-DD string
@@ -156,20 +191,13 @@ export function formatKanbanDateHeader(dateString) {
 }
 
 /**
- * Gets array of 3 date strings for kanban view
- * @param {string} centerDate - Center date in YYYY-MM-DD format
- * @returns {string[]} Array of 3 date strings [earlier, center, later] (RTL: right to left)
+ * Format minutes from midnight (0–1440) as "HH:MM"
+ * @param {number} minutes - Minutes from midnight
+ * @returns {string} Formatted time string
  */
-export function getThreeDaysForView(centerDate) {
-  if (isToday(centerDate)) {
-    // If viewing today: show [today, tomorrow, day+2]
-    const tomorrow = getNextDay(centerDate)
-    const dayAfterTomorrow = getNextDay(tomorrow)
-    return [centerDate, tomorrow, dayAfterTomorrow]
-  } else {
-    // If viewing future date: show [day-1, center, day+1]
-    const prevDay = getPrevDay(centerDate)
-    const nextDay = getNextDay(centerDate)
-    return [prevDay, centerDate, nextDay]
-  }
+export function formatMinutesToTime(minutes) {
+  const h = Math.floor(minutes / 60)
+  const m = Math.floor(minutes % 60)
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
+

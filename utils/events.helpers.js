@@ -1,27 +1,13 @@
-import { HEBREW_WEEKDAYS, HEBREW_MONTHS } from '~/consts/dates.const'
+/**
+ * Event helper functions for formatting and transformation
+ * Note: formatDateToYYYYMMDD and parseDateString live in date.helpers.js - import from there
+ */
 
-// Date utility functions
-export function formatDateToYYYYMMDD(date) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-export function parseDateString(dateString) {
-  const [year, month, day] = dateString.split('-').map(Number)
-  return new Date(year, month - 1, day)
-}
-
-export function formatDateForDisplay(dateString) {
-  const date = parseDateString(dateString)
-  const weekday = HEBREW_WEEKDAYS[date.getDay()]
-  const day = date.getDate()
-  const month = HEBREW_MONTHS[date.getMonth()]
-  const year = date.getFullYear()
-  return `יום ${weekday} | ${day} ב${month} ${year}`
-}
-
+/**
+ * Format event occurrence time for display
+ * @param {Object} occurrence - Event occurrence with startTime, endTime, hasTime
+ * @returns {string} Formatted time string or "כל היום" for all-day events
+ */
 export function formatEventTime(occurrence) {
   if (!occurrence.hasTime) {
     return 'כל היום'
@@ -48,6 +34,11 @@ export function formatEventTime(occurrence) {
   return startTime
 }
 
+/**
+ * Format event price for display
+ * @param {Object} event - Event object with price property
+ * @returns {string} Formatted price string or "חינם" for free events
+ */
 export function formatEventPrice(event) {
   if (event.price === null || event.price === undefined || event.price === 0) {
     return 'חינם'
@@ -55,6 +46,11 @@ export function formatEventPrice(event) {
   return `${event.price} ש"ח`
 }
 
+/**
+ * Format event location for display
+ * @param {Object} event - Event object with location property
+ * @returns {string} Formatted location string (city, address) or empty string
+ */
 export function formatEventLocation(event) {
   if (!event.location) return ''
 
@@ -65,6 +61,12 @@ export function formatEventLocation(event) {
   return parts.join(', ')
 }
 
+/**
+ * Transform event and occurrence into a card-friendly format
+ * @param {Object} event - Event object
+ * @param {Object} occurrence - Event occurrence object
+ * @returns {Object} Transformed card data with timeText, title, desc, and price
+ */
 export function transformEventForCard(event, occurrence) {
   return {
     timeText: formatEventTime(occurrence),
