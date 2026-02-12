@@ -43,8 +43,10 @@ const spaceBetween = 24
 
 const swiperBreakpoints = {
   0: {
-    slidesPerView: 1.15,
-    spaceBetween: 8,
+    slidesPerView: 'auto',
+    spaceBetween: 16,
+    centeredSlides: true,
+    centeredSlidesBounds: true,
   },
   769: {
     slidesPerView: 3,
@@ -183,34 +185,37 @@ watch(
   position: relative;
   overflow: hidden;
   direction: rtl; // Ensure RTL direction
+  height: 100%;
 
   &-swiper {
     width: 100%;
     max-width: 100%;
     overflow: hidden;
     padding: 0;
+    height: 100%;
   }
 
   &-slide {
     width: 100%;
     display: flex;
-    align-items: flex-start; // Align to top, not stretch
+    align-items: stretch;
     justify-content: center;
     min-width: 0; // Allow flex shrinking
-    height: auto; // Let height be based on content
+    height: 100%;
   }
 }
 
 // Swiper RTL and styling overrides
 .KanbanCarousel-swiper {
   .swiper-wrapper {
-    align-items: flex-start; // Align to top, not stretch
+    align-items: stretch;
     padding-bottom: var(--spacing-lg); // Prevent shadow cropping
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
   }
 
   .swiper-slide {
-    height: auto; // Let height be based on content
+    height: 100%;
     box-sizing: border-box;
     flex-shrink: 0;
   }

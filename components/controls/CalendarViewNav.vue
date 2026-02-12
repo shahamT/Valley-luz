@@ -249,7 +249,7 @@ const handleNext = () => {
     align-items: center;
     gap: var(--spacing-md);
     direction: rtl;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
 
     @media (max-width: 768px) {
       margin-bottom: 0;
@@ -319,18 +319,6 @@ const handleNext = () => {
 
     &-viewToggleSegment {
       padding: 0 var(--spacing-sm);
-    }
-  }
-
-  &--monthView {
-    @media (max-width: 768px) {
-      .CalendarViewNav-row {
-        gap: 0;
-      }
-
-      .CalendarViewNav-rowCenter {
-        gap: 0;
-      }
     }
   }
 

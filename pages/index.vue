@@ -168,14 +168,26 @@ const filteredEvents = computed(() => {
   min-height: 0;
   min-width: 0;
 
+  @media (max-width: 768px) {
+    gap: 0;
+  }
+
   &-header {
     grid-row: 1;
+
+    @media (max-width: 768px) {
+      padding-inline: 1rem;
+    }
   }
 
   &-calendar {
     grid-row: 2;
     min-height: 0;
     min-width: 0;
+
+    @media (max-width: 768px) {
+      padding-inline: 1rem;
+    }
   }
 
   &-error {

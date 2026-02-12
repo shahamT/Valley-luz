@@ -47,9 +47,16 @@ const formattedDate = computed(() => {
   min-width: 0;
   width: 100%;
   max-width: 100%;
+  height: 100%;
   background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+
+  @media (max-width: 768px) {
+    width: 85vw;
+    max-width: 85vw;
+    min-width: 85vw;
+  }
 
   &--disabled {
     opacity: 0.55;
@@ -59,6 +66,7 @@ const formattedDate = computed(() => {
 
   &-header {
     height: 52px;
+    flex-shrink: 0;
     padding-block: 0;
     padding-inline: var(--spacing-md);
     display: flex;
@@ -78,9 +86,33 @@ const formattedDate = computed(() => {
   }
 
   &-events {
-    flex: none; // Don't stretch, size based on content
-    overflow: visible; // Allow content to determine height
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: var(--spacing-md);
+    padding-right: calc(var(--spacing-md) - 4px);
+    scrollbar-gutter: stable;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--brand-light-green);
+      border-radius: 2px;
+
+      &:hover {
+        background-color: var(--brand-dark-green);
+      }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--brand-light-green) transparent;
   }
 
   &-empty {

@@ -65,6 +65,7 @@ defineEmits(['prev', 'next'])
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: visible;
+    padding: 0;
   }
 
   &-navArrow {

@@ -61,7 +61,7 @@ defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
     flex-direction: column;
 
     @media (max-width: 768px) {
-      padding-inline: 1rem;
+      padding-inline: 0;
       padding-block: var(--spacing-md);
     }
   }

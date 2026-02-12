@@ -196,6 +196,10 @@ const handleViewChange = ({ view }) => {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+
+    @media (max-width: 768px) {
+      padding-inline: 1rem;
+    }
   }
 
   &-content {
