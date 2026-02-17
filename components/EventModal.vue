@@ -6,8 +6,8 @@
           <p class="EventModal-notFound">{{ MODAL_TEXT.noEventSelected }}</p>
         </div>
         <template v-else>
-          <!-- Disclaimer Note (Mobile Only - Above Header) -->
-          <div class="EventModal-disclaimer EventModal-disclaimer--mobile">
+          <!-- Disclaimer Note (Above Header for all screens) -->
+          <div class="EventModal-disclaimer">
             <span class="EventModal-disclaimerText">פרטי האירוע מגיעים מהמפרסם ועוברים עיבוד ב AI - אין לנו אחריות על מהימנות ודיוק הפרטים.</span>
           </div>
 
@@ -39,7 +39,18 @@
             <div class="EventModal-infoBar">
               <div class="EventModal-infoItem">
                 <UiIcon name="location_on" size="md" color="var(--brand-dark-green)" class="EventModal-infoIcon" />
-                <span>{{ formattedLocation }}</span>
+                <div class="EventModal-infoContent">
+                  <span>{{ basicLocation }}</span>
+                  <button
+                    v-if="hasLocationDetails"
+                    ref="locationButtonRef"
+                    type="button"
+                    class="EventModal-moreInfoButton"
+                    @click="toggleLocationPopup"
+                  >
+                    למידע נוסף
+                  </button>
+                </div>
               </div>
               <div class="EventModal-infoDivider" />
               <div class="EventModal-infoItem">
@@ -51,12 +62,6 @@
                 <UiIcon name="confirmation_number" size="md" color="var(--brand-dark-green)" class="EventModal-infoIcon" />
                 <span>{{ eventPrice }}</span>
               </div>
-            </div>
-
-            <!-- Disclaimer Note (Desktop Only) -->
-            <div class="EventModal-disclaimer EventModal-disclaimer--desktop">
-              <UiIcon name="info" size="xs" class="EventModal-disclaimerIcon" />
-              <span class="EventModal-disclaimerText">פרטי האירוע מגיעים מהמפרסם ועוברים עיבוד ב AI - אין לנו אחריות על מהימנות ודיוק הפרטים.</span>
             </div>
 
             <!-- Description Section -->
@@ -140,6 +145,15 @@
       @select="handleCalendarSelect"
     />
   </Teleport>
+
+  <!-- Location Info Popup -->
+  <Teleport to="body">
+    <UiLocationInfoPopup
+      v-if="isLocationPopupOpen"
+      :full-location="formattedLocation"
+      @close="isLocationPopupOpen = false"
+    />
+  </Teleport>
 </template>
 
 <script setup>
@@ -157,6 +171,9 @@ const { events, categories } = useCalendarViewData()
 
 const isCalendarPopupOpen = ref(false)
 const calendarButtonRef = ref(null)
+
+const isLocationPopupOpen = ref(false)
+const locationButtonRef = ref(null)
 
 // computed
 const isMobile = computed(() => {
@@ -220,6 +237,17 @@ const eventDescription = computed(() => {
   )
 })
 
+const basicLocation = computed(() => {
+  if (!selectedEvent.value?.location) return MODAL_TEXT.unknownLocation
+  const loc = selectedEvent.value.location
+  const parts = []
+  if (loc.addressLine1) parts.push(loc.addressLine1)
+  if (loc.addressLine2) parts.push(loc.addressLine2)
+  if (loc.city) parts.push(loc.city)
+  if (parts.length === 0) return MODAL_TEXT.unknownLocation
+  return parts.join(', ')
+})
+
 const formattedLocation = computed(() => {
   if (!selectedEvent.value?.location) return MODAL_TEXT.unknownLocation
   const loc = selectedEvent.value.location
@@ -233,6 +261,10 @@ const formattedLocation = computed(() => {
     result += `\n${loc.locationDetails}`
   }
   return result
+})
+
+const hasLocationDetails = computed(() => {
+  return !!selectedEvent.value?.location?.locationDetails
 })
 
 const whatsappLink = computed(() => {
@@ -273,6 +305,7 @@ const calendarTimeZone = computed(() => {
 const closeModal = () => {
   uiStore.closeEventModal()
   isCalendarPopupOpen.value = false
+  isLocationPopupOpen.value = false
 }
 
 const getCategoryLabel = (categoryId) => {
@@ -281,6 +314,10 @@ const getCategoryLabel = (categoryId) => {
 
 const toggleCalendarPopup = () => {
   isCalendarPopupOpen.value = !isCalendarPopupOpen.value
+}
+
+const toggleLocationPopup = () => {
+  isLocationPopupOpen.value = !isLocationPopupOpen.value
 }
 
 const handleCalendarSelect = async (calendarType) => {
@@ -375,11 +412,9 @@ const handleCalendarSelect = async (calendarType) => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 
     @media (max-width: 768px) {
       min-height: 160px;
-      border-radius: 0;
     }
   }
 
@@ -513,6 +548,34 @@ const handleCalendarSelect = async (calendarType) => {
   &-infoIcon {
     @media (max-width: 768px) {
       font-size: 1.375rem !important;
+      margin-top: 4px;
+    }
+  }
+
+  &-infoContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+
+    @media (max-width: 768px) {
+      align-items: flex-start;
+    }
+  }
+
+  &-moreInfoButton {
+    background: none;
+    border: none;
+    color: var(--brand-dark-green);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.7;
     }
   }
 
@@ -533,36 +596,13 @@ const handleCalendarSelect = async (calendarType) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-xs);
-    border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 
     @media (max-width: 768px) {
       padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: 0;
     }
-
-    &--mobile {
-      display: none;
-
-      @media (max-width: 768px) {
-        display: flex;
-        border-top: none;
-      }
-    }
-
-    &--desktop {
-      display: flex;
-
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
-  }
-
-  &-disclaimerIcon {
-    color: #2c5aa0;
-    flex-shrink: 0;
-    font-size: 0.75rem !important;
   }
 
   &-disclaimerText {
@@ -683,12 +723,14 @@ const handleCalendarSelect = async (calendarType) => {
     position: sticky;
     bottom: 0;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 
     @media (max-width: 768px) {
       padding: var(--spacing-md);
       border-top: none;
       box-shadow: none;
       gap: var(--spacing-sm);
+      border-radius: 0;
     }
   }
 

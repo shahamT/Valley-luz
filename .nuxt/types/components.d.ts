@@ -36,6 +36,7 @@ interface _GlobalComponents {
   'UiHoursFilterPanel': typeof import("../../components/ui/HoursFilterPanel.vue").default
   'UiIcon': typeof import("../../components/ui/Icon.vue").default
   'UiLoadingSpinner': typeof import("../../components/ui/LoadingSpinner.vue").default
+  'UiLocationInfoPopup': typeof import("../../components/ui/LocationInfoPopup.vue").default
   'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
   'UiMonthYearPicker': typeof import("../../components/ui/MonthYearPicker.vue").default
   'UiMonthYearPopup': typeof import("../../components/ui/MonthYearPopup.vue").default
@@ -85,6 +86,7 @@ interface _GlobalComponents {
   'LazyUiHoursFilterPanel': LazyComponent<typeof import("../../components/ui/HoursFilterPanel.vue").default>
   'LazyUiIcon': LazyComponent<typeof import("../../components/ui/Icon.vue").default>
   'LazyUiLoadingSpinner': LazyComponent<typeof import("../../components/ui/LoadingSpinner.vue").default>
+  'LazyUiLocationInfoPopup': LazyComponent<typeof import("../../components/ui/LocationInfoPopup.vue").default>
   'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>
   'LazyUiMonthYearPicker': LazyComponent<typeof import("../../components/ui/MonthYearPicker.vue").default>
   'LazyUiMonthYearPopup': LazyComponent<typeof import("../../components/ui/MonthYearPopup.vue").default>
