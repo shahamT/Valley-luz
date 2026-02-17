@@ -62,6 +62,21 @@ export function formatEventLocation(event) {
 }
 
 /**
+ * Format event location for the Kanban card location chip
+ * @param {Object} event - Event object with location property
+ * @returns {string} "name - city", "city", "name", or "לא ידוע"
+ */
+export function formatEventLocationForChip(event) {
+  const loc = event?.location
+  const name = loc?.addressLine1?.trim()
+  const city = loc?.city?.trim()
+  if (name && city) return `${name} - ${city}`
+  if (city) return city
+  if (name) return name
+  return 'לא ידוע'
+}
+
+/**
  * Transform event and occurrence into a card-friendly format
  * @param {Object} event - Event object
  * @param {Object} occurrence - Event occurrence object

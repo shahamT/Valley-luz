@@ -6,3 +6,10 @@
 @import 'swiper/css';
 @import 'swiper/css/navigation';
 @import 'swiper/css/pagination';
+
+// Hide floating-vue tooltips on mobile (desktop only)
+@media (max-width: 768px) {
+  .v-popper__popper {
+    display: none !important;
+  }
+}

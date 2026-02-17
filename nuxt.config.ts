@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   
   css: ['~/assets/css/main.scss'],
   
-  modules: ['@pinia/nuxt', '@vueuse/nuxt'],
+  modules: ['@pinia/nuxt', '@vueuse/nuxt', 'floating-vue/nuxt'],
   
   app: {
     head: {

@@ -1,6 +1,6 @@
 import { storeToRefs } from 'pinia'
 import { eventsService } from '~/utils/events.service'
-import { transformEventForCard } from '~/utils/events.helpers'
+import { transformEventForCard, formatEventLocationForChip } from '~/utils/events.helpers'
 
 /**
  * Composable for filtering events by categories and time range
@@ -65,12 +65,20 @@ export const useEventFilters = (events) => {
 
     dates.forEach((date) => {
       const pairs = getFilteredEventsForDate(date)
+      // Sort by start time so earlier events show at the top
+      const sorted = [...pairs].sort((a, b) => {
+        const aStart = a.occurrence?.startTime || ''
+        const bStart = b.occurrence?.startTime || ''
+        return aStart.localeCompare(bStart)
+      })
 
-      result[date] = pairs.map(({ event, occurrence }, index) => ({
+      result[date] = sorted.map(({ event, occurrence }, index) => ({
         ...transformEventForCard(event, occurrence),
         id: `${event.id}-${index}`,
         eventId: event.id,
         mainCategory: event.mainCategory,
+        categories: event.categories ?? [],
+        locationDisplay: formatEventLocationForChip(event),
       }))
     })
 

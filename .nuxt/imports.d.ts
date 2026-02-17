@@ -41,7 +41,7 @@ export { useUrlState } from '../composables/useUrlState';
 export { getDisplayEvents, getAdditionalEventsCount, isWeekendDay, getCategoryColor, getMoreEventsText } from '../utils/calendar-display.helpers';
 export { generateCalendarDays } from '../utils/calendar.helpers';
 export { formatDateToYYYYMMDD, parseDateString, getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isMonthBefore, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, isBeforeToday, formatKanbanDateHeader, formatMinutesToTime } from '../utils/date.helpers';
-export { formatEventTime, formatEventPrice, formatEventLocation, transformEventForCard } from '../utils/events.helpers';
+export { formatEventTime, formatEventPrice, formatEventLocation, formatEventLocationForChip, transformEventForCard } from '../utils/events.helpers';
 export { eventsService } from '../utils/events.service';
 export { logger } from '../utils/logger';
 export { isValidDateString, isValidRouteDate, parseCategories, serializeCategories, parseTimeFilter, isValidMonthYear } from '../utils/validation.helpers';

@@ -4,13 +4,15 @@
       <h2 class="KanbanColumn-title">{{ formattedDate }}</h2>
     </div>
     <div class="KanbanColumn-events">
-      <DailyKanbanEventCard
-        v-for="event in events"
-        :key="event.id"
-        :event="event"
-      />
-      <div v-if="events.length === 0" class="KanbanColumn-empty">
-        {{ UI_TEXT.noEvents }}
+      <div class="KanbanColumn-events-inner">
+        <DailyKanbanEventCard
+          v-for="event in events"
+          :key="event.id"
+          :event="event"
+        />
+        <div v-if="events.length === 0" class="KanbanColumn-empty">
+          {{ UI_TEXT.noEvents }}
+        </div>
       </div>
     </div>
   </div>
@@ -47,7 +49,6 @@ const formattedDate = computed(() => {
   min-width: 0;
   width: 100%;
   max-width: 100%;
-  height: 100%;
   background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -72,47 +73,26 @@ const formattedDate = computed(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--brand-dark-green);
-    color: var(--chip-text-white);
+    background-color: color-mix(in srgb, var(--brand-light-green) 35%, white);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 
   &-title {
     font-size: var(--font-size-lg);
     font-weight: 700;
-    color: var(--chip-text-white);
+    color: var(--brand-dark-green);
     margin: 0;
     text-align: center;
   }
 
   &-events {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    direction: ltr; // Inner wrapper restores RTL for cards
     padding: var(--spacing-md);
-    padding-right: calc(var(--spacing-md) - 4px);
-    scrollbar-gutter: stable;
+    overflow-x: hidden;
+  }
 
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-      border-radius: 2px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: var(--brand-light-green);
-      border-radius: 2px;
-
-      &:hover {
-        background-color: var(--brand-dark-green);
-      }
-    }
-
-    scrollbar-width: thin;
-    scrollbar-color: var(--brand-light-green) transparent;
+  &-events-inner {
+    direction: rtl; // Restore RTL so cards keep correct order (accent, body, text)
   }
 
   &-empty {

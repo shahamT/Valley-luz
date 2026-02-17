@@ -181,43 +181,39 @@ watch(
 .KanbanCarousel {
   width: 100%;
   max-width: 100%;
-  min-width: 0; // Allow grid/flex shrink so overflow doesn't expand parent
+  min-width: 0;
   position: relative;
   overflow: hidden;
   direction: rtl; // Ensure RTL direction
-  height: 100%;
 
   &-swiper {
     width: 100%;
     max-width: 100%;
     overflow: hidden;
     padding: 0;
-    height: 100%;
   }
 
   &-slide {
     width: 100%;
     display: flex;
-    align-items: stretch;
+    align-items: flex-start;
     justify-content: center;
-    min-width: 0; // Allow flex shrinking
-    height: 100%;
+    min-width: 0;
   }
 }
 
 // Swiper RTL and styling overrides
 .KanbanCarousel-swiper {
   .swiper-wrapper {
-    align-items: stretch;
+    align-items: flex-start;
     padding-bottom: var(--spacing-lg); // Prevent shadow cropping
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    height: 100%;
   }
 
   .swiper-slide {
-    height: 100%;
     box-sizing: border-box;
     flex-shrink: 0;
+    height: auto;
   }
 
   // Desktop: 3 slides per view

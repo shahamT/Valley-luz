@@ -18,6 +18,7 @@
         class="DayCell-chip"
         :class="{ 'DayCell-chip--more': event.isMore }"
         :style="event.isMore ? {} : { backgroundColor: getEventChipColor(event.mainCategory) }"
+        v-tooltip="event.isMore ? undefined : (event.title || '')"
       >
         <span class="DayCell-chipText" :class="{ 'DayCell-chipText--more': event.isMore }">
           {{ event.isMore ? getMoreChipText() : (event.title || '') }}
@@ -80,9 +81,8 @@ const isWeekend = computed(() => {
 
 // methods
 const handleClick = () => {
-  if (props.day.eventsCount > 0) {
-    navigateTo(`/daily-view/${props.day.dateString}`)
-  }
+  if (props.day.isOutsideMonth || isPast.value) return
+  navigateTo(`/daily-view/${props.day.dateString}`)
 }
 
 const getEventChipColor = (mainCategory) => {
@@ -148,12 +148,12 @@ const getMoreChipText = () => {
   }
 
   &--no-events {
-    cursor: default;
+    cursor: pointer;
 
     &:hover {
-      transform: none;
-      box-shadow: var(--shadow-card);
-      background-color: var(--light-bg);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      background-color: var(--day-cell-hover-bg);
     }
   }
 
@@ -171,9 +171,9 @@ const getMoreChipText = () => {
 
   &--weekend#{&}--no-events {
     &:hover {
-      transform: none !important;
-      box-shadow: var(--shadow-card) !important;
-      background-color: var(--weekend-day-bg) !important;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      background-color: var(--weekend-day-hover-bg);
     }
   }
 
@@ -212,7 +212,7 @@ const getMoreChipText = () => {
     padding: 0 6px;
     font-size: 0.6875rem;
     font-weight: 500;
-    border-radius: 0.5rem;
+    border-radius: 4px;
     color: var(--chip-text-white);
     white-space: nowrap;
     overflow: hidden;

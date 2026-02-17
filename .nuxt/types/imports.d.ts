@@ -51,6 +51,7 @@ declare global {
   const extendRef: typeof import('../../node_modules/@vueuse/core').extendRef
   const formatDateToYYYYMMDD: typeof import('../../utils/date.helpers').formatDateToYYYYMMDD
   const formatEventLocation: typeof import('../../utils/events.helpers').formatEventLocation
+  const formatEventLocationForChip: typeof import('../../utils/events.helpers').formatEventLocationForChip
   const formatEventPrice: typeof import('../../utils/events.helpers').formatEventPrice
   const formatEventTime: typeof import('../../utils/events.helpers').formatEventTime
   const formatKanbanDateHeader: typeof import('../../utils/date.helpers').formatKanbanDateHeader
@@ -507,6 +508,7 @@ declare module 'vue' {
     readonly extendRef: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['extendRef']>
     readonly formatDateToYYYYMMDD: UnwrapRef<typeof import('../../utils/date.helpers')['formatDateToYYYYMMDD']>
     readonly formatEventLocation: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocation']>
+    readonly formatEventLocationForChip: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocationForChip']>
     readonly formatEventPrice: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventPrice']>
     readonly formatEventTime: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventTime']>
     readonly formatKanbanDateHeader: UnwrapRef<typeof import('../../utils/date.helpers')['formatKanbanDateHeader']>
