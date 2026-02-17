@@ -6,6 +6,11 @@
           <p class="EventModal-notFound">{{ MODAL_TEXT.noEventSelected }}</p>
         </div>
         <template v-else>
+          <!-- Disclaimer Note (Mobile Only - Above Header) -->
+          <div class="EventModal-disclaimer EventModal-disclaimer--mobile">
+            <span class="EventModal-disclaimerText">פרטי האירוע מגיעים מהמפרסם ועוברים עיבוד ב AI - אין לנו אחריות על מהימנות ודיוק הפרטים.</span>
+          </div>
+
           <!-- Image Header with Overlay -->
           <div class="EventModal-imageHeader">
             <img :src="eventImage" :alt="selectedEvent.title" class="EventModal-image" />
@@ -46,6 +51,12 @@
                 <UiIcon name="confirmation_number" size="md" color="var(--brand-dark-green)" class="EventModal-infoIcon" />
                 <span>{{ eventPrice }}</span>
               </div>
+            </div>
+
+            <!-- Disclaimer Note (Desktop Only) -->
+            <div class="EventModal-disclaimer EventModal-disclaimer--desktop">
+              <UiIcon name="info" size="xs" class="EventModal-disclaimerIcon" />
+              <span class="EventModal-disclaimerText">פרטי האירוע מגיעים מהמפרסם ועוברים עיבוד ב AI - אין לנו אחריות על מהימנות ודיוק הפרטים.</span>
             </div>
 
             <!-- Description Section -->
@@ -514,6 +525,51 @@ const handleCalendarSelect = async (calendarType) => {
       width: 100%;
       height: 1px;
     }
+  }
+
+  &-disclaimer {
+    background-color: rgba(173, 216, 230, 0.15);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+
+    @media (max-width: 768px) {
+      padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    &--mobile {
+      display: none;
+
+      @media (max-width: 768px) {
+        display: flex;
+        border-top: none;
+      }
+    }
+
+    &--desktop {
+      display: flex;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+  }
+
+  &-disclaimerIcon {
+    color: #2c5aa0;
+    flex-shrink: 0;
+    font-size: 0.75rem !important;
+  }
+
+  &-disclaimerText {
+    font-size: 0.6875rem;
+    color: #2c5aa0;
+    line-height: 1.4;
+    text-align: center;
   }
 
   &-descriptionSection {
