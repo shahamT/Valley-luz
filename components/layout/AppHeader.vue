@@ -335,7 +335,7 @@ const handleYearChange = ({ year }) => {
 
     @media (max-width: 768px) {
       padding: var(--spacing-xs) var(--spacing-md);
-      gap: var(--spacing-xs);
+      gap: var(--spacing-sm);
     }
   }
 
