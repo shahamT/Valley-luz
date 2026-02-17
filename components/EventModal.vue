@@ -66,31 +66,29 @@
 
             <!-- Description Section -->
             <div v-if="eventDescription" class="EventModal-descriptionSection">
-              <p class="EventModal-description">{{ eventDescription }}</p>
+              <div class="EventModal-description" v-html="eventDescription"></div>
             </div>
 
-            <!-- Links Section (if exists) -->
-            <div v-if="selectedEvent.urls?.length" class="EventModal-linksSection">
+            <!-- Links & Contact Section -->
+            <div v-if="selectedEvent.urls?.length || selectedEvent.publisherPhone" class="EventModal-linksSection">
               <a
-                v-for="(url, index) in selectedEvent.urls"
+                v-for="(link, index) in selectedEvent.urls"
                 :key="index"
-                :href="url"
+                :href="link.Url"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="EventModal-linkButton"
               >
-                {{ MODAL_TEXT.linkButton }} {{ index + 1 }}
+                {{ link.Title }}
               </a>
-            </div>
-
-            <!-- Contact Publisher Button (always visible) -->
-            <div class="EventModal-contactSection">
+              
+              <!-- Contact Publisher Button -->
               <a
                 v-if="selectedEvent.publisherPhone"
                 :href="whatsappLink"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="EventModal-contactButton"
+                class="EventModal-linkButton EventModal-linkButton--whatsapp"
               >
                 <img src="/icons/whatsapp-icon.svg" alt="WhatsApp" class="EventModal-whatsappIcon" />
                 {{ MODAL_TEXT.contactPublisher }}
@@ -98,7 +96,7 @@
               <button
                 v-else
                 disabled
-                class="EventModal-contactButton EventModal-contactButton--disabled"
+                class="EventModal-linkButton EventModal-linkButton--whatsapp EventModal-linkButton--disabled"
               >
                 <img src="/icons/whatsapp-icon.svg" alt="WhatsApp" class="EventModal-whatsappIcon" />
                 {{ MODAL_TEXT.contactPublisher }}
@@ -614,10 +612,10 @@ const handleCalendarSelect = async (calendarType) => {
 
   &-descriptionSection {
     background-color: var(--color-background);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-lg) 0 var(--spacing-lg);
 
     @media (max-width: 768px) {
-      padding: var(--spacing-md);
+      padding: var(--spacing-md) var(--spacing-md) 0 var(--spacing-md);
     }
   }
 
@@ -625,8 +623,66 @@ const handleCalendarSelect = async (calendarType) => {
     font-size: var(--font-size-base);
     color: var(--color-text);
     line-height: 1.6;
-    white-space: pre-line;
     margin: 0;
+
+    // HTML content styles
+    p {
+      margin: 0 0 1em 0;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    ul, ol {
+      margin: 0 0 1em 0;
+      padding-right: 1.5em;
+      padding-left: 0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    li {
+      margin-bottom: 0.5em;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: underline;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    strong, b {
+      font-weight: 700;
+    }
+
+    em, i {
+      font-style: italic;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      margin: 0 0 0.75em 0;
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.4;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    h1 { font-size: var(--font-size-xl); }
+    h2 { font-size: var(--font-size-lg); }
+    h3, h4, h5, h6 { font-size: var(--font-size-base); }
   }
 
   &-linksSection {
@@ -646,6 +702,7 @@ const handleCalendarSelect = async (calendarType) => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     background-color: transparent;
     color: var(--brand-dark-green);
@@ -656,46 +713,27 @@ const handleCalendarSelect = async (calendarType) => {
     text-decoration: none;
     transition: all 0.2s ease;
     width: auto;
-
-    &:hover {
-      background-color: var(--brand-dark-green);
-      color: var(--chip-text-white);
-      border-color: var(--brand-dark-green);
-    }
-
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-  }
-
-  &-contactSection {
-    background-color: var(--color-background);
-    padding: 0 var(--spacing-lg) var(--spacing-lg);
-
-    @media (max-width: 768px) {
-      padding: 0 var(--spacing-md) var(--spacing-md);
-    }
-  }
-
-  &-contactButton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    background-color: #25D366;
-    color: var(--chip-text-white);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    width: auto;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, #25D366 85%, black);
+      background-color: var(--brand-dark-green);
+      color: var(--chip-text-white);
+      border-color: var(--brand-dark-green);
+
+      .EventModal-whatsappIcon {
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    &--whatsapp {
+      color: #25D366;
+      border-color: #25D366;
+
+      &:hover:not(:disabled) {
+        background-color: #25D366;
+        color: var(--chip-text-white);
+        border-color: #25D366;
+      }
     }
 
     &--disabled {
@@ -711,7 +749,8 @@ const handleCalendarSelect = async (calendarType) => {
   &-whatsappIcon {
     width: 20px;
     height: 20px;
-    filter: brightness(0) invert(1);
+    flex-shrink: 0;
+    filter: invert(59%) sepia(89%) saturate(464%) hue-rotate(94deg) brightness(95%) contrast(87%);
   }
 
   &-actionBar {
