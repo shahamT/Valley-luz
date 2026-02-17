@@ -70,7 +70,7 @@ defineEmits(['prev', 'next'])
 
   &-navArrow {
     position: absolute;
-    top: 12px;
+    top: 8px;
     z-index: 1;
 
     @media (max-width: 768px) {

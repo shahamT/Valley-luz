@@ -66,7 +66,7 @@ const formattedDate = computed(() => {
   }
 
   &-header {
-    height: 52px;
+    height: 44px;
     flex-shrink: 0;
     padding-block: 0;
     padding-inline: var(--spacing-md);
@@ -78,7 +78,7 @@ const formattedDate = computed(() => {
   }
 
   &-title {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     font-weight: 700;
     color: var(--brand-dark-green);
     margin: 0;
@@ -87,12 +87,15 @@ const formattedDate = computed(() => {
 
   &-events {
     direction: ltr; // Inner wrapper restores RTL for cards
-    padding: var(--spacing-md);
+    padding: 12px;
     overflow-x: hidden;
   }
 
   &-events-inner {
     direction: rtl; // Restore RTL so cards keep correct order (accent, body, text)
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   &-empty {

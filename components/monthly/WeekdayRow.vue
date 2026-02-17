@@ -32,7 +32,7 @@ const isWeekendDay = (index) => {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   align-items: center;
-  height: 52px;
+  height: 44px;
   padding-block: 0;
   gap: var(--spacing-md);
 

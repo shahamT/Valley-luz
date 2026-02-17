@@ -93,7 +93,6 @@ const handleCardClick = () => {
   background-color: var(--card-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  margin-bottom: var(--spacing-sm);
   display: flex;
   flex-direction: row;
   align-items: stretch;
