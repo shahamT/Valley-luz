@@ -1,28 +1,18 @@
 <template>
   <header class="AppHeader">
     <div class="AppHeader-container">
-      <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
-        <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
-      </button>
-      <div class="AppHeader-leftSpacer" aria-hidden="true"></div>
-      <button class="AppHeader-whatsappButton" aria-label="לבוט הוואטסאפ שלנו">
-        <img src="/icons/whatsapp-icon.svg" alt="" class="AppHeader-whatsappIcon" />
-        <span class="AppHeader-whatsappText">לבוט הוואטסאפ שלנו</span>
-      </button>
-      <div class="AppHeader-rightSpacer" aria-hidden="true"></div>
-      <div class="AppHeader-rightGroup">
-        <img
-          v-if="!isMobile"
-          src="/logos/valleyluz-logo.png"
-          alt="Valley Luz"
-          class="AppHeader-logo"
-        />
-        <img
-          v-else
-          src="/logos/valleyluz-icon.svg"
-          alt="Valley Luz"
-          class="AppHeader-logo AppHeader-logo--icon"
-        />
+      <div class="AppHeader-side AppHeader-side--menu">
+        <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
+          <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
+        </button>
+      </div>
+      <div class="AppHeader-side AppHeader-side--center">
+        <button class="AppHeader-whatsappButton" aria-label="לבוט הוואטסאפ שלנו">
+          <img src="/icons/whatsapp-icon.svg" alt="" class="AppHeader-whatsappIcon" />
+          <span class="AppHeader-whatsappText">לבוט הוואטסאפ שלנו</span>
+        </button>
+      </div>
+      <div class="AppHeader-side AppHeader-side--logo">
         <div class="AppHeader-center">
         <slot name="center">
           <ClientOnly>
@@ -92,6 +82,27 @@
         </ClientOnly>
       </slot>
       </div>
+        <ClientOnly>
+          <img
+            v-if="!isMobile"
+            src="/logos/valleyluz-logo.png"
+            alt="Valley Luz"
+            class="AppHeader-logo"
+          />
+          <img
+            v-else
+            src="/logos/valleyluz-icon.svg"
+            alt="Valley Luz"
+            class="AppHeader-logo AppHeader-logo--icon"
+          />
+          <template #fallback>
+            <img
+              src="/logos/valleyluz-logo.png"
+              alt="Valley Luz"
+              class="AppHeader-logo"
+            />
+          </template>
+        </ClientOnly>
       </div>
     </div>
   </header>
@@ -169,13 +180,42 @@ const handleYearChange = ({ year }) => {
     margin: 0 auto;
     padding-inline: var(--spacing-3xl);
     height: 100%;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
     align-items: center;
     gap: var(--spacing-md);
 
     @media (max-width: 768px) {
       padding-inline: 1rem;
     }
+  }
+
+  &-side {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    grid-row: 1;
+
+    &--menu {
+      justify-content: flex-end;
+      grid-column: 1;
+    }
+
+    &--center {
+      justify-content: center;
+      grid-column: 2;
+    }
+
+    &--logo {
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      grid-column: 3;
+    }
+  }
+
+  [dir='rtl'] &-side--menu {
+    justify-content: flex-start;
   }
 
   &-logo {
@@ -210,46 +250,12 @@ const handleYearChange = ({ year }) => {
     flex-shrink: 0;
   }
 
-  &-leftSpacer,
-  &-rightSpacer {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &-rightGroup {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    min-width: 0;
-  }
-
   &-center {
     flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     min-width: 0;
-  }
-
-  [dir='rtl'] &-menuButton {
-    order: 0;
-  }
-
-  [dir='rtl'] &-leftSpacer {
-    order: 1;
-  }
-
-  [dir='rtl'] &-whatsappButton {
-    order: 2;
-  }
-
-  [dir='rtl'] &-rightSpacer {
-    order: 3;
-  }
-
-  [dir='rtl'] &-rightGroup {
-    order: 4;
   }
 
   &-monthNav {
