@@ -15,9 +15,20 @@
           <div class="EventModal-imageHeader">
             <img :src="eventImage" :alt="selectedEvent.title" class="EventModal-image" />
             <div class="EventModal-imageOverlay" />
-            <button @click="closeModal" class="EventModal-closeButton" :aria-label="MODAL_TEXT.close">
-              <UiIcon name="close" size="lg" />
-            </button>
+            <div class="EventModal-headerActions">
+              <button
+                v-if="canShare"
+                type="button"
+                class="EventModal-shareButton"
+                :aria-label="MODAL_TEXT.share"
+                @click="handleShare"
+              >
+                <UiIcon name="share" size="lg" />
+              </button>
+              <button @click="closeModal" class="EventModal-closeButton" :aria-label="MODAL_TEXT.close">
+                <UiIcon name="close" size="lg" />
+              </button>
+            </div>
             <div class="EventModal-headerContent">
               <h1 class="EventModal-eventTitle">{{ selectedEvent.title }}</h1>
               <div v-if="selectedEvent.categories?.length" class="EventModal-categories">
@@ -172,7 +183,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getCategoryColor } from '~/utils/calendar-display.helpers'
 import { formatEventTime, formatEventPrice } from '~/utils/events.helpers'
@@ -191,6 +202,13 @@ const isLocationPopupOpen = ref(false)
 const locationButtonRef = ref(null)
 
 const isImagePopupOpen = ref(false)
+
+const canShare = ref(false)
+onMounted(() => {
+  if (import.meta.client && navigator.share) {
+    canShare.value = true
+  }
+})
 
 // computed
 const isMobile = computed(() => {
@@ -358,6 +376,21 @@ const closeImagePopup = () => {
   isImagePopupOpen.value = false
 }
 
+const handleShare = async () => {
+  if (!navigator.share || !selectedEvent.value) return
+  try {
+    await navigator.share({
+      title: selectedEvent.value.title,
+      url: typeof window !== 'undefined' ? window.location.href : '',
+      text: selectedEvent.value.shortDescription || selectedEvent.value.title,
+    })
+  } catch (e) {
+    if (e.name !== 'AbortError') {
+      // User cancelled or share failed; no feedback required
+    }
+  }
+}
+
 const handleCalendarSelect = async (calendarType) => {
   const eventData = {
     title: selectedEvent.value?.title || '',
@@ -496,23 +529,34 @@ const handleCalendarSelect = async (calendarType) => {
     background-color: rgba(11, 151, 74, 0.75);
   }
 
-  &-closeButton {
+  &-headerActions {
     position: absolute;
     top: var(--spacing-md);
-    right: var(--spacing-md);
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline: var(--spacing-md);
+    z-index: 10;
+  }
+
+  [dir='rtl'] &-headerActions {
+    flex-direction: row-reverse;
+  }
+
+  &-shareButton,
+  &-closeButton {
     background: none;
     border: none;
     cursor: pointer;
     color: var(--chip-text-white);
-    padding: 0;
-    width: var(--modal-close-size);
-    height: var(--modal-close-size);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
+    border-radius: 50%;
     transition: background-color 0.2s ease;
-    z-index: 10;
     font-weight: 700;
 
     &:hover {
