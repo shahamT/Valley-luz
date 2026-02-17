@@ -1,5 +1,5 @@
 <template>
-  <div class="KanbanEventCard">
+  <div class="KanbanEventCard" @click="handleCardClick">
     <div
       class="KanbanEventCard-accent"
       :style="{ backgroundColor: categoryColor }"
@@ -43,6 +43,7 @@ const props = defineProps({
 
 // data
 const { categories } = useCalendarViewData()
+const uiStore = useUiStore()
 
 // computed
 const categoryColor = computed(() => {
@@ -81,6 +82,10 @@ const getChipColor = (categoryId) => {
 const getCategoryLabel = (categoryId) => {
   return categories.value?.[categoryId]?.label ?? categoryId
 }
+
+const handleCardClick = () => {
+  uiStore.openEventModal(props.event.eventId)
+}
 </script>
 
 <style lang="scss">
@@ -93,6 +98,13 @@ const getCategoryLabel = (categoryId) => {
   flex-direction: row;
   align-items: stretch;
   overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
 
   &-body {
     flex: 1;

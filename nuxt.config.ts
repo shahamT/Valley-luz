@@ -8,6 +8,12 @@ export default defineNuxtConfig({
   
   modules: ['@pinia/nuxt', '@vueuse/nuxt', 'floating-vue/nuxt'],
   
+  vue: {
+    compilerOptions: {
+      isCustomElement: (tag) => tag.startsWith('add-'),
+    },
+  },
+  
   app: {
     head: {
       title: 'Valley Luz',

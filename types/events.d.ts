@@ -43,6 +43,9 @@ export interface Event {
   isActive: boolean
   createdAt?: string
   updatedAt?: string
+  urls?: string[] // Array of URL strings
+  media?: any[] // Media attachments (images, videos)
+  publisherPhone?: string // WhatsApp contact number
 }
 
 /**

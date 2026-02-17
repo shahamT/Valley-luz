@@ -43,7 +43,7 @@ export function formatEventPrice(event) {
   if (event.price === null || event.price === undefined || event.price === 0) {
     return 'חינם'
   }
-  return `${event.price} ש"ח`
+  return `${event.price} ₪`
 }
 
 /**

@@ -6,8 +6,17 @@ export const MOBILE_BREAKPOINT = 768 // Main mobile breakpoint for layouts and n
 export const DAY_CELL_BREAKPOINT = 920 // Breakpoint for day cell chip display logic
 
 export const MODAL_TEXT = {
-  title: 'Event Modal',
+  title: 'פרטי אירוע',
   close: 'סגור',
-  noEventSelected: 'אין אירוע נבחר',
-  placeholder: 'זהו רכיב מודאלי של מציין מיקום.',
+  noEventSelected: 'אירוע לא נמצא',
+  categories: 'קטגוריות',
+  location: 'מיקום',
+  time: 'זמן',
+  price: 'מחיר',
+  description: 'תיאור',
+  links: 'קישורים',
+  linkButton: 'קישור',
+  contactPublisher: 'צור קשר עם המפרסם',
+  addToCalendar: 'הוסף ליומן',
+  unknownLocation: 'לא ידוע',
 }
