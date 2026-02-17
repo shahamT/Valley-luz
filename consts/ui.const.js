@@ -15,9 +15,9 @@ export const MODAL_TEXT = {
   price: 'מחיר',
   description: 'תיאור',
   links: 'קישורים',
-  contactPublisher: 'צור קשר עם המפרסם',
-  addToCalendar: 'הוסף ליומן',
-  navigateToEvent: 'נווט לאירוע',
+  contactPublisher: 'יצירת קשר עם המפרסם',
+  addToCalendar: 'הוספה ליומן',
+  navigateToEvent: 'ניווט לאירוע',
   unknownLocation: 'לא ידוע',
 }
 

@@ -1,19 +1,29 @@
 <template>
   <header class="AppHeader">
     <div class="AppHeader-container">
-      <img
-        v-if="!isMobile"
-        src="/logos/valleyluz-logo.png"
-        alt="Valley Luz"
-        class="AppHeader-logo"
-      />
-      <img
-        v-else
-        src="/logos/valleyluz-icon.svg"
-        alt="Valley Luz"
-        class="AppHeader-logo AppHeader-logo--icon"
-      />
-      <div class="AppHeader-center">
+      <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
+        <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
+      </button>
+      <div class="AppHeader-leftSpacer" aria-hidden="true"></div>
+      <button class="AppHeader-whatsappButton" aria-label="לבוט הוואטסאפ שלנו">
+        <img src="/icons/whatsapp-icon.svg" alt="" class="AppHeader-whatsappIcon" />
+        <span class="AppHeader-whatsappText">לבוט הוואטסאפ שלנו</span>
+      </button>
+      <div class="AppHeader-rightSpacer" aria-hidden="true"></div>
+      <div class="AppHeader-rightGroup">
+        <img
+          v-if="!isMobile"
+          src="/logos/valleyluz-logo.png"
+          alt="Valley Luz"
+          class="AppHeader-logo"
+        />
+        <img
+          v-else
+          src="/logos/valleyluz-icon.svg"
+          alt="Valley Luz"
+          class="AppHeader-logo AppHeader-logo--icon"
+        />
+        <div class="AppHeader-center">
         <slot name="center">
           <ClientOnly>
             <div v-if="showMonthYear" class="AppHeader-monthNav">
@@ -81,6 +91,7 @@
           </template>
         </ClientOnly>
       </slot>
+      </div>
       </div>
     </div>
   </header>
@@ -175,6 +186,44 @@ const handleYearChange = ({ year }) => {
     direction: ltr;
   }
 
+  &-menuButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--brand-dark-green);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: var(--weekend-day-bg);
+    }
+  }
+
+  &-menuIcon {
+    flex-shrink: 0;
+  }
+
+  &-leftSpacer,
+  &-rightSpacer {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &-rightGroup {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    min-width: 0;
+  }
+
   &-center {
     flex: 1;
     display: flex;
@@ -183,12 +232,24 @@ const handleYearChange = ({ year }) => {
     min-width: 0;
   }
 
-  [dir='rtl'] &-logo {
+  [dir='rtl'] &-menuButton {
+    order: 0;
+  }
+
+  [dir='rtl'] &-leftSpacer {
+    order: 1;
+  }
+
+  [dir='rtl'] &-whatsappButton {
     order: 2;
   }
 
-  [dir='rtl'] &-center {
-    order: 1;
+  [dir='rtl'] &-rightSpacer {
+    order: 3;
+  }
+
+  [dir='rtl'] &-rightGroup {
+    order: 4;
   }
 
   &-monthNav {
@@ -253,6 +314,47 @@ const handleYearChange = ({ year }) => {
     font-size: var(--font-size-lg);
     font-weight: 700;
     color: var(--brand-dark-green);
+  }
+
+  &-whatsappButton {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: #25D366;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-md);
+    transition: opacity 0.2s ease;
+    flex-shrink: 0;
+    height: 34px;
+
+    &:hover {
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      padding: var(--spacing-xs) var(--spacing-md);
+      gap: var(--spacing-xs);
+    }
+  }
+
+  &-whatsappIcon {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) saturate(100%);
+
+    @media (max-width: 768px) {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &-whatsappText {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
   }
 }
 </style>

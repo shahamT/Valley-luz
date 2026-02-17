@@ -8,7 +8,7 @@
     <div class="CalendarOptionsPopup-content">
       <div class="CalendarOptionsPopup-header">
         <div class="CalendarOptionsPopup-titleWrapper">
-          <div class="CalendarOptionsPopup-titleLabel">הוסף ליומן את</div>
+          <div class="CalendarOptionsPopup-titleLabel">הוסיפו ליומן את</div>
           <h2 class="CalendarOptionsPopup-title">{{ eventName }}</h2>
         </div>
         <button

@@ -64,6 +64,13 @@
               </div>
             </div>
 
+            <!-- Event Image Thumbnail (if exists) -->
+            <div v-if="hasEventImage" class="EventModal-imageThumbSection">
+              <div class="EventModal-imageThumb" @click="openImagePopup">
+                <img :src="eventContentImage" :alt="selectedEvent.title" class="EventModal-thumbImage" />
+              </div>
+            </div>
+
             <!-- Description Section -->
             <div v-if="eventDescription" class="EventModal-descriptionSection">
               <div class="EventModal-description" v-html="eventDescription"></div>
@@ -152,6 +159,16 @@
       @close="isLocationPopupOpen = false"
     />
   </Teleport>
+
+  <!-- Image Full-Size Popup -->
+  <Teleport to="body">
+    <UiImagePopup
+      v-if="isImagePopupOpen && eventContentImage"
+      :image-url="eventContentImage"
+      :alt-text="selectedEvent.title"
+      @close="closeImagePopup"
+    />
+  </Teleport>
 </template>
 
 <script setup>
@@ -172,6 +189,8 @@ const calendarButtonRef = ref(null)
 
 const isLocationPopupOpen = ref(false)
 const locationButtonRef = ref(null)
+
+const isImagePopupOpen = ref(false)
 
 // computed
 const isMobile = computed(() => {
@@ -213,6 +232,18 @@ const eventImage = computed(() => {
     return typeof firstMedia === 'string' ? firstMedia : firstMedia?.url || '/imgs/default-event-bg.webp'
   }
   return '/imgs/default-event-bg.webp'
+})
+
+const hasEventImage = computed(() => {
+  const media = selectedEvent.value?.media
+  return media && media.length > 0
+})
+
+const eventContentImage = computed(() => {
+  if (!hasEventImage.value) return null
+  const media = selectedEvent.value.media
+  const firstMedia = media[0]
+  return typeof firstMedia === 'string' ? firstMedia : firstMedia?.url || null
 })
 
 const eventTime = computed(() => {
@@ -304,6 +335,7 @@ const closeModal = () => {
   uiStore.closeEventModal()
   isCalendarPopupOpen.value = false
   isLocationPopupOpen.value = false
+  isImagePopupOpen.value = false
 }
 
 const getCategoryLabel = (categoryId) => {
@@ -316,6 +348,14 @@ const toggleCalendarPopup = () => {
 
 const toggleLocationPopup = () => {
   isLocationPopupOpen.value = !isLocationPopupOpen.value
+}
+
+const openImagePopup = () => {
+  isImagePopupOpen.value = true
+}
+
+const closeImagePopup = () => {
+  isImagePopupOpen.value = false
 }
 
 const handleCalendarSelect = async (calendarType) => {
@@ -348,6 +388,30 @@ const handleCalendarSelect = async (calendarType) => {
   padding: var(--spacing-lg);
   padding-top: var(--spacing-xl);
   overflow-y: auto;
+  direction: ltr;
+
+  /* Custom scrollbar styling (matching html scrollbar) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
+
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--scrollbar-track-bg);
+    border-radius: var(--scrollbar-border-radius);
+    margin: var(--scrollbar-margin);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb-bg);
+    border-radius: var(--scrollbar-border-radius);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover-bg);
+  }
 
   @media (max-width: 768px) {
     padding: 0;
@@ -355,6 +419,7 @@ const handleCalendarSelect = async (calendarType) => {
   }
 
   &-content {
+    direction: rtl;
     background-color: var(--color-background);
     border-radius: var(--radius-lg);
     max-width: 600px;
@@ -605,6 +670,46 @@ const handleCalendarSelect = async (calendarType) => {
     color: #2c5aa0;
     line-height: 1.4;
     text-align: center;
+  }
+
+  &-imageThumbSection {
+    background-color: var(--color-background);
+    padding: var(--spacing-lg);
+    padding-bottom: 0;
+    display: flex;
+    justify-content: flex-start;
+
+    @media (max-width: 768px) {
+      padding: var(--spacing-md);
+      padding-bottom: 0;
+    }
+  }
+
+  &-imageThumb {
+    max-height: 140px;
+    max-width: 100%;
+    display: inline-block;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: scale(1.01);
+    }
+  }
+
+  &-thumbImage {
+    max-height: 140px;
+    max-width: 100%;
+    height: auto;
+    width: auto;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    background-color: var(--color-surface);
   }
 
   &-descriptionSection {

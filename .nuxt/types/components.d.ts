@@ -35,6 +35,7 @@ interface _GlobalComponents {
   'UiFilterPopup': typeof import("../../components/ui/FilterPopup.vue").default
   'UiHoursFilterPanel': typeof import("../../components/ui/HoursFilterPanel.vue").default
   'UiIcon': typeof import("../../components/ui/Icon.vue").default
+  'UiImagePopup': typeof import("../../components/ui/ImagePopup.vue").default
   'UiLoadingSpinner': typeof import("../../components/ui/LoadingSpinner.vue").default
   'UiLocationInfoPopup': typeof import("../../components/ui/LocationInfoPopup.vue").default
   'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
@@ -85,6 +86,7 @@ interface _GlobalComponents {
   'LazyUiFilterPopup': LazyComponent<typeof import("../../components/ui/FilterPopup.vue").default>
   'LazyUiHoursFilterPanel': LazyComponent<typeof import("../../components/ui/HoursFilterPanel.vue").default>
   'LazyUiIcon': LazyComponent<typeof import("../../components/ui/Icon.vue").default>
+  'LazyUiImagePopup': LazyComponent<typeof import("../../components/ui/ImagePopup.vue").default>
   'LazyUiLoadingSpinner': LazyComponent<typeof import("../../components/ui/LoadingSpinner.vue").default>
   'LazyUiLocationInfoPopup': LazyComponent<typeof import("../../components/ui/LocationInfoPopup.vue").default>
   'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>
