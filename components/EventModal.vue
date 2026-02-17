@@ -381,16 +381,13 @@ const handleCalendarSelect = async (calendarType) => {
   &-body {
     @media (max-width: 768px) {
       flex: 1;
+      padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
     }
   }
   
   &-actions {
     @media (max-width: 768px) {
       flex-shrink: 0;
-      background-color: var(--color-background);
-      border-top: 1px solid var(--color-border);
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-      padding-bottom: env(safe-area-inset-bottom, 0);
     }
   }
 
@@ -765,11 +762,17 @@ const handleCalendarSelect = async (calendarType) => {
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 
     @media (max-width: 768px) {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       padding: var(--spacing-md);
-      border-top: none;
-      box-shadow: none;
+      padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0));
+      border-top: 1px solid var(--color-border);
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
       gap: var(--spacing-sm);
       border-radius: 0;
+      z-index: 10;
     }
   }
 
