@@ -63,7 +63,6 @@
                 rel="noopener noreferrer"
                 class="EventModal-linkButton"
               >
-                <UiIcon name="link" size="sm" />
                 {{ MODAL_TEXT.linkButton }} {{ index + 1 }}
               </a>
             </div>
@@ -77,7 +76,7 @@
                 rel="noopener noreferrer"
                 class="EventModal-contactButton"
               >
-                <UiIcon name="chat" size="sm" />
+                <img src="/icons/whatsapp-icon.svg" alt="WhatsApp" class="EventModal-whatsappIcon" />
                 {{ MODAL_TEXT.contactPublisher }}
               </a>
               <button
@@ -85,7 +84,7 @@
                 disabled
                 class="EventModal-contactButton EventModal-contactButton--disabled"
               >
-                <UiIcon name="chat" size="sm" />
+                <img src="/icons/whatsapp-icon.svg" alt="WhatsApp" class="EventModal-whatsappIcon" />
                 {{ MODAL_TEXT.contactPublisher }}
               </button>
             </div>
@@ -93,7 +92,7 @@
 
           <!-- Fixed Actions Bar -->
           <div class="EventModal-actions">
-            <!-- Action Bar - Add to Calendar Only -->
+            <!-- Action Bar - Bottom Buttons -->
             <div v-if="calendarStartDate" class="EventModal-actionBar">
               <button
                 ref="calendarButtonRef"
@@ -103,6 +102,14 @@
               >
                 <UiIcon name="event_available" size="sm" />
                 {{ MODAL_TEXT.addToCalendar }}
+              </button>
+              <button
+                type="button"
+                class="EventModal-navigateButton"
+                disabled
+              >
+                <UiIcon name="directions" size="sm" />
+                {{ MODAL_TEXT.navigateToEvent }}
               </button>
             </div>
           </div>
@@ -530,7 +537,8 @@ const handleCalendarSelect = async (calendarType) => {
     background-color: var(--color-background);
     padding: var(--spacing-lg);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: var(--spacing-sm);
 
     @media (max-width: 768px) {
@@ -542,22 +550,21 @@ const handleCalendarSelect = async (calendarType) => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
-    background-color: var(--color-surface);
-    color: var(--color-primary);
-    border: 2px solid var(--color-border);
+    background-color: transparent;
+    color: var(--brand-dark-green);
+    border: 2px solid var(--brand-dark-green);
     border-radius: var(--radius-md);
     font-size: var(--font-size-sm);
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
     width: auto;
 
     &:hover {
-      background-color: var(--color-primary);
+      background-color: var(--brand-dark-green);
       color: var(--chip-text-white);
-      border-color: var(--color-primary);
+      border-color: var(--brand-dark-green);
     }
 
     @media (max-width: 768px) {
@@ -579,12 +586,12 @@ const handleCalendarSelect = async (calendarType) => {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-lg);
-    background-color: var(--brand-dark-green);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: #25D366;
     color: var(--chip-text-white);
     border: none;
     border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -592,7 +599,7 @@ const handleCalendarSelect = async (calendarType) => {
     cursor: pointer;
 
     &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--brand-dark-green) 85%, black);
+      background-color: color-mix(in srgb, #25D366 85%, black);
     }
 
     &--disabled {
@@ -605,12 +612,18 @@ const handleCalendarSelect = async (calendarType) => {
     }
   }
 
+  &-whatsappIcon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+  }
+
   &-actionBar {
     background-color: var(--color-background);
     padding: var(--spacing-md) var(--spacing-lg);
     border-top: 1px solid var(--color-border);
     display: flex;
-    justify-content: center;
+    gap: var(--spacing-md);
     position: sticky;
     bottom: 0;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
@@ -619,12 +632,12 @@ const handleCalendarSelect = async (calendarType) => {
       padding: var(--spacing-md);
       border-top: none;
       box-shadow: none;
+      gap: var(--spacing-sm);
     }
   }
 
   &-calendarButton {
-    width: 100%;
-    max-width: 240px;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -647,9 +660,36 @@ const handleCalendarSelect = async (calendarType) => {
     &:active {
       transform: scale(0.98);
     }
+  }
+
+  &-navigateButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--brand-dark-green);
+    color: var(--chip-text-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
     
-    @media (max-width: 768px) {
-      max-width: none;
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--brand-dark-green) 85%, black);
+    }
+    
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
 }

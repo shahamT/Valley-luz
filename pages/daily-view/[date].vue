@@ -58,6 +58,7 @@ const route = useRoute()
 const { events, isLoading, isError } = useCalendarViewData()
 
 const calendarStore = useCalendarStore()
+const uiStore = useUiStore()
 
 const { getFilteredEventsByDate } = useEventFilters(events)
 const { navigateToMonth, navigateToMonthInDailyView, goToPrevDay, goToNextDay } = useCalendarNavigation()
@@ -70,6 +71,8 @@ onMounted(() => {
   initializeFromUrl()
   // Start watching store and syncing filters to URL
   startUrlSync()
+  // Initialize modal from URL if event param exists
+  uiStore.initializeModalFromUrl()
 })
 
 // Validate and redirect invalid dates

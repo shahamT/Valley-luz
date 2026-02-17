@@ -69,6 +69,8 @@ const { events, isLoading, isError } = useCalendarViewData()
 const calendarStore = useCalendarStore()
 const { currentDate } = storeToRefs(calendarStore)
 
+const uiStore = useUiStore()
+
 const { getFilteredEventsForMonth } = useEventFilters(events)
 const { switchToDailyView } = useCalendarNavigation()
 
@@ -80,6 +82,8 @@ onMounted(() => {
   initializeFromUrl()
   // Start watching store and syncing to URL
   startUrlSync()
+  // Initialize modal from URL if event param exists
+  uiStore.initializeModalFromUrl()
 })
 
 const currentYear = computed(() => currentDate.value?.year ?? getCurrentYearMonth().year)

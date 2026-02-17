@@ -18,6 +18,7 @@ export const MODAL_TEXT = {
   linkButton: 'קישור',
   contactPublisher: 'צור קשר עם המפרסם',
   addToCalendar: 'הוסף ליומן',
+  navigateToEvent: 'נווט לאירוע',
   unknownLocation: 'לא ידוע',
 }
 
