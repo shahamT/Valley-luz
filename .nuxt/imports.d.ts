@@ -40,6 +40,7 @@ export { useScreenWidth } from '../composables/useScreenWidth';
 export { useUrlState } from '../composables/useUrlState';
 export { getDisplayEvents, getAdditionalEventsCount, isWeekendDay, getCategoryColor, getMoreEventsText } from '../utils/calendar-display.helpers';
 export { generateCalendarDays } from '../utils/calendar.helpers';
+export { downloadIcsFile, getGoogleCalendarUrl, handleCalendarSelection } from '../utils/calendar.service';
 export { formatDateToYYYYMMDD, parseDateString, getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isMonthBefore, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, isBeforeToday, formatKanbanDateHeader, formatMinutesToTime } from '../utils/date.helpers';
 export { formatEventTime, formatEventPrice, formatEventLocation, formatEventLocationForChip, transformEventForCard } from '../utils/events.helpers';
 export { eventsService } from '../utils/events.service';

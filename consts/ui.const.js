@@ -20,3 +20,10 @@ export const MODAL_TEXT = {
   addToCalendar: 'הוסף ליומן',
   unknownLocation: 'לא ידוע',
 }
+
+export const CALENDAR_OPTIONS = [
+  { id: 'google', label: 'Google Calendar', iconPath: '/icons/google-calendar.png' },
+  { id: 'apple', label: 'Apple Calendar', iconPath: '/icons/apple-calendar.png' },
+  { id: 'outlook', label: 'Outlook', iconPath: '/icons/outlook.png' },
+  { id: 'ical', label: 'iCal', iconPath: '/icons/ical.svg' },
+]

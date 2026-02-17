@@ -28,6 +28,7 @@ interface _GlobalComponents {
   'MonthlyMonthCarousel': typeof import("../../components/monthly/MonthCarousel.vue").default
   'MonthlyWeekdayRow': typeof import("../../components/monthly/WeekdayRow.vue").default
   'UiCalendarNavArrow': typeof import("../../components/ui/CalendarNavArrow.vue").default
+  'UiCalendarOptionsPopup': typeof import("../../components/ui/CalendarOptionsPopup.vue").default
   'UiCategoryPill': typeof import("../../components/ui/CategoryPill.vue").default
   'UiFilterModal': typeof import("../../components/ui/FilterModal.vue").default
   'UiFilterPanel': typeof import("../../components/ui/FilterPanel.vue").default
@@ -76,6 +77,7 @@ interface _GlobalComponents {
   'LazyMonthlyMonthCarousel': LazyComponent<typeof import("../../components/monthly/MonthCarousel.vue").default>
   'LazyMonthlyWeekdayRow': LazyComponent<typeof import("../../components/monthly/WeekdayRow.vue").default>
   'LazyUiCalendarNavArrow': LazyComponent<typeof import("../../components/ui/CalendarNavArrow.vue").default>
+  'LazyUiCalendarOptionsPopup': LazyComponent<typeof import("../../components/ui/CalendarOptionsPopup.vue").default>
   'LazyUiCategoryPill': LazyComponent<typeof import("../../components/ui/CategoryPill.vue").default>
   'LazyUiFilterModal': LazyComponent<typeof import("../../components/ui/FilterModal.vue").default>
   'LazyUiFilterPanel': LazyComponent<typeof import("../../components/ui/FilterPanel.vue").default>

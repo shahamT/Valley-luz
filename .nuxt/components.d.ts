@@ -28,6 +28,7 @@ export const MonthlyMonthCalendar: typeof import("../components/monthly/MonthCal
 export const MonthlyMonthCarousel: typeof import("../components/monthly/MonthCarousel.vue").default
 export const MonthlyWeekdayRow: typeof import("../components/monthly/WeekdayRow.vue").default
 export const UiCalendarNavArrow: typeof import("../components/ui/CalendarNavArrow.vue").default
+export const UiCalendarOptionsPopup: typeof import("../components/ui/CalendarOptionsPopup.vue").default
 export const UiCategoryPill: typeof import("../components/ui/CategoryPill.vue").default
 export const UiFilterModal: typeof import("../components/ui/FilterModal.vue").default
 export const UiFilterPanel: typeof import("../components/ui/FilterPanel.vue").default
@@ -76,6 +77,7 @@ export const LazyMonthlyMonthCalendar: LazyComponent<typeof import("../component
 export const LazyMonthlyMonthCarousel: LazyComponent<typeof import("../components/monthly/MonthCarousel.vue").default>
 export const LazyMonthlyWeekdayRow: LazyComponent<typeof import("../components/monthly/WeekdayRow.vue").default>
 export const LazyUiCalendarNavArrow: LazyComponent<typeof import("../components/ui/CalendarNavArrow.vue").default>
+export const LazyUiCalendarOptionsPopup: LazyComponent<typeof import("../components/ui/CalendarOptionsPopup.vue").default>
 export const LazyUiCategoryPill: LazyComponent<typeof import("../components/ui/CategoryPill.vue").default>
 export const LazyUiFilterModal: LazyComponent<typeof import("../components/ui/FilterModal.vue").default>
 export const LazyUiFilterPanel: LazyComponent<typeof import("../components/ui/FilterPanel.vue").default>

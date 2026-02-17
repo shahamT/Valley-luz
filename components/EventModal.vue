@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div v-if="isEventModalShowing" class="EventModal" @click.self="closeModal">
-      <div class="EventModal-content">
+      <div class="EventModal-content" :class="{'EventModal-content--mobile': isMobile}">
         <div v-if="!selectedEvent" class="EventModal-notFoundWrapper">
           <p class="EventModal-notFound">{{ MODAL_TEXT.noEventSelected }}</p>
         </div>
@@ -28,8 +28,8 @@
             </div>
           </div>
 
-          <!-- Inner Content Wrapper (for direction reset) -->
-          <div class="EventModal-innerContent">
+          <!-- Scrollable Body -->
+          <div class="EventModal-body">
             <!-- Info Bar (Location, Time, Price) -->
             <div class="EventModal-infoBar">
               <div class="EventModal-infoItem">
@@ -53,41 +53,23 @@
               <p class="EventModal-description">{{ eventDescription }}</p>
             </div>
 
-            <!-- Action Bar (Links, Calendar, Contact) -->
-            <div class="EventModal-actionBar">
-              <!-- Links -->
-              <div v-if="selectedEvent.urls?.length" class="EventModal-linksWrapper">
-                <a
-                  v-for="(url, index) in selectedEvent.urls"
-                  :key="index"
-                  :href="url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="EventModal-linkButton"
-                >
-                  {{ MODAL_TEXT.linkButton }} {{ index + 1 }}
-                </a>
-              </div>
+            <!-- Links Section (if exists) -->
+            <div v-if="selectedEvent.urls?.length" class="EventModal-linksSection">
+              <a
+                v-for="(url, index) in selectedEvent.urls"
+                :key="index"
+                :href="url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="EventModal-linkButton"
+              >
+                <UiIcon name="link" size="sm" />
+                {{ MODAL_TEXT.linkButton }} {{ index + 1 }}
+              </a>
+            </div>
 
-              <!-- Add to Calendar -->
-              <div class="EventModal-calendarButton">
-                <add-to-calendar-button
-                  :name="selectedEvent.title"
-                  :description="eventDescription"
-                  :location="formattedLocation"
-                  :startDate="calendarStartDate"
-                  :startTime="calendarStartTime"
-                  :endDate="calendarEndDate"
-                  :endTime="calendarEndTime"
-                  :options="['Google', 'Apple', 'Outlook.com', 'iCal']"
-                  :timeZone="calendarTimeZone"
-                  :language="'he'"
-                  buttonStyle="flat"
-                  lightMode="bodyScheme"
-                />
-              </div>
-
-              <!-- Contact Publisher -->
+            <!-- Contact Publisher Button (always visible) -->
+            <div class="EventModal-contactSection">
               <a
                 v-if="selectedEvent.publisherPhone"
                 :href="whatsappLink"
@@ -98,27 +80,90 @@
                 <UiIcon name="chat" size="sm" />
                 {{ MODAL_TEXT.contactPublisher }}
               </a>
+              <button
+                v-else
+                disabled
+                class="EventModal-contactButton EventModal-contactButton--disabled"
+              >
+                <UiIcon name="chat" size="sm" />
+                {{ MODAL_TEXT.contactPublisher }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Fixed Actions Bar -->
+          <div class="EventModal-actions">
+            <!-- Action Bar - Add to Calendar Only -->
+            <div v-if="calendarStartDate" class="EventModal-actionBar">
+              <button
+                ref="calendarButtonRef"
+                type="button"
+                class="EventModal-calendarButton"
+                @click="toggleCalendarPopup"
+              >
+                <UiIcon name="event_available" size="sm" />
+                {{ MODAL_TEXT.addToCalendar }}
+              </button>
             </div>
           </div>
         </template>
       </div>
     </div>
   </Teleport>
+
+  <!-- Calendar Options Popup -->
+  <Teleport to="body">
+    <UiCalendarOptionsPopup
+      v-if="isCalendarPopupOpen && calendarButtonRef && selectedEvent"
+      :trigger-element="calendarButtonRef"
+      :calendar-options="CALENDAR_OPTIONS"
+      :event-name="selectedEvent.title"
+      @close="isCalendarPopupOpen = false"
+      @select="handleCalendarSelect"
+    />
+  </Teleport>
 </template>
 
 <script setup>
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { getCategoryColor } from '~/utils/calendar-display.helpers'
 import { formatEventTime, formatEventPrice } from '~/utils/events.helpers'
-import { MODAL_TEXT } from '~/consts/ui.const'
-import 'add-to-calendar-button'
+import { handleCalendarSelection } from '~/utils/calendar.service'
+import { MODAL_TEXT, CALENDAR_OPTIONS, MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
 // data
 const uiStore = useUiStore()
 const { isEventModalShowing, selectedEventId } = storeToRefs(uiStore)
 const { events, categories } = useCalendarViewData()
 
+const isCalendarPopupOpen = ref(false)
+const calendarButtonRef = ref(null)
+
 // computed
+const isMobile = computed(() => {
+  if (typeof window === 'undefined') return false
+  return window.innerWidth <= MOBILE_BREAKPOINT
+})
+
+// Lock body scroll when modal is open
+watch(isEventModalShowing, (isShowing) => {
+  if (typeof document === 'undefined') return
+  
+  if (isShowing) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+}, { immediate: true })
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
+
 const selectedEvent = computed(() => {
   if (!selectedEventId.value || !events.value) return null
   return events.value.find((event) => event.id === selectedEventId.value) || null
@@ -209,10 +254,29 @@ const calendarTimeZone = computed(() => {
 // methods
 const closeModal = () => {
   uiStore.closeEventModal()
+  isCalendarPopupOpen.value = false
 }
 
 const getCategoryLabel = (categoryId) => {
   return categories.value?.[categoryId]?.label ?? categoryId
+}
+
+const toggleCalendarPopup = () => {
+  isCalendarPopupOpen.value = !isCalendarPopupOpen.value
+}
+
+const handleCalendarSelect = async (calendarType) => {
+  const eventData = {
+    title: selectedEvent.value?.title || '',
+    description: eventDescription.value,
+    location: formattedLocation.value,
+    startDate: calendarStartDate.value,
+    startTime: calendarStartTime.value,
+    endDate: calendarEndDate.value,
+    endTime: calendarEndTime.value,
+  }
+  
+  await handleCalendarSelection(calendarType, eventData)
 }
 </script>
 
@@ -225,14 +289,16 @@ const getCategoryLabel = (categoryId) => {
   bottom: 0;
   background-color: var(--modal-backdrop-bg);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: var(--z-index-modal);
   padding: var(--spacing-lg);
+  padding-top: var(--spacing-xl);
+  overflow-y: auto;
 
   @media (max-width: 768px) {
     padding: 0;
-    align-items: flex-start;
+    overflow-y: auto;
   }
 
   &-content {
@@ -248,6 +314,30 @@ const getCategoryLabel = (categoryId) => {
       width: 100%;
       min-height: 100vh;
       border-radius: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    &--mobile {
+      @media (max-width: 768px) {
+        height: 100vh;
+      }
+    }
+  }
+  
+  &-body {
+    @media (max-width: 768px) {
+      flex: 1;
+    }
+  }
+  
+  &-actions {
+    @media (max-width: 768px) {
+      flex-shrink: 0;
+      background-color: var(--color-background);
+      border-top: 1px solid var(--color-border);
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+      padding-bottom: env(safe-area-inset-bottom, 0);
     }
   }
 
@@ -436,32 +526,15 @@ const getCategoryLabel = (categoryId) => {
     margin: 0;
   }
 
-  &-actionBar {
+  &-linksSection {
     background-color: var(--color-background);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-top: 1px solid var(--color-border);
+    padding: var(--spacing-lg);
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: var(--spacing-sm);
-    position: sticky;
-    bottom: 0;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 
     @media (max-width: 768px) {
       padding: var(--spacing-md);
-      position: relative;
-      flex-direction: column;
-    }
-  }
-
-  &-linksWrapper {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    flex: 1;
-
-    @media (max-width: 768px) {
-      flex-direction: column;
     }
   }
 
@@ -469,6 +542,7 @@ const getCategoryLabel = (categoryId) => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     background-color: var(--color-surface);
     color: var(--color-primary);
@@ -478,6 +552,7 @@ const getCategoryLabel = (categoryId) => {
     font-weight: 500;
     text-decoration: none;
     transition: all 0.2s ease;
+    width: auto;
 
     &:hover {
       background-color: var(--color-primary);
@@ -490,11 +565,12 @@ const getCategoryLabel = (categoryId) => {
     }
   }
 
-  &-calendarButton {
-    flex: 1;
+  &-contactSection {
+    background-color: var(--color-background);
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
 
     @media (max-width: 768px) {
-      width: 100%;
+      padding: 0 var(--spacing-md) var(--spacing-md);
     }
   }
 
@@ -503,7 +579,7 @@ const getCategoryLabel = (categoryId) => {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
     background-color: var(--brand-dark-green);
     color: var(--chip-text-white);
     border: none;
@@ -512,14 +588,68 @@ const getCategoryLabel = (categoryId) => {
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
-    flex: 1;
+    width: auto;
+    cursor: pointer;
 
-    &:hover {
+    &:hover:not(:disabled) {
       background-color: color-mix(in srgb, var(--brand-dark-green) 85%, black);
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     @media (max-width: 768px) {
       width: 100%;
+    }
+  }
+
+  &-actionBar {
+    background-color: var(--color-background);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: center;
+    position: sticky;
+    bottom: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+
+    @media (max-width: 768px) {
+      padding: var(--spacing-md);
+      border-top: none;
+      box-shadow: none;
+    }
+  }
+
+  &-calendarButton {
+    width: 100%;
+    max-width: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--color-primary);
+    color: var(--chip-text-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    
+    &:hover {
+      background-color: color-mix(in srgb, var(--color-primary) 85%, black);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    @media (max-width: 768px) {
+      max-width: none;
     }
   }
 }

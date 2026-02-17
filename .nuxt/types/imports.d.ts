@@ -44,6 +44,7 @@ declare global {
   const definePayloadReducer: typeof import('../../node_modules/nuxt/dist/app/composables/payload').definePayloadReducer
   const definePayloadReviver: typeof import('../../node_modules/nuxt/dist/app/composables/payload').definePayloadReviver
   const defineStore: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').defineStore
+  const downloadIcsFile: typeof import('../../utils/calendar.service').downloadIcsFile
   const eagerComputed: typeof import('../../node_modules/@vueuse/core').eagerComputed
   const effect: typeof import('../../node_modules/vue').effect
   const effectScope: typeof import('../../node_modules/vue').effectScope
@@ -65,6 +66,7 @@ declare global {
   const getCurrentScope: typeof import('../../node_modules/vue').getCurrentScope
   const getCurrentYearMonth: typeof import('../../utils/date.helpers').getCurrentYearMonth
   const getDisplayEvents: typeof import('../../utils/calendar-display.helpers').getDisplayEvents
+  const getGoogleCalendarUrl: typeof import('../../utils/calendar.service').getGoogleCalendarUrl
   const getMoreEventsText: typeof import('../../utils/calendar-display.helpers').getMoreEventsText
   const getNextDay: typeof import('../../utils/date.helpers').getNextDay
   const getNextMonth: typeof import('../../utils/date.helpers').getNextMonth
@@ -73,6 +75,7 @@ declare global {
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
   const getTodayDateString: typeof import('../../utils/date.helpers').getTodayDateString
   const h: typeof import('../../node_modules/vue').h
+  const handleCalendarSelection: typeof import('../../utils/calendar.service').handleCalendarSelection
   const hasInjectionContext: typeof import('../../node_modules/vue').hasInjectionContext
   const ignorableWatch: typeof import('../../node_modules/@vueuse/core').ignorableWatch
   const inject: typeof import('../../node_modules/vue').inject
@@ -501,6 +504,7 @@ declare module 'vue' {
     readonly definePayloadReducer: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['definePayloadReducer']>
     readonly definePayloadReviver: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/payload')['definePayloadReviver']>
     readonly defineStore: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['defineStore']>
+    readonly downloadIcsFile: UnwrapRef<typeof import('../../utils/calendar.service')['downloadIcsFile']>
     readonly eagerComputed: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['eagerComputed']>
     readonly effect: UnwrapRef<typeof import('../../node_modules/vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('../../node_modules/vue')['effectScope']>
@@ -522,6 +526,7 @@ declare module 'vue' {
     readonly getCurrentScope: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentScope']>
     readonly getCurrentYearMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getCurrentYearMonth']>
     readonly getDisplayEvents: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getDisplayEvents']>
+    readonly getGoogleCalendarUrl: UnwrapRef<typeof import('../../utils/calendar.service')['getGoogleCalendarUrl']>
     readonly getMoreEventsText: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getMoreEventsText']>
     readonly getNextDay: UnwrapRef<typeof import('../../utils/date.helpers')['getNextDay']>
     readonly getNextMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getNextMonth']>
@@ -530,6 +535,7 @@ declare module 'vue' {
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
     readonly getTodayDateString: UnwrapRef<typeof import('../../utils/date.helpers')['getTodayDateString']>
     readonly h: UnwrapRef<typeof import('../../node_modules/vue')['h']>
+    readonly handleCalendarSelection: UnwrapRef<typeof import('../../utils/calendar.service')['handleCalendarSelection']>
     readonly hasInjectionContext: UnwrapRef<typeof import('../../node_modules/vue')['hasInjectionContext']>
     readonly ignorableWatch: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('../../node_modules/vue')['inject']>
