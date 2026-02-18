@@ -1,0 +1,80 @@
+# Render Blueprint – Valley Luz monorepo
+# Two services from one repo, both deploy from main branch only.
+#
+# 1. valleyluz-web    – Nuxt 3 SSR app (Web Service)
+# 2. valleyluz-wa     – WhatsApp listener (Background Worker + persistent disk)
+#
+# Shared env vars live in the "valleyluz-shared" environment group (create once in Render dashboard).
+
+services:
+  # ── Nuxt 3 Web App ────────────────────────────────────────────
+  - type: web
+    name: valleyluz-web
+    runtime: node
+    branch: main
+    plan: starter
+    region: frankfurt
+    buildCommand: npm install && npm run build
+    startCommand: node .output/server/index.mjs
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - fromGroup: valleyluz-shared
+
+  # ── WhatsApp Listener Worker ──────────────────────────────────
+  - type: worker
+    name: valleyluz-wa
+    runtime: node
+    branch: main
+    plan: starter
+    region: frankfurt
+    rootDir: apps/wa-listener
+    buildCommand: npm install
+    startCommand: npm start
+    disk:
+      name: wa-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: WA_AUTH_PATH
+        value: /var/data/auth
+      - fromGroup: valleyluz-shared
+      - fromGroup: valleyluz-wa-secrets
+
+# ── Environment Groups ──────────────────────────────────────────
+# Create these in the Render dashboard and fill in the actual values.
+# The "sync: false" flag means Render will prompt you to enter the value manually.
+
+envVarGroups:
+  # Shared between both services (Nuxt web + WA worker)
+  - name: valleyluz-shared
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB_NAME
+        sync: false
+
+  # WA worker only – secrets that the Nuxt app does not need
+  - name: valleyluz-wa-secrets
+    envVars:
+      - key: NODE_ENV
+        sync: false
+      - key: WA_DISCOVERY_MODE
+        sync: false
+      - key: WHATSAPP_GROUP_IDS
+        sync: false
+      - key: WHATSAPP_CONFIRMATION_GROUP_IDS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
