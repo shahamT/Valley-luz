@@ -11,9 +11,10 @@
         {{ MODAL_TEXT.addToCalendar }}
       </button>
       <button
+        ref="navigateButtonRef"
         type="button"
         class="EventModal-navigateButton"
-        disabled
+        @click="toggleNavigationPopup"
       >
         <UiIcon name="directions" size="sm" />
         {{ MODAL_TEXT.navigateToEvent }}
@@ -32,11 +33,24 @@
       @select="handleCalendarSelect"
     />
   </Teleport>
+
+  <!-- Navigation Options Popup -->
+  <Teleport to="body">
+    <UiNavigationOptionsPopup
+      v-if="isNavigationPopupOpen && navigateButtonRef && event"
+      :trigger-element="navigateButtonRef"
+      :navigation-options="NAVIGATION_OPTIONS"
+      :event-name="event.title"
+      @close="isNavigationPopupOpen = false"
+      @select="handleNavigationSelect"
+    />
+  </Teleport>
 </template>
 
 <script setup>
 import { handleCalendarSelection } from '~/utils/calendar.service'
-import { MODAL_TEXT, CALENDAR_OPTIONS } from '~/consts/ui.const'
+import { handleNavigationSelection } from '~/utils/navigation.service'
+import { MODAL_TEXT, CALENDAR_OPTIONS, NAVIGATION_OPTIONS } from '~/consts/ui.const'
 
 defineOptions({ name: 'EventModalActions' })
 
@@ -57,6 +71,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  location: {
+    type: Object,
+    default: null,
+  },
   calendarStartTime: {
     type: String,
     default: '',
@@ -73,9 +91,17 @@ const props = defineProps({
 
 const isCalendarPopupOpen = ref(false)
 const calendarButtonRef = ref(null)
+const isNavigationPopupOpen = ref(false)
+const navigateButtonRef = ref(null)
 
 const toggleCalendarPopup = () => {
+  isNavigationPopupOpen.value = false
   isCalendarPopupOpen.value = !isCalendarPopupOpen.value
+}
+
+const toggleNavigationPopup = () => {
+  isCalendarPopupOpen.value = false
+  isNavigationPopupOpen.value = !isNavigationPopupOpen.value
 }
 
 const handleCalendarSelect = async (calendarType) => {
@@ -89,6 +115,10 @@ const handleCalendarSelect = async (calendarType) => {
     endTime: props.calendarEndTime,
   }
   await handleCalendarSelection(calendarType, eventData)
+}
+
+const handleNavigationSelect = (navType) => {
+  handleNavigationSelection(navType, props.location)
 }
 </script>
 
@@ -169,17 +199,12 @@ const handleCalendarSelect = async (calendarType) => {
     transition: all 0.2s ease;
     position: relative;
 
-    &:hover:not(:disabled) {
+    &:hover {
       background-color: color-mix(in srgb, var(--brand-dark-green) 85%, black);
     }
 
-    &:active:not(:disabled) {
+    &:active {
       transform: scale(0.98);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
   }
 }

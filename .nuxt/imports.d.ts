@@ -46,6 +46,7 @@ export { formatDateToYYYYMMDD, parseDateString, getTodayDateString, getCurrentYe
 export { formatEventTime, formatEventPrice, formatEventLocation, formatEventLocationForChip, transformEventForCard } from '../utils/events.helpers';
 export { getActiveEvents, getDateFromISO, getEventOccurrencesOnDate, getEventsForDate, getEventsByDate, eventMatchesCategories, filterEventsByCategories, getOccurrenceMinutesOfDay, occurrenceOverlapsTimeRange, filterEventsByTimeRangeForMonth, filterEventOccurrencesByTimeRange } from '../utils/events.service';
 export { logger } from '../utils/logger';
+export { handleNavigationSelection } from '../utils/navigation.service';
 export { isValidDateString, isValidRouteDate, parseCategories, serializeCategories, parseTimeFilter, isValidMonthYear } from '../utils/validation.helpers';
 export { useCalendarStore } from '../stores/calendar.store';
 export { useUiStore } from '../stores/ui.store';

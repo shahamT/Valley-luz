@@ -85,6 +85,7 @@
             :event="selectedEvent"
             :event-description="eventDescription"
             :formatted-location="formattedLocation"
+            :location="selectedEvent.location"
             :calendar-start-time="calendarStartTime"
             :calendar-end-date="calendarEndDate"
             :calendar-end-time="calendarEndTime"

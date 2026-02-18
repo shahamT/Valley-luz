@@ -31,3 +31,8 @@ export const CALENDAR_OPTIONS = [
   { id: 'outlook', label: 'Outlook', iconPath: '/icons/outlook.png' },
   { id: 'ical', label: 'iCal', iconPath: '/icons/ical.svg' },
 ]
+
+export const NAVIGATION_OPTIONS = [
+  { id: 'waze', label: 'ניווט עם Waze', iconPath: '/icons/waze-icon.svg' },
+  { id: 'gmaps', label: 'ניווט עם Google Maps', iconPath: '/icons/google-maps-icon.svg' },
+]

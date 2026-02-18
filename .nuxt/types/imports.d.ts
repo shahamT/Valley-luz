@@ -85,6 +85,7 @@ declare global {
   const getTodayDateString: typeof import('../../utils/date.helpers').getTodayDateString
   const h: typeof import('../../node_modules/vue').h
   const handleCalendarSelection: typeof import('../../utils/calendar.service').handleCalendarSelection
+  const handleNavigationSelection: typeof import('../../utils/navigation.service').handleNavigationSelection
   const hasInjectionContext: typeof import('../../node_modules/vue').hasInjectionContext
   const ignorableWatch: typeof import('../../node_modules/@vueuse/core').ignorableWatch
   const inject: typeof import('../../node_modules/vue').inject
@@ -557,6 +558,7 @@ declare module 'vue' {
     readonly getTodayDateString: UnwrapRef<typeof import('../../utils/date.helpers')['getTodayDateString']>
     readonly h: UnwrapRef<typeof import('../../node_modules/vue')['h']>
     readonly handleCalendarSelection: UnwrapRef<typeof import('../../utils/calendar.service')['handleCalendarSelection']>
+    readonly handleNavigationSelection: UnwrapRef<typeof import('../../utils/navigation.service')['handleNavigationSelection']>
     readonly hasInjectionContext: UnwrapRef<typeof import('../../node_modules/vue')['hasInjectionContext']>
     readonly ignorableWatch: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['ignorableWatch']>
     readonly inject: UnwrapRef<typeof import('../../node_modules/vue')['inject']>

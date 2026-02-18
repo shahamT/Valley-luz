@@ -44,6 +44,7 @@ export const UiLocationInfoPopup: typeof import("../components/ui/LocationInfoPo
 export const UiMonthYearModal: typeof import("../components/ui/MonthYearModal.vue").default
 export const UiMonthYearPicker: typeof import("../components/ui/MonthYearPicker.vue").default
 export const UiMonthYearPopup: typeof import("../components/ui/MonthYearPopup.vue").default
+export const UiNavigationOptionsPopup: typeof import("../components/ui/NavigationOptionsPopup.vue").default
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue").default
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout").default
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue").default
@@ -97,6 +98,7 @@ export const LazyUiLocationInfoPopup: LazyComponent<typeof import("../components
 export const LazyUiMonthYearModal: LazyComponent<typeof import("../components/ui/MonthYearModal.vue").default>
 export const LazyUiMonthYearPicker: LazyComponent<typeof import("../components/ui/MonthYearPicker.vue").default>
 export const LazyUiMonthYearPopup: LazyComponent<typeof import("../components/ui/MonthYearPopup.vue").default>
+export const LazyUiNavigationOptionsPopup: LazyComponent<typeof import("../components/ui/NavigationOptionsPopup.vue").default>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue").default>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout").default>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue").default>
