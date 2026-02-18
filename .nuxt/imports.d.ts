@@ -51,4 +51,3 @@ export { isValidDateString, isValidRouteDate, parseCategories, serializeCategori
 export { useCalendarStore } from '../stores/calendar.store';
 export { useUiStore } from '../stores/ui.store';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
-export { useNuxtDevTools } from '../node_modules/nuxt/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';

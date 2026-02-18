@@ -11,7 +11,7 @@ import 'node:url';
 import 'mongodb';
 
 function transformEventForFrontend(doc) {
-  var _a, _b, _c, _d, _e, _f;
+  var _a, _b, _c, _d, _e, _f, _g, _h;
   const backendEvent = doc.event;
   if (!backendEvent) {
     return null;
@@ -36,7 +36,9 @@ function transformEventForFrontend(doc) {
       city: ((_c = backendEvent.location) == null ? void 0 : _c.City) || "",
       addressLine1: ((_d = backendEvent.location) == null ? void 0 : _d.addressLine1) || void 0,
       addressLine2: ((_e = backendEvent.location) == null ? void 0 : _e.addressLine2) || void 0,
-      locationDetails: ((_f = backendEvent.location) == null ? void 0 : _f.locationDetails) || void 0
+      locationDetails: ((_f = backendEvent.location) == null ? void 0 : _f.locationDetails) || void 0,
+      wazeNavLink: ((_g = backendEvent.location) == null ? void 0 : _g.wazeNavLink) || void 0,
+      gmapsNavLink: ((_h = backendEvent.location) == null ? void 0 : _h.gmapsNavLink) || void 0
     },
     occurrences,
     isActive: doc.isActive !== false,
