@@ -49,6 +49,9 @@ export async function initializeClient() {
     logger.info(LOG_PREFIXES.WHATSAPP, '')
     qrcode.generate(qr, { small: true })
     logger.info(LOG_PREFIXES.WHATSAPP, '')
+    logger.info(LOG_PREFIXES.WHATSAPP, '=== Raw QR Data (paste into any online QR generator) ===')
+    logger.info(LOG_PREFIXES.WHATSAPP, qr)
+    logger.info(LOG_PREFIXES.WHATSAPP, '=== End Raw QR Data ===')
   })
 
   // Authentication events
