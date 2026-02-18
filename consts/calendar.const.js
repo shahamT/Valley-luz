@@ -43,5 +43,6 @@ export const UI_TEXT = {
   hoursFilter: 'שעות',
   hoursFilterAll: 'כל שעה',
   resetFilter: 'ניקוי',
+  filterDone: 'סיום',
   categoriesCountLabel: (count) => `${count} קטגוריות`,
 }

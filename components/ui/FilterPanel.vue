@@ -61,10 +61,9 @@
         {{ resetButtonText }}
       </button>
       <button
-        v-if="onClose"
         type="button"
         class="FilterPanel-doneButton"
-        @click="onClose"
+        @click="$emit('close')"
       >
         <UiIcon name="check" size="sm" class="FilterPanel-doneButtonIcon" />
         {{ doneButtonText }}
@@ -74,11 +73,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { storeToRefs } from 'pinia'
 import { UI_TEXT, MINUTES_PER_DAY } from '~/consts/calendar.const'
 
 defineOptions({ name: 'FilterPanel' })
+
+defineEmits(['close'])
 
 const props = defineProps({
   selectedCategoriesCount: {
@@ -89,10 +88,6 @@ const props = defineProps({
     type: String,
     default: () => UI_TEXT.hoursFilterAll,
   },
-  onClose: {
-    type: Function,
-    default: null,
-  },
 })
 
 // data
@@ -102,7 +97,7 @@ const calendarStore = useCalendarStore()
 const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calendarStore)
 
 const resetButtonText = UI_TEXT.resetFilter
-const doneButtonText = 'סיום'
+const doneButtonText = UI_TEXT.filterDone
 
 // computed
 const categoriesTabLabel = computed(
@@ -111,10 +106,6 @@ const categoriesTabLabel = computed(
 
 const selectedCategoriesList = computed(() => selectedCategories?.value ?? [])
 const categoriesList = computed(() => categories?.value ?? {})
-
-const hasSelectedCategories = computed(() => {
-  return selectedCategoriesList.value.length > 0
-})
 
 const isTimeFilterActive = computed(() => {
   return timeFilterStart.value !== 0 || timeFilterEnd.value !== MINUTES_PER_DAY
@@ -131,7 +122,6 @@ const handleToggleCategory = (categoryId) => {
 
 const handleClearAllFilters = () => {
   calendarStore.resetFilter()
-  if (props.onClose) props.onClose()
 }
 </script>
 

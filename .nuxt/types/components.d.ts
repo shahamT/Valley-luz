@@ -30,6 +30,9 @@ interface _GlobalComponents {
   'UiCalendarNavArrow': typeof import("../../components/ui/CalendarNavArrow.vue").default
   'UiCalendarOptionsPopup': typeof import("../../components/ui/CalendarOptionsPopup.vue").default
   'UiCategoryPill': typeof import("../../components/ui/CategoryPill.vue").default
+  'UiEventModalActions': typeof import("../../components/ui/EventModalActions.vue").default
+  'UiEventModalHeader': typeof import("../../components/ui/EventModalHeader.vue").default
+  'UiEventModalInfoBar': typeof import("../../components/ui/EventModalInfoBar.vue").default
   'UiFilterModal': typeof import("../../components/ui/FilterModal.vue").default
   'UiFilterPanel': typeof import("../../components/ui/FilterPanel.vue").default
   'UiFilterPopup': typeof import("../../components/ui/FilterPopup.vue").default
@@ -41,7 +44,6 @@ interface _GlobalComponents {
   'UiMonthYearModal': typeof import("../../components/ui/MonthYearModal.vue").default
   'UiMonthYearPicker': typeof import("../../components/ui/MonthYearPicker.vue").default
   'UiMonthYearPopup': typeof import("../../components/ui/MonthYearPopup.vue").default
-  'UiMonthYearSelection': typeof import("../../components/ui/MonthYearSelection.vue").default
   'NuxtWelcome': typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default
   'NuxtLayout': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default
   'NuxtErrorBoundary': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue").default
@@ -81,6 +83,9 @@ interface _GlobalComponents {
   'LazyUiCalendarNavArrow': LazyComponent<typeof import("../../components/ui/CalendarNavArrow.vue").default>
   'LazyUiCalendarOptionsPopup': LazyComponent<typeof import("../../components/ui/CalendarOptionsPopup.vue").default>
   'LazyUiCategoryPill': LazyComponent<typeof import("../../components/ui/CategoryPill.vue").default>
+  'LazyUiEventModalActions': LazyComponent<typeof import("../../components/ui/EventModalActions.vue").default>
+  'LazyUiEventModalHeader': LazyComponent<typeof import("../../components/ui/EventModalHeader.vue").default>
+  'LazyUiEventModalInfoBar': LazyComponent<typeof import("../../components/ui/EventModalInfoBar.vue").default>
   'LazyUiFilterModal': LazyComponent<typeof import("../../components/ui/FilterModal.vue").default>
   'LazyUiFilterPanel': LazyComponent<typeof import("../../components/ui/FilterPanel.vue").default>
   'LazyUiFilterPopup': LazyComponent<typeof import("../../components/ui/FilterPopup.vue").default>
@@ -92,7 +97,6 @@ interface _GlobalComponents {
   'LazyUiMonthYearModal': LazyComponent<typeof import("../../components/ui/MonthYearModal.vue").default>
   'LazyUiMonthYearPicker': LazyComponent<typeof import("../../components/ui/MonthYearPicker.vue").default>
   'LazyUiMonthYearPopup': LazyComponent<typeof import("../../components/ui/MonthYearPopup.vue").default>
-  'LazyUiMonthYearSelection': LazyComponent<typeof import("../../components/ui/MonthYearSelection.vue").default>
   'LazyNuxtWelcome': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default>
   'LazyNuxtLayout': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default>
   'LazyNuxtErrorBoundary': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue").default>

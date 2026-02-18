@@ -44,6 +44,8 @@ function transformEventForFrontend(doc: any) {
       addressLine1: backendEvent.location?.addressLine1 || undefined,
       addressLine2: backendEvent.location?.addressLine2 || undefined,
       locationDetails: backendEvent.location?.locationDetails || undefined,
+      wazeNavLink: backendEvent.location?.wazeNavLink || undefined,
+      gmapsNavLink: backendEvent.location?.gmapsNavLink || undefined,
     },
     occurrences: occurrences,
     isActive: doc.isActive !== false,

@@ -1,14 +1,6 @@
 <template>
   <div class="AppShell">
-    <LayoutAppHeader
-      :show-month-year="showMonthYear"
-      :month-year="monthYear"
-      :current-date="currentDate"
-      @prev-month="$emit('prev-month')"
-      @next-month="$emit('next-month')"
-      @select-month-year="$emit('select-month-year', $event)"
-      @year-change="$emit('year-change', $event)"
-    />
+    <LayoutAppHeader />
     <div class="AppShell-content">
       <slot />
     </div>
@@ -16,29 +8,7 @@
 </template>
 
 <script setup>
-/**
- * Month-nav emits (prev-month, next-month, select-month-year, year-change) are for future use
- * when show-month-year=true. Current routes pass show-month-year=false and use CalendarViewHeader.
- */
-const props = defineProps({
-  showMonthYear: {
-    type: Boolean,
-    default: false,
-  },
-  monthYear: {
-    type: String,
-    default: '',
-  },
-  currentDate: {
-    type: Object,
-    default: () => ({
-      year: new Date().getFullYear(),
-      month: new Date().getMonth() + 1,
-    }),
-  },
-})
-
-defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
+defineOptions({ name: 'AppShell' })
 </script>
 
 <style lang="scss">

@@ -68,9 +68,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { onClickOutside } from '@vueuse/core'
 import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
+import { logger } from '~/utils/logger'
 
 defineOptions({ name: 'CalendarOptionsPopup' })
 
@@ -94,10 +93,7 @@ const emit = defineEmits(['close', 'select'])
 const popupRef = ref(null)
 const popupStyle = ref({})
 
-const isMobile = computed(() => {
-  if (typeof window === 'undefined') return false
-  return window.innerWidth <= MOBILE_BREAKPOINT
-})
+const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 
 onMounted(async () => {
   await nextTick()
@@ -114,7 +110,7 @@ onMounted(async () => {
         transform: 'translateX(-50%)',
       }
     } catch (error) {
-      console.error('Error positioning popup:', error)
+      logger.error('[CalendarOptionsPopup]', 'Error positioning popup:', error)
     }
   }
 })

@@ -33,13 +33,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { isMonthBefore } from '~/utils/date.helpers'
+import { isMonthBefore, isSameMonth } from '~/utils/date.helpers'
 
-function isSameMonth(a, b) {
-  return a && b && a.year === b.year && a.month === b.month
-}
+defineOptions({ name: 'MonthCarousel' })
 
 const props = defineProps({
   visibleMonths: {

@@ -1,5 +1,3 @@
-import { computed, unref } from 'vue'
-
 /**
  * Composable for getting events and categories data in calendar views
  * Handles both SSR (direct composable call) and CSR (plugin-provided data)

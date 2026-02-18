@@ -4006,7 +4006,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "94ffe008-af5b-49a3-ac50-6dda5a31289d",
+    "buildId": "cae8a7ce-c673-480e-b236-3a5cd1ba75e1",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4484,26 +4484,47 @@ const assets = {
     "size": 186,
     "path": "../public/.gitkeep"
   },
-  "/_nuxt/B3v3fkZ5.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"4b9-RXq+zlhnbyDOt/R74LpZ6HIoxCE\"",
-    "mtime": "2026-02-11T23:18:18.673Z",
-    "size": 1209,
-    "path": "../public/_nuxt/B3v3fkZ5.js"
+  "/icons/outlook.png": {
+    "type": "image/png",
+    "etag": "\"34f-V/DDAx9yJHn2EmNtJSdXgxw7IRo\"",
+    "mtime": "2026-02-17T18:25:58.273Z",
+    "size": 847,
+    "path": "../public/icons/outlook.png"
   },
-  "/_nuxt/C7ySE7qV.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1c0-GFI7hXghJjC9ifGLFP2/bHJsqPU\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 448,
-    "path": "../public/_nuxt/C7ySE7qV.js"
+  "/icons/google-calendar.png": {
+    "type": "image/png",
+    "etag": "\"75a9-S+bl+hd7NxNv0bJxyvDxneRGuDA\"",
+    "mtime": "2026-02-17T18:24:45.542Z",
+    "size": 30121,
+    "path": "../public/icons/google-calendar.png"
   },
-  "/_nuxt/BG0bJulQ.js": {
+  "/icons/ical.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"14f-3msyD8xPSepRQ9dTsRgcqUFxoC4\"",
+    "mtime": "2026-02-17T18:17:09.663Z",
+    "size": 335,
+    "path": "../public/icons/ical.svg"
+  },
+  "/icons/whatsapp-icon.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"6ac-Odc6MDsnJQaDKaQ3pU2bPhUrNKs\"",
+    "mtime": "2026-02-17T18:45:36.003Z",
+    "size": 1708,
+    "path": "../public/icons/whatsapp-icon.svg"
+  },
+  "/imgs/default-event-bg.webp": {
+    "type": "image/webp",
+    "etag": "\"b046-naqOa0HvozrvYiND6ysIslVVHeQ\"",
+    "mtime": "2025-12-27T15:43:28.488Z",
+    "size": 45126,
+    "path": "../public/imgs/default-event-bg.webp"
+  },
+  "/_nuxt/C0itjdmZ.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1874-lySWrlqECZWVJRRhrJQght7FIps\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 6260,
-    "path": "../public/_nuxt/BG0bJulQ.js"
+    "etag": "\"1d83-fcvyJAYyxJLxb/qtC9/8D2GKi7A\"",
+    "mtime": "2026-02-18T08:32:56.684Z",
+    "size": 7555,
+    "path": "../public/_nuxt/C0itjdmZ.js"
   },
   "/logos/valleyluz-icon.svg": {
     "type": "image/svg+xml",
@@ -4512,6 +4533,27 @@ const assets = {
     "size": 331043,
     "path": "../public/logos/valleyluz-icon.svg"
   },
+  "/_nuxt/DZgM3Nl5.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1f2b-kBAS+MuLtnTH/B16SzAGCg1Bm/s\"",
+    "mtime": "2026-02-18T08:32:56.683Z",
+    "size": 7979,
+    "path": "../public/_nuxt/DZgM3Nl5.js"
+  },
+  "/_nuxt/index.DJjhcjKJ.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1285-4dUpO+VwvL2X0qDoFhIARd9ONuw\"",
+    "mtime": "2026-02-18T08:32:56.682Z",
+    "size": 4741,
+    "path": "../public/_nuxt/index.DJjhcjKJ.css"
+  },
+  "/_nuxt/entry.BlmzUZIT.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"4afc-7LX+rrojZbW4s/Y6D9J+zjs92CI\"",
+    "mtime": "2026-02-18T08:32:56.677Z",
+    "size": 19196,
+    "path": "../public/_nuxt/entry.BlmzUZIT.css"
+  },
   "/logos/valleyluz-logo.png": {
     "type": "image/png",
     "etag": "\"3f098-teA1GtEXjijAlMaGgu0TNRy7BXQ\"",
@@ -4519,75 +4561,68 @@ const assets = {
     "size": 258200,
     "path": "../public/logos/valleyluz-logo.png"
   },
-  "/_nuxt/entry.D5D44TgN.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1e13-Vzbazwth/ijivtG2fvTyeNmt27s\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 7699,
-    "path": "../public/_nuxt/entry.D5D44TgN.css"
-  },
-  "/_nuxt/CoydzPQz.js": {
+  "/_nuxt/j06kZHX2.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"3294e-TAKdhkk4yPi/kY7Qe0gD/1m9LWQ\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 207182,
-    "path": "../public/_nuxt/CoydzPQz.js"
+    "etag": "\"1a5-hAVIeaAp4iauGEQI+WJLOVqOQKs\"",
+    "mtime": "2026-02-18T08:32:56.682Z",
+    "size": 421,
+    "path": "../public/_nuxt/j06kZHX2.js"
   },
-  "/_nuxt/CS5ACRjG.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"24b29-7N+jVxgu5Xchd3IB8eW38UVkmyg\"",
-    "mtime": "2026-02-11T23:18:18.673Z",
-    "size": 150313,
-    "path": "../public/_nuxt/CS5ACRjG.js"
-  },
-  "/_nuxt/index.Cwvi8llr.css": {
+  "/_nuxt/useUrlState.Bd9iS3N4.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"113a-RXsc69500XiBbxO3kfWmU602h7w\"",
-    "mtime": "2026-02-11T23:18:18.669Z",
-    "size": 4410,
-    "path": "../public/_nuxt/index.Cwvi8llr.css"
-  },
-  "/_nuxt/sp9AKWmH.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f0d-SwpC81nci2yZp+/rnOx1WyQHK2A\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 7949,
-    "path": "../public/_nuxt/sp9AKWmH.js"
-  },
-  "/_nuxt/useUrlState.ByxywfAn.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"4bd9-imMigApaTVjUfDlvajowSQhOUKs\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 19417,
-    "path": "../public/_nuxt/useUrlState.ByxywfAn.css"
+    "etag": "\"5b67-J6qCE1DNBy1pmnrqqpNMwpaQB98\"",
+    "mtime": "2026-02-18T08:32:56.682Z",
+    "size": 23399,
+    "path": "../public/_nuxt/useUrlState.Bd9iS3N4.css"
   },
   "/_nuxt/_...B4vAkJll.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"272-iSQXhQQ2jmEMDM+ncsnWZ9IUof0\"",
-    "mtime": "2026-02-11T23:18:18.671Z",
+    "mtime": "2026-02-18T08:32:56.682Z",
     "size": 626,
     "path": "../public/_nuxt/_...B4vAkJll.css"
   },
-  "/_nuxt/_date_.COmcUVHq.css": {
+  "/_nuxt/_date_.6zvOPt5X.css": {
     "type": "text/css; charset=utf-8",
-    "etag": "\"a16-qi+AZQshv6ayzKvYHxIRYYxw9Gg\"",
-    "mtime": "2026-02-11T23:18:18.672Z",
-    "size": 2582,
-    "path": "../public/_nuxt/_date_.COmcUVHq.css"
+    "etag": "\"10ba-fwSzRf8lVwBFpN44mo9koZWw70A\"",
+    "mtime": "2026-02-18T08:32:56.682Z",
+    "size": 4282,
+    "path": "../public/_nuxt/_date_.6zvOPt5X.css"
   },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-S1xmUo12OEF4sRVHQHBBhnkmp+U\"",
-    "mtime": "2026-02-11T23:18:21.595Z",
+    "etag": "\"47-H4GYk7G7iqel1FnvJgzOuo07/34\"",
+    "mtime": "2026-02-18T08:32:59.782Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
-  "/_nuxt/builds/meta/94ffe008-af5b-49a3-ac50-6dda5a31289d.json": {
+  "/_nuxt/Odd95hdQ.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"25129-496aW0TZLpuuOBfNgV0SL+TyaAY\"",
+    "mtime": "2026-02-18T08:32:56.683Z",
+    "size": 151849,
+    "path": "../public/_nuxt/Odd95hdQ.js"
+  },
+  "/_nuxt/builds/meta/cae8a7ce-c673-480e-b236-3a5cd1ba75e1.json": {
     "type": "application/json",
-    "etag": "\"58-5mCNQitr9saI1gyedafI2f/J3Mk\"",
-    "mtime": "2026-02-11T23:18:21.595Z",
+    "etag": "\"58-3GPpxXZ3N51bUIIO0opDmT0l8wM\"",
+    "mtime": "2026-02-18T08:32:59.783Z",
     "size": 88,
-    "path": "../public/_nuxt/builds/meta/94ffe008-af5b-49a3-ac50-6dda5a31289d.json"
+    "path": "../public/_nuxt/builds/meta/cae8a7ce-c673-480e-b236-3a5cd1ba75e1.json"
+  },
+  "/_nuxt/CScE6ojO.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"53008-2pU2yaZIhp8MqmXd/xFP9o/Xqvo\"",
+    "mtime": "2026-02-18T08:32:56.683Z",
+    "size": 339976,
+    "path": "../public/_nuxt/CScE6ojO.js"
+  },
+  "/icons/apple-calendar.png": {
+    "type": "image/png",
+    "etag": "\"a0abd-mjm9VxvQfGL/J9sJZKyWw1GST3c\"",
+    "mtime": "2026-02-17T18:24:30.170Z",
+    "size": 658109,
+    "path": "../public/icons/apple-calendar.png"
   }
 };
 
@@ -5226,5 +5261,5 @@ function setupGracefulShutdown(listener, nitroApp) {
   });
 }
 
-export { $fetch as $, hash$1 as A, trapUnhandledNodeErrors as a, useNitroApp as b, defineEventHandler as c, destr as d, createError$1 as e, sendRedirect as f, getRouterParam as g, getQuery as h, getResponseStatusText as i, joinRelativeURL as j, getResponseStatus as k, decodePath as l, defineRenderHandler as m, getRouteRules as n, joinURL as o, hasProtocol as p, isScriptProtocol as q, sanitizeStatusCode as r, setupGracefulShutdown as s, toNodeListener as t, useRuntimeConfig as u, getContext as v, withQuery as w, createHooks as x, executeAsync as y, defu as z };
+export { $fetch as $, defu as A, trapUnhandledNodeErrors as a, useNitroApp as b, defineEventHandler as c, destr as d, createError$1 as e, sendRedirect as f, getRouterParam as g, getQuery as h, getResponseStatusText as i, joinRelativeURL as j, getResponseStatus as k, decodePath as l, defineRenderHandler as m, getRouteRules as n, joinURL as o, hasProtocol as p, isScriptProtocol as q, sanitizeStatusCode as r, setupGracefulShutdown as s, toNodeListener as t, useRuntimeConfig as u, getContext as v, withQuery as w, hash$1 as x, createHooks as y, executeAsync as z };
 //# sourceMappingURL=nitro.mjs.map

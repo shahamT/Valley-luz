@@ -6,6 +6,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'LoadingSpinner' })
+
 const props = defineProps({
   icon: {
     type: String,

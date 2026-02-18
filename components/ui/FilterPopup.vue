@@ -7,14 +7,13 @@
     <UiFilterPanel
       :selected-categories-count="selectedCategoriesCount"
       :hours-filter-label="hoursFilterLabel"
-      :on-close="() => emit('close')"
+      @close="emit('close')"
     />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { onClickOutside } from '@vueuse/core'
+defineOptions({ name: 'FilterPopup' })
 
 const props = defineProps({
   triggerElement: {

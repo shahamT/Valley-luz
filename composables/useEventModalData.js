@@ -1,0 +1,145 @@
+import { formatEventTime, formatEventPrice } from '~/utils/events.helpers'
+import { MODAL_TEXT } from '~/consts/ui.const'
+
+/**
+ * Builds an array of non-empty address parts from a location object.
+ * @param {Object} loc - Location object
+ * @returns {string[]}
+ */
+function buildAddressParts(loc) {
+  const parts = []
+  if (loc.addressLine1) parts.push(loc.addressLine1)
+  if (loc.addressLine2) parts.push(loc.addressLine2)
+  if (loc.city) parts.push(loc.city)
+  return parts
+}
+
+/**
+ * Formats a Date object's local time to an HH:mm string.
+ * @param {Date} date
+ * @returns {string}
+ */
+function formatTimeFromDate(date) {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+/**
+ * Composable that derives all display-computed values for the EventModal.
+ *
+ * @param {import('vue').ComputedRef} selectedEvent
+ * @param {import('vue').ComputedRef} selectedOccurrence
+ */
+export function useEventModalData(selectedEvent, selectedOccurrence) {
+  // --- Media ---
+
+  const eventImage = computed(() => {
+    const media = selectedEvent.value?.media
+    if (media && media.length > 0) {
+      const firstMedia = media[0]
+      return typeof firstMedia === 'string' ? firstMedia : firstMedia?.url || '/imgs/default-event-bg.webp'
+    }
+    return '/imgs/default-event-bg.webp'
+  })
+
+  const hasEventImage = computed(() => {
+    const media = selectedEvent.value?.media
+    return !!(media && media.length > 0)
+  })
+
+  const eventContentImage = computed(() => {
+    if (!hasEventImage.value) return null
+    const firstMedia = selectedEvent.value.media[0]
+    return typeof firstMedia === 'string' ? firstMedia : firstMedia?.url || null
+  })
+
+  // --- Display info ---
+
+  const eventTime = computed(() => {
+    if (!selectedOccurrence.value) return ''
+    return formatEventTime(selectedOccurrence.value)
+  })
+
+  const eventPrice = computed(() => {
+    if (!selectedEvent.value) return ''
+    return formatEventPrice(selectedEvent.value)
+  })
+
+  const eventDescription = computed(() => {
+    if (!selectedEvent.value) return ''
+    return (
+      selectedEvent.value.fullDescription ||
+      selectedEvent.value.shortDescription ||
+      selectedEvent.value.description ||
+      ''
+    )
+  })
+
+  // --- Location ---
+
+  const basicLocation = computed(() => {
+    if (!selectedEvent.value?.location) return MODAL_TEXT.unknownLocation
+    const parts = buildAddressParts(selectedEvent.value.location)
+    return parts.length === 0 ? MODAL_TEXT.unknownLocation : parts.join(', ')
+  })
+
+  const formattedLocation = computed(() => {
+    if (!selectedEvent.value?.location) return MODAL_TEXT.unknownLocation
+    const loc = selectedEvent.value.location
+    const parts = buildAddressParts(loc)
+    if (parts.length === 0) return MODAL_TEXT.unknownLocation
+    let result = parts.join(', ')
+    if (loc.locationDetails) result += `\n${loc.locationDetails}`
+    return result
+  })
+
+  const hasLocationDetails = computed(() => {
+    return !!selectedEvent.value?.location?.locationDetails
+  })
+
+  // --- Contact ---
+
+  const whatsappLink = computed(() => {
+    if (!selectedEvent.value?.publisherPhone) return ''
+    const cleanPhone = selectedEvent.value.publisherPhone.replace(/\D/g, '')
+    return `https://wa.me/${cleanPhone}`
+  })
+
+  // --- Calendar dates ---
+
+  const calendarStartDate = computed(() => {
+    if (!selectedOccurrence.value?.startTime) return ''
+    return new Date(selectedOccurrence.value.startTime).toISOString().split('T')[0]
+  })
+
+  const calendarStartTime = computed(() => {
+    if (!selectedOccurrence.value?.startTime || !selectedOccurrence.value?.hasTime) return ''
+    return formatTimeFromDate(new Date(selectedOccurrence.value.startTime))
+  })
+
+  const calendarEndDate = computed(() => {
+    if (!selectedOccurrence.value?.endTime) return calendarStartDate.value
+    return new Date(selectedOccurrence.value.endTime).toISOString().split('T')[0]
+  })
+
+  const calendarEndTime = computed(() => {
+    if (!selectedOccurrence.value?.endTime || !selectedOccurrence.value?.hasTime) return ''
+    return formatTimeFromDate(new Date(selectedOccurrence.value.endTime))
+  })
+
+  return {
+    eventImage,
+    hasEventImage,
+    eventContentImage,
+    eventTime,
+    eventPrice,
+    eventDescription,
+    basicLocation,
+    formattedLocation,
+    hasLocationDetails,
+    whatsappLink,
+    calendarStartDate,
+    calendarStartTime,
+    calendarEndDate,
+    calendarEndTime,
+  }
+}

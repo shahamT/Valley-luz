@@ -22,6 +22,8 @@
 import { formatKanbanDateHeader } from '~/utils/date.helpers'
 import { UI_TEXT } from '~/consts/calendar.const'
 
+defineOptions({ name: 'KanbanColumn' })
+
 const props = defineProps({
   date: {
     type: String,

@@ -11,6 +11,9 @@ export interface EventLocation {
   city?: string
   addressLine1?: string
   addressLine2?: string
+  locationDetails?: string
+  wazeNavLink?: string
+  gmapsNavLink?: string
   coordinates?: {
     lat: number
     lng: number

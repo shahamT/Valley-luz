@@ -18,7 +18,7 @@
         <UiFilterPanel
           :selected-categories-count="selectedCategoriesCount"
           :hours-filter-label="hoursFilterLabel"
-          :on-close="handleClose"
+          @close="handleClose"
         />
       </div>
     </div>
@@ -27,6 +27,8 @@
 
 <script setup>
 import { UI_TEXT } from '~/consts/calendar.const'
+
+defineOptions({ name: 'FilterModal' })
 
 defineProps({
   selectedCategoriesCount: {
@@ -126,108 +128,5 @@ const handleClose = () => {
     }
   }
 
-  &-tabs {
-    display: flex;
-    gap: 0;
-    background-color: var(--light-bg);
-    border-bottom: 2px solid var(--color-border);
-    overflow: hidden;
-  }
-
-  &-tab {
-    flex: 1;
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--color-text-light);
-    background-color: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-
-    &:hover {
-      color: var(--color-text);
-    }
-
-    &--active {
-      background-color: var(--brand-dark-green);
-      color: var(--chip-text-white);
-      border-bottom-color: var(--brand-dark-green);
-    }
-  }
-
-  &-panels {
-    padding: var(--spacing-lg);
-    min-height: 320px;
-    overflow-y: auto;
-  }
-
-  &-panel {
-    &--categories {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--spacing-md);
-      row-gap: calc((var(--spacing-sm) + var(--spacing-md)) / 2);
-    }
-
-    &--hours {
-      padding: var(--spacing-sm) 0;
-    }
-  }
-
-  &-footer {
-    padding: var(--spacing-lg);
-    padding-top: 0;
-    border-top: 1px solid var(--color-border);
-  }
-
-  &-clearAllButton {
-    width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--color-text);
-    background-color: transparent;
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease;
-
-    &:hover {
-      border-color: var(--brand-dark-green);
-      color: var(--brand-dark-green);
-    }
-  }
-
-  &-resetButton {
-    border: 2px solid var(--color-text-light);
-    border-radius: var(--pill-radius);
-    padding: 0.375rem var(--pill-padding-x);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    transition: all 0.2s ease;
-    background-color: transparent;
-    color: var(--color-text-light);
-    white-space: nowrap;
-
-    &:hover:not(:disabled) {
-      opacity: 1;
-      transform: translateY(-1px);
-      border-color: var(--color-text);
-      color: var(--color-text);
-    }
-
-    &--disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-  }
 }
 </style>

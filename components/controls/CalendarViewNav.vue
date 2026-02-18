@@ -110,9 +110,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
 import { UI_TEXT } from '~/consts/calendar.const'
-import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
+import { MOBILE_BREAKPOINT, SMALL_MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
 defineOptions({ name: 'CalendarViewNav' })
 
@@ -177,7 +176,7 @@ const monthTriggerButtonRef = ref(null)
 const isFilterPopupOpen = ref(false)
 const filterTriggerRef = ref(null)
 const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
-const isSmallMobile = useScreenWidth(560)
+const isSmallMobile = useScreenWidth(SMALL_MOBILE_BREAKPOINT)
 
 const viewMonthlyLabel = UI_TEXT.viewMonthly
 const viewDailyLabel = UI_TEXT.viewDaily
@@ -474,10 +473,6 @@ const handleNext = () => {
 
   &-viewToggleIcon {
     flex-shrink: 0;
-  }
-
-  &-viewToggleText {
-    // Text hidden on small screens via media query above
   }
 }
 </style>

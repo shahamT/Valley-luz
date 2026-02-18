@@ -3,6 +3,10 @@
  * Note: formatDateToYYYYMMDD and parseDateString live in date.helpers.js - import from there
  */
 
+const ALL_DAY_TEXT = 'כל היום'
+const FREE_TEXT = 'חינם'
+const UNKNOWN_LOCATION_TEXT = 'לא ידוע'
+
 /**
  * Format event occurrence time for display
  * @param {Object} occurrence - Event occurrence with startTime, endTime, hasTime
@@ -10,7 +14,7 @@
  */
 export function formatEventTime(occurrence) {
   if (!occurrence.hasTime) {
-    return 'כל היום'
+    return ALL_DAY_TEXT
   }
 
   if (!occurrence.startTime) {
@@ -41,7 +45,7 @@ export function formatEventTime(occurrence) {
  */
 export function formatEventPrice(event) {
   if (event.price === null || event.price === undefined || event.price === 0) {
-    return 'חינם'
+    return FREE_TEXT
   }
   return `${event.price} ₪`
 }
@@ -73,7 +77,7 @@ export function formatEventLocationForChip(event) {
   if (name && city) return `${name} - ${city}`
   if (city) return city
   if (name) return name
-  return 'לא ידוע'
+  return UNKNOWN_LOCATION_TEXT
 }
 
 /**
@@ -87,6 +91,6 @@ export function transformEventForCard(event, occurrence) {
     timeText: formatEventTime(occurrence),
     title: event.title,
     desc: event.shortDescription || event.fullDescription || '',
-    price: `${formatEventPrice(event)} ${formatEventLocation(event)}`,
+    price: [formatEventPrice(event), formatEventLocation(event)].filter(Boolean).join(' '),
   }
 }

@@ -10,6 +10,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'CategoryPill' })
+
 const props = defineProps({
   category: {
     type: Object,

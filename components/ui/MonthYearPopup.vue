@@ -4,17 +4,17 @@
     class="MonthYearPopup"
     @click.stop
   >
-    <UiMonthYearSelection
-      :current-date="currentDate"
-      @select="handleSelect"
-      @year-change="handleYearChange"
+    <UiMonthYearPicker
+      :year="currentDate.year"
+      :month="currentDate.month"
+      @select="handlePickerSelect"
+      @year-change="handlePickerYearChange"
     />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { onClickOutside } from '@vueuse/core'
+defineOptions({ name: 'MonthYearPopup' })
 
 const props = defineProps({
   currentDate: {
@@ -31,13 +31,13 @@ const emit = defineEmits(['close', 'select', 'year-change'])
 
 const popupRef = ref(null)
 
-const handleSelect = (data) => {
-  emit('select', data)
+const handlePickerSelect = (year, month) => {
+  emit('select', { year, month })
   emit('close')
 }
 
-const handleYearChange = (data) => {
-  emit('year-change', data)
+const handlePickerYearChange = (year) => {
+  emit('year-change', { year })
 }
 
 onClickOutside(

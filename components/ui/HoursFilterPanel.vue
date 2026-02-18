@@ -39,8 +39,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
 import Slider from '@vueform/slider'
 import '@vueform/slider/themes/default.css'
 import { MINUTES_PER_DAY, TIME_FILTER_PRESETS, TIME_SLIDER_STEP } from '~/consts/calendar.const'

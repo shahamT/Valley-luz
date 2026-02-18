@@ -2148,7 +2148,22 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1c9b1-Tf33xs+xohsM040gGjueCdr2BA8\"",
+    "mtime": "2026-02-18T08:34:34.880Z",
+    "size": 117169,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"725a2-0LNBss/rT8G80DeUxqknnoNF85U\"",
+    "mtime": "2026-02-18T08:34:34.881Z",
+    "size": 468386,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -3082,7 +3097,7 @@ async function getMongoConnection() {
 }
 
 function transformEventForFrontend(doc) {
-  var _a, _b, _c, _d, _e, _f;
+  var _a, _b, _c, _d, _e, _f, _g, _h;
   const backendEvent = doc.event;
   if (!backendEvent) {
     return null;
@@ -3107,7 +3122,9 @@ function transformEventForFrontend(doc) {
       city: ((_c = backendEvent.location) == null ? void 0 : _c.City) || "",
       addressLine1: ((_d = backendEvent.location) == null ? void 0 : _d.addressLine1) || void 0,
       addressLine2: ((_e = backendEvent.location) == null ? void 0 : _e.addressLine2) || void 0,
-      locationDetails: ((_f = backendEvent.location) == null ? void 0 : _f.locationDetails) || void 0
+      locationDetails: ((_f = backendEvent.location) == null ? void 0 : _f.locationDetails) || void 0,
+      wazeNavLink: ((_g = backendEvent.location) == null ? void 0 : _g.wazeNavLink) || void 0,
+      gmapsNavLink: ((_h = backendEvent.location) == null ? void 0 : _h.gmapsNavLink) || void 0
     },
     occurrences,
     isActive: doc.isActive !== false,

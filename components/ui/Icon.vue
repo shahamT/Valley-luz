@@ -9,6 +9,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Icon' })
+
 const props = defineProps({
   name: {
     type: String,

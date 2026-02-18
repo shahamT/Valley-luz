@@ -9,8 +9,3 @@
 const uiStore = useUiStore()
 const { isEventModalShowing } = storeToRefs(uiStore)
 </script>
-
-<style lang="scss">
-.App {
-}
-</style>

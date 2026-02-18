@@ -1,5 +1,3 @@
-import { watch, onMounted, ref } from 'vue'
-import { storeToRefs } from 'pinia'
 import { parseCategories, serializeCategories, parseTimeFilter, isValidMonthYear } from '~/utils/validation.helpers'
 import { MINUTES_PER_DAY } from '~/consts/calendar.const'
 
@@ -167,8 +165,5 @@ export const useUrlState = (options = {}) => {
   return {
     initializeFromUrl,
     startUrlSync,
-    parseUrlParams,
-    buildQueryParams,
-    updateUrl,
   }
 }

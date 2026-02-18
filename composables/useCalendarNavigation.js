@@ -1,7 +1,4 @@
-import { computed } from 'vue'
 import {
-  getPrevMonth,
-  getNextMonth,
   getPrevDay,
   getNextDay,
   getTodayDateString,
@@ -15,11 +12,8 @@ import {
  * @returns {{
  *   navigateToMonth: (year: number, month: number) => void,
  *   navigateToDay: (dateString: string) => void,
- *   goToPrevMonth: (currentDate: {year: number, month: number}) => {year: number, month: number},
- *   goToNextMonth: (currentDate: {year: number, month: number}) => {year: number, month: number},
  *   goToPrevDay: (dateString: string) => string,
  *   goToNextDay: (dateString: string) => string,
- *   getDailyTargetDateForMonth: (year: number, month: number) => string,
  *   switchToDailyView: (currentDate: {year: number, month: number}) => void,
  *   navigateToMonthInDailyView: (year: number, month: number) => void
  * }}
@@ -56,26 +50,6 @@ export const useCalendarNavigation = () => {
       path: `/daily-view/${dateString}`,
       query: currentQuery,
     })
-  }
-
-  /**
-   * Navigate to previous month
-   * @param {Object} currentDate - Current date object {year, month}
-   */
-  const goToPrevMonth = (currentDate) => {
-    const newDate = getPrevMonth(currentDate.year, currentDate.month)
-    calendarStore.setCurrentDate(newDate)
-    return newDate
-  }
-
-  /**
-   * Navigate to next month
-   * @param {Object} currentDate - Current date object {year, month}
-   */
-  const goToNextMonth = (currentDate) => {
-    const newDate = getNextMonth(currentDate.year, currentDate.month)
-    calendarStore.setCurrentDate(newDate)
-    return newDate
   }
 
   /**
@@ -140,11 +114,8 @@ export const useCalendarNavigation = () => {
   return {
     navigateToMonth,
     navigateToDay,
-    goToPrevMonth,
-    goToNextMonth,
     goToPrevDay,
     goToNextDay,
-    getDailyTargetDateForMonth,
     switchToDailyView,
     navigateToMonthInDailyView,
   }

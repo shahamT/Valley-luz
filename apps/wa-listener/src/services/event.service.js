@@ -436,7 +436,9 @@ EVENT OBJECT STRUCTURE (when status is "new_event" or "updated_event"):
     "City": string,  // City name
     "addressLine1": string | undefined,
     "addressLine2": string | undefined,
-    "locationDetails": string | undefined
+    "locationDetails": string | undefined,
+    "wazeNavLink": string | undefined,  // Waze navigation URL
+    "gmapsNavLink": string | undefined  // Google Maps navigation URL
   },
   "price": number | 0 | null,  // Price as number (0 if free, null if not specified)
   "occurrence": {
@@ -521,6 +523,8 @@ LOCATION RULES:
 - addressLine1: Venue/place name only (e.g., "Szold Art", "חוות הג'לבון") - if not present, set to undefined
 - addressLine2: Street address only (e.g., "רחוב הרצל 15") - if not present, set to undefined
 - locationDetails: Navigation instructions only - if not present, set to undefined
+- wazeNavLink: Look in message text AND links for a Waze URL (patterns: waze.com/, ul.waze.com/, waze://). Extract the full URL or set to undefined
+- gmapsNavLink: Look in message text AND links for a Google Maps URL (patterns: maps.google.com, goo.gl/maps, maps.app.goo.gl, google.com/maps). Extract the full URL or set to undefined
 - DO NOT fill fields with guessed or inferred information
 
 DATA EXTRACTION RULES:
@@ -705,7 +709,9 @@ EVENT OBJECT STRUCTURE (same as input):
     "City": string,
     "addressLine1": string | undefined,
     "addressLine2": string | undefined,
-    "locationDetails": string | undefined
+    "locationDetails": string | undefined,
+    "wazeNavLink": string | undefined,
+    "gmapsNavLink": string | undefined
   },
   "price": number | 0 | null,
   "occurrence": {
@@ -731,6 +737,7 @@ VALIDATION RULES:
    - Title/shortDescription: Remove any price mentions (price belongs only in price field)
    - location.City: Search RAW MESSAGE TEXT first. If city name not found word-for-word in message, check image. If still not found, set to "" (empty string). DO NOT keep guessed city names.
    - location.addressLine1/addressLine2/locationDetails: Must be explicitly stated, otherwise set to undefined
+   - location.wazeNavLink/gmapsNavLink: Must be a URL actually present in the raw message text or links. If the URL cannot be found in the source, set to undefined
    - price: Must be explicitly stated entrance price, otherwise set to null
    - occurrence.startTime: Verify the year matches the current year ${CURRENT_YEAR} if no year was specified in the message
 4. If critical fields (Title, categories, occurrence.startTime) cannot be corrected, return null for event
@@ -880,7 +887,9 @@ REQUIRED EVENT STRUCTURE (return this exact structure):
     "City": string,  // City name
     "addressLine1": string | undefined,
     "addressLine2": string | undefined,
-    "locationDetails": string | undefined
+    "locationDetails": string | undefined,
+    "wazeNavLink": string | undefined,  // Waze navigation URL
+    "gmapsNavLink": string | undefined  // Google Maps navigation URL
   },
   "price": number | 0 | null,  // Price as number (0 if free, null if not specified)
   "occurrence": {
@@ -950,6 +959,10 @@ DATA EXTRACTION RULES:
 - DO NOT invent, assume, or infer missing information
 - If unclear or missing, leave field empty/null/undefined
 - Incomplete data is better than incorrect data
+
+NAV LINK EXTRACTION RULES:
+- wazeNavLink: Look in message text AND the provided Links list for a Waze URL (patterns: waze.com/, ul.waze.com/, waze://). If found, set to the full URL. If not present, set to undefined
+- gmapsNavLink: Look in message text AND the provided Links list for a Google Maps URL (patterns: maps.google.com, goo.gl/maps, maps.app.goo.gl, google.com/maps). If found, set to the full URL. If not present, set to undefined
 
 Return the event object directly (no wrapper, no isEvent field).`
 

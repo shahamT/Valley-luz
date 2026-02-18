@@ -1,9 +1,9 @@
 <template>
-  <LayoutAppShell :show-month-year="false">
+  <LayoutAppShell>
     <div class="ErrorPage">
       <div class="ErrorPage-content">
         <div class="ErrorPage-icon">
-          <UiIcon name="error" :size="64" color="var(--color-error)" />
+          <UiIcon name="error" size="xl" color="var(--color-error)" />
         </div>
         <h1 class="ErrorPage-title">
           {{ error.statusCode === 404 ? 'עמוד לא נמצא' : 'אירעה שגיאה' }}

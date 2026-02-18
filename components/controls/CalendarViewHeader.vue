@@ -21,8 +21,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
 import { UI_TEXT, MINUTES_PER_DAY } from '~/consts/calendar.const'
 import { formatMinutesToTime } from '~/utils/date.helpers'
 

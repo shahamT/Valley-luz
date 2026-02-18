@@ -35,7 +35,6 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 
 const slidesPerView = 3

@@ -15,10 +15,11 @@
             <UiIcon name="close" size="md" />
           </button>
         </div>
-        <UiMonthYearSelection
-          :current-date="currentDate"
-          @select="handleSelect"
-          @year-change="handleYearChange"
+        <UiMonthYearPicker
+          :year="currentDate.year"
+          :month="currentDate.month"
+          @select="handlePickerSelect"
+          @year-change="handlePickerYearChange"
         />
       </div>
     </div>
@@ -26,6 +27,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'MonthYearModal' })
+
 const props = defineProps({
   currentDate: {
     type: Object,
@@ -39,13 +42,13 @@ const handleClose = () => {
   emit('close')
 }
 
-const handleSelect = (data) => {
-  emit('select', data)
+const handlePickerSelect = (year, month) => {
+  emit('select', { year, month })
   emit('close')
 }
 
-const handleYearChange = (data) => {
-  emit('year-change', data)
+const handlePickerYearChange = (year) => {
+  emit('year-change', { year })
 }
 </script>
 

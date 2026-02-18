@@ -48,8 +48,11 @@ declare global {
   const eagerComputed: typeof import('../../node_modules/@vueuse/core').eagerComputed
   const effect: typeof import('../../node_modules/vue').effect
   const effectScope: typeof import('../../node_modules/vue').effectScope
-  const eventsService: typeof import('../../utils/events.service').eventsService
+  const eventMatchesCategories: typeof import('../../utils/events.service').eventMatchesCategories
   const extendRef: typeof import('../../node_modules/@vueuse/core').extendRef
+  const filterEventOccurrencesByTimeRange: typeof import('../../utils/events.service').filterEventOccurrencesByTimeRange
+  const filterEventsByCategories: typeof import('../../utils/events.service').filterEventsByCategories
+  const filterEventsByTimeRangeForMonth: typeof import('../../utils/events.service').filterEventsByTimeRangeForMonth
   const formatDateToYYYYMMDD: typeof import('../../utils/date.helpers').formatDateToYYYYMMDD
   const formatEventLocation: typeof import('../../utils/events.helpers').formatEventLocation
   const formatEventLocationForChip: typeof import('../../utils/events.helpers').formatEventLocationForChip
@@ -59,17 +62,23 @@ declare global {
   const formatMinutesToTime: typeof import('../../utils/date.helpers').formatMinutesToTime
   const formatMonthYear: typeof import('../../utils/date.helpers').formatMonthYear
   const generateCalendarDays: typeof import('../../utils/calendar.helpers').generateCalendarDays
+  const getActiveEvents: typeof import('../../utils/events.service').getActiveEvents
   const getAdditionalEventsCount: typeof import('../../utils/calendar-display.helpers').getAdditionalEventsCount
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCategoryColor: typeof import('../../utils/calendar-display.helpers').getCategoryColor
   const getCurrentInstance: typeof import('../../node_modules/vue').getCurrentInstance
   const getCurrentScope: typeof import('../../node_modules/vue').getCurrentScope
   const getCurrentYearMonth: typeof import('../../utils/date.helpers').getCurrentYearMonth
+  const getDateFromISO: typeof import('../../utils/events.service').getDateFromISO
   const getDisplayEvents: typeof import('../../utils/calendar-display.helpers').getDisplayEvents
+  const getEventOccurrencesOnDate: typeof import('../../utils/events.service').getEventOccurrencesOnDate
+  const getEventsByDate: typeof import('../../utils/events.service').getEventsByDate
+  const getEventsForDate: typeof import('../../utils/events.service').getEventsForDate
   const getGoogleCalendarUrl: typeof import('../../utils/calendar.service').getGoogleCalendarUrl
   const getMoreEventsText: typeof import('../../utils/calendar-display.helpers').getMoreEventsText
   const getNextDay: typeof import('../../utils/date.helpers').getNextDay
   const getNextMonth: typeof import('../../utils/date.helpers').getNextMonth
+  const getOccurrenceMinutesOfDay: typeof import('../../utils/events.service').getOccurrenceMinutesOfDay
   const getPrevDay: typeof import('../../utils/date.helpers').getPrevDay
   const getPrevMonth: typeof import('../../utils/date.helpers').getPrevMonth
   const getRouteRules: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getRouteRules
@@ -90,6 +99,7 @@ declare global {
   const isReactive: typeof import('../../node_modules/vue').isReactive
   const isReadonly: typeof import('../../node_modules/vue').isReadonly
   const isRef: typeof import('../../node_modules/vue').isRef
+  const isSameMonth: typeof import('../../utils/date.helpers').isSameMonth
   const isShallow: typeof import('../../node_modules/vue').isShallow
   const isToday: typeof import('../../utils/date.helpers').isToday
   const isValidDateString: typeof import('../../utils/validation.helpers').isValidDateString
@@ -106,6 +116,7 @@ declare global {
   const markRaw: typeof import('../../node_modules/vue').markRaw
   const navigateTo: typeof import('../../node_modules/nuxt/dist/app/composables/router').navigateTo
   const nextTick: typeof import('../../node_modules/vue').nextTick
+  const occurrenceOverlapsTimeRange: typeof import('../../utils/events.service').occurrenceOverlapsTimeRange
   const onActivated: typeof import('../../node_modules/vue').onActivated
   const onBeforeMount: typeof import('../../node_modules/vue').onBeforeMount
   const onBeforeRouteLeave: typeof import('../../node_modules/vue-router').onBeforeRouteLeave
@@ -257,6 +268,7 @@ declare global {
   const useEventBus: typeof import('../../node_modules/@vueuse/core').useEventBus
   const useEventFilters: typeof import('../../composables/useEventFilters').useEventFilters
   const useEventListener: typeof import('../../node_modules/@vueuse/core').useEventListener
+  const useEventModalData: typeof import('../../composables/useEventModalData').useEventModalData
   const useEventSource: typeof import('../../node_modules/@vueuse/core').useEventSource
   const useEvents: typeof import('../../composables/useEvents').useEvents
   const useEyeDropper: typeof import('../../node_modules/@vueuse/core').useEyeDropper
@@ -508,8 +520,11 @@ declare module 'vue' {
     readonly eagerComputed: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['eagerComputed']>
     readonly effect: UnwrapRef<typeof import('../../node_modules/vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('../../node_modules/vue')['effectScope']>
-    readonly eventsService: UnwrapRef<typeof import('../../utils/events.service')['eventsService']>
+    readonly eventMatchesCategories: UnwrapRef<typeof import('../../utils/events.service')['eventMatchesCategories']>
     readonly extendRef: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['extendRef']>
+    readonly filterEventOccurrencesByTimeRange: UnwrapRef<typeof import('../../utils/events.service')['filterEventOccurrencesByTimeRange']>
+    readonly filterEventsByCategories: UnwrapRef<typeof import('../../utils/events.service')['filterEventsByCategories']>
+    readonly filterEventsByTimeRangeForMonth: UnwrapRef<typeof import('../../utils/events.service')['filterEventsByTimeRangeForMonth']>
     readonly formatDateToYYYYMMDD: UnwrapRef<typeof import('../../utils/date.helpers')['formatDateToYYYYMMDD']>
     readonly formatEventLocation: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocation']>
     readonly formatEventLocationForChip: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocationForChip']>
@@ -519,17 +534,23 @@ declare module 'vue' {
     readonly formatMinutesToTime: UnwrapRef<typeof import('../../utils/date.helpers')['formatMinutesToTime']>
     readonly formatMonthYear: UnwrapRef<typeof import('../../utils/date.helpers')['formatMonthYear']>
     readonly generateCalendarDays: UnwrapRef<typeof import('../../utils/calendar.helpers')['generateCalendarDays']>
+    readonly getActiveEvents: UnwrapRef<typeof import('../../utils/events.service')['getActiveEvents']>
     readonly getAdditionalEventsCount: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getAdditionalEventsCount']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCategoryColor: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getCategoryColor']>
     readonly getCurrentInstance: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('../../node_modules/vue')['getCurrentScope']>
     readonly getCurrentYearMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getCurrentYearMonth']>
+    readonly getDateFromISO: UnwrapRef<typeof import('../../utils/events.service')['getDateFromISO']>
     readonly getDisplayEvents: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getDisplayEvents']>
+    readonly getEventOccurrencesOnDate: UnwrapRef<typeof import('../../utils/events.service')['getEventOccurrencesOnDate']>
+    readonly getEventsByDate: UnwrapRef<typeof import('../../utils/events.service')['getEventsByDate']>
+    readonly getEventsForDate: UnwrapRef<typeof import('../../utils/events.service')['getEventsForDate']>
     readonly getGoogleCalendarUrl: UnwrapRef<typeof import('../../utils/calendar.service')['getGoogleCalendarUrl']>
     readonly getMoreEventsText: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getMoreEventsText']>
     readonly getNextDay: UnwrapRef<typeof import('../../utils/date.helpers')['getNextDay']>
     readonly getNextMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getNextMonth']>
+    readonly getOccurrenceMinutesOfDay: UnwrapRef<typeof import('../../utils/events.service')['getOccurrenceMinutesOfDay']>
     readonly getPrevDay: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevDay']>
     readonly getPrevMonth: UnwrapRef<typeof import('../../utils/date.helpers')['getPrevMonth']>
     readonly getRouteRules: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getRouteRules']>
@@ -550,6 +571,7 @@ declare module 'vue' {
     readonly isReactive: UnwrapRef<typeof import('../../node_modules/vue')['isReactive']>
     readonly isReadonly: UnwrapRef<typeof import('../../node_modules/vue')['isReadonly']>
     readonly isRef: UnwrapRef<typeof import('../../node_modules/vue')['isRef']>
+    readonly isSameMonth: UnwrapRef<typeof import('../../utils/date.helpers')['isSameMonth']>
     readonly isShallow: UnwrapRef<typeof import('../../node_modules/vue')['isShallow']>
     readonly isToday: UnwrapRef<typeof import('../../utils/date.helpers')['isToday']>
     readonly isValidDateString: UnwrapRef<typeof import('../../utils/validation.helpers')['isValidDateString']>
@@ -566,6 +588,7 @@ declare module 'vue' {
     readonly markRaw: UnwrapRef<typeof import('../../node_modules/vue')['markRaw']>
     readonly navigateTo: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/router')['navigateTo']>
     readonly nextTick: UnwrapRef<typeof import('../../node_modules/vue')['nextTick']>
+    readonly occurrenceOverlapsTimeRange: UnwrapRef<typeof import('../../utils/events.service')['occurrenceOverlapsTimeRange']>
     readonly onActivated: UnwrapRef<typeof import('../../node_modules/vue')['onActivated']>
     readonly onBeforeMount: UnwrapRef<typeof import('../../node_modules/vue')['onBeforeMount']>
     readonly onBeforeRouteLeave: UnwrapRef<typeof import('../../node_modules/vue-router')['onBeforeRouteLeave']>
@@ -717,6 +740,7 @@ declare module 'vue' {
     readonly useEventBus: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEventBus']>
     readonly useEventFilters: UnwrapRef<typeof import('../../composables/useEventFilters')['useEventFilters']>
     readonly useEventListener: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEventListener']>
+    readonly useEventModalData: UnwrapRef<typeof import('../../composables/useEventModalData')['useEventModalData']>
     readonly useEventSource: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEventSource']>
     readonly useEvents: UnwrapRef<typeof import('../../composables/useEvents')['useEvents']>
     readonly useEyeDropper: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useEyeDropper']>

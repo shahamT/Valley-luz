@@ -23,6 +23,8 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'CalendarViewContent' })
+
 defineProps({
   viewMode: {
     type: String,

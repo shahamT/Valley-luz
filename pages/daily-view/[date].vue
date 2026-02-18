@@ -1,5 +1,5 @@
 <template>
-  <LayoutAppShell :show-month-year="false">
+  <LayoutAppShell>
     <div class="DailyView">
       <div class="DailyView-header">
         <ControlsCalendarViewHeader
@@ -47,7 +47,6 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
 import { UI_TEXT, DAILY_CAROUSEL_DAYS_RANGE } from '~/consts/calendar.const'
 import { getTodayDateString, formatMonthYear, parseDateString, formatDateToYYYYMMDD } from '~/utils/date.helpers'
 import { isValidRouteDate } from '~/utils/validation.helpers'

@@ -18,7 +18,9 @@
 <script setup>
 import { generateCalendarDays } from '~/utils/calendar.helpers'
 import { getCurrentYearMonth } from '~/utils/date.helpers'
-import { eventsService } from '~/utils/events.service'
+import { getEventsByDate } from '~/utils/events.service'
+
+defineOptions({ name: 'MonthCalendar' })
 
 const props = defineProps({
   date: {
@@ -31,12 +33,16 @@ const props = defineProps({
   },
 })
 
-const eventCountsMap = computed(() => {
-  return eventsService.getEventCountsByDate(props.events, props.date.year, props.date.month)
+const eventsMap = computed(() => {
+  return getEventsByDate(props.events, props.date.year, props.date.month)
 })
 
-const eventsMap = computed(() => {
-  return eventsService.getEventsByDate(props.events, props.date.year, props.date.month)
+const eventCountsMap = computed(() => {
+  const counts = {}
+  for (const [dateString, events] of Object.entries(eventsMap.value)) {
+    counts[dateString] = events.length
+  }
+  return counts
 })
 
 const calendarDays = computed(() => {

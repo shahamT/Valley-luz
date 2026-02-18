@@ -1,5 +1,10 @@
-import { storeToRefs } from 'pinia'
-import { eventsService } from '~/utils/events.service'
+import {
+  filterEventsByCategories,
+  filterEventsByTimeRangeForMonth,
+  getEventsForDate,
+  eventMatchesCategories,
+  filterEventOccurrencesByTimeRange,
+} from '~/utils/events.service'
 import { transformEventForCard, formatEventLocationForChip } from '~/utils/events.helpers'
 
 /**
@@ -23,10 +28,10 @@ export const useEventFilters = (events) => {
     let allEvents = events.value
     
     if (selectedCategories.value.length > 0) {
-      allEvents = eventsService.filterEventsByCategories(allEvents, selectedCategories.value)
+      allEvents = filterEventsByCategories(allEvents, selectedCategories.value)
     }
     
-    return eventsService.filterEventsByTimeRangeForMonth(
+    return filterEventsByTimeRangeForMonth(
       allEvents,
       year,
       month,
@@ -45,13 +50,13 @@ export const useEventFilters = (events) => {
     const startMin = timeFilterStart.value
     const endMin = timeFilterEnd.value
 
-    let pairs = eventsService.getEventsForDate(events.value, dateString)
+    let pairs = getEventsForDate(events.value, dateString)
 
     if (categories.length > 0) {
-      pairs = pairs.filter(({ event }) => eventsService.eventMatchesCategories(event, categories))
+      pairs = pairs.filter(({ event }) => eventMatchesCategories(event, categories))
     }
 
-    return eventsService.filterEventOccurrencesByTimeRange(pairs, startMin, endMin)
+    return filterEventOccurrencesByTimeRange(pairs, startMin, endMin)
   }
 
   /**
@@ -65,7 +70,6 @@ export const useEventFilters = (events) => {
 
     dates.forEach((date) => {
       const pairs = getFilteredEventsForDate(date)
-      // Sort by start time so earlier events show at the top
       const sorted = [...pairs].sort((a, b) => {
         const aStart = a.occurrence?.startTime || ''
         const bStart = b.occurrence?.startTime || ''

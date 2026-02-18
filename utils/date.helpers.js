@@ -201,3 +201,13 @@ export function formatMinutesToTime(minutes) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
+/**
+ * Checks whether two month/year objects represent the same month.
+ * @param {{ year: number, month: number } | null | undefined} a
+ * @param {{ year: number, month: number } | null | undefined} b
+ * @returns {boolean}
+ */
+export function isSameMonth(a, b) {
+  return !!(a && b && a.year === b.year && a.month === b.month)
+}
+

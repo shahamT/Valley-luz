@@ -1,4 +1,5 @@
 import { createEvent } from 'ics'
+import { logger } from '~/utils/logger'
 
 /**
  * Convert date string to ICS format array [year, month, day, hour, minute]
@@ -50,7 +51,7 @@ export async function downloadIcsFile(eventData) {
   const { title, description, location, startDate, startTime, endDate, endTime } = eventData
   
   if (!startDate) {
-    console.error('Start date is required for calendar event')
+    logger.error('[CalendarService]', 'Start date is required for calendar event')
     return false
   }
   
@@ -66,7 +67,7 @@ export async function downloadIcsFile(eventData) {
   return new Promise((resolve) => {
     createEvent(event, (error, value) => {
       if (error) {
-        console.error('Error creating ICS file:', error)
+        logger.error('[CalendarService]', 'Error creating ICS file:', error)
         resolve(false)
         return
       }
@@ -84,7 +85,7 @@ export async function downloadIcsFile(eventData) {
         URL.revokeObjectURL(url)
         resolve(true)
       } catch (err) {
-        console.error('Error downloading ICS file:', err)
+        logger.error('[CalendarService]', 'Error downloading ICS file:', err)
         resolve(false)
       }
     })
@@ -107,7 +108,7 @@ export function getGoogleCalendarUrl(eventData) {
   const { title, description, location, startDate, startTime, endDate, endTime } = eventData
   
   if (!startDate) {
-    console.error('Start date is required for calendar event')
+    logger.error('[CalendarService]', 'Start date is required for calendar event')
     return ''
   }
   
@@ -152,6 +153,6 @@ export async function handleCalendarSelection(calendarType, eventData) {
       break
     
     default:
-      console.error('Unknown calendar type:', calendarType)
+      logger.error('[CalendarService]', 'Unknown calendar type:', calendarType)
   }
 }

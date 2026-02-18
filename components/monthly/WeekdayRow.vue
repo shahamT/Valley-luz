@@ -16,6 +16,8 @@ import { HEBREW_WEEKDAYS, HEBREW_WEEKDAYS_SHORT } from '~/consts/dates.const'
 import { WEEKEND_DAYS } from '~/consts/calendar.const'
 import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
+defineOptions({ name: 'WeekdayRow' })
+
 const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 
 const weekdays = computed(() => {

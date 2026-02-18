@@ -1,5 +1,5 @@
 <template>
-  <LayoutAppShell :show-month-year="false">
+  <LayoutAppShell>
     <div class="MonthlyView">
       <div class="MonthlyView-header">
         <ControlsCalendarViewHeader
@@ -47,8 +47,6 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
 import { UI_TEXT } from '~/consts/calendar.const'
 import { formatMonthYear, getCurrentYearMonth, getPrevMonth, getNextMonth } from '~/utils/date.helpers'
 
@@ -94,7 +92,7 @@ const monthYearDisplay = computed(() => {
 })
 
 const isCurrentMonth = computed(() => {
-  if (typeof window === 'undefined') return false
+  if (import.meta.server) return false
   const now = new Date()
   const date = currentDate.value
   return date && date.year === now.getFullYear() && date.month === now.getMonth() + 1
@@ -114,12 +112,10 @@ const visibleMonths = computed(() => {
 
 const slideToMonthRequest = ref(null)
 
-const handlePrevMonth = () => {
-  const targetMonth = getPrevMonth(currentDate.value.year, currentDate.value.month)
+const navigateMonth = (targetMonth) => {
   const isInVisibleMonths = visibleMonths.value.some(
-    m => m.year === targetMonth.year && m.month === targetMonth.month
+    (m) => m.year === targetMonth.year && m.month === targetMonth.month
   )
-  
   if (isInVisibleMonths) {
     slideToMonthRequest.value = targetMonth
   } else {
@@ -127,17 +123,12 @@ const handlePrevMonth = () => {
   }
 }
 
+const handlePrevMonth = () => {
+  navigateMonth(getPrevMonth(currentDate.value.year, currentDate.value.month))
+}
+
 const handleNextMonth = () => {
-  const targetMonth = getNextMonth(currentDate.value.year, currentDate.value.month)
-  const isInVisibleMonths = visibleMonths.value.some(
-    m => m.year === targetMonth.year && m.month === targetMonth.month
-  )
-  
-  if (isInVisibleMonths) {
-    slideToMonthRequest.value = targetMonth
-  } else {
-    calendarStore.setCurrentDate(targetMonth)
-  }
+  navigateMonth(getNextMonth(currentDate.value.year, currentDate.value.month))
 }
 
 const handleMonthChange = (payload) => {

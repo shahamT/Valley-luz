@@ -13,75 +13,6 @@
         </button>
       </div>
       <div class="AppHeader-side AppHeader-side--logo">
-        <div class="AppHeader-center">
-        <slot name="center">
-          <ClientOnly>
-            <div v-if="showMonthYear" class="AppHeader-monthNav">
-            <button 
-              class="AppHeader-navButton" 
-              :class="{ 'AppHeader-navButton--disabled': isCurrentMonth }"
-              :disabled="isCurrentMonth"
-              @click="$emit('prev-month')" 
-              aria-label="Previous month"
-            >
-              <UiIcon name="chevron_right" size="md" />
-            </button>
-            <div class="AppHeader-monthTriggerWrapper">
-              <button 
-                ref="monthTriggerButtonRef"
-                class="AppHeader-monthTrigger" 
-                @click="toggleMonthYearPicker" 
-                aria-label="Select month and year"
-              >
-                <span class="AppHeader-month">{{ monthYear }}</span>
-                <UiIcon name="expand_more" size="sm" class="AppHeader-chevron" />
-              </button>
-              <UiMonthYearPopup
-                v-if="isMonthYearPickerOpen && !isMobile"
-                :current-date="currentDate"
-                :trigger-element="monthTriggerButtonRef"
-                @close="closeMonthYearPicker"
-                @select="handleMonthYearSelect"
-                @year-change="handleYearChange"
-              />
-              <UiMonthYearModal
-                v-if="isMonthYearPickerOpen && isMobile"
-                :current-date="currentDate"
-                @close="closeMonthYearPicker"
-                @select="handleMonthYearSelect"
-                @year-change="handleYearChange"
-              />
-            </div>
-            <button class="AppHeader-navButton" @click="$emit('next-month')" aria-label="Next month">
-              <UiIcon name="chevron_left" size="md" />
-            </button>
-          </div>
-          <template #fallback>
-            <div v-if="showMonthYear" class="AppHeader-monthNav">
-              <button 
-                class="AppHeader-navButton" 
-                @click="$emit('prev-month')" 
-                aria-label="Previous month"
-              >
-                <UiIcon name="chevron_right" size="md" />
-              </button>
-              <div class="AppHeader-monthTriggerWrapper">
-                <button 
-                  class="AppHeader-monthTrigger" 
-                  aria-label="Select month and year"
-                >
-                  <span class="AppHeader-month">{{ monthYear }}</span>
-                  <UiIcon name="expand_more" size="sm" class="AppHeader-chevron" />
-                </button>
-              </div>
-              <button class="AppHeader-navButton" @click="$emit('next-month')" aria-label="Next month">
-                <UiIcon name="chevron_left" size="md" />
-              </button>
-            </div>
-          </template>
-        </ClientOnly>
-      </slot>
-      </div>
         <ClientOnly>
           <img
             v-if="!isMobile"
@@ -109,60 +40,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
 import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
-const props = defineProps({
-  showMonthYear: {
-    type: Boolean,
-    default: false,
-  },
-  monthYear: {
-    type: String,
-    default: '',
-  },
-  currentDate: {
-    type: Object,
-    default: () => ({
-      year: new Date().getFullYear(),
-      month: new Date().getMonth() + 1,
-    }),
-  },
-})
-
-const emit = defineEmits(['prev-month', 'next-month', 'select-month-year', 'year-change'])
-
-const isMonthYearPickerOpen = ref(false)
-const monthTriggerButtonRef = ref(null)
+defineOptions({ name: 'AppHeader' })
 
 const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
-
-const isCurrentMonth = computed(() => {
-  if (typeof window === 'undefined') {
-    return false
-  }
-  const now = new Date()
-  const currentYear = now.getFullYear()
-  const currentMonth = now.getMonth() + 1
-  return props.currentDate.year === currentYear && props.currentDate.month === currentMonth
-})
-
-const toggleMonthYearPicker = () => {
-  isMonthYearPickerOpen.value = !isMonthYearPickerOpen.value
-}
-
-const closeMonthYearPicker = () => {
-  isMonthYearPickerOpen.value = false
-}
-
-const handleMonthYearSelect = ({ year, month }) => {
-  emit('select-month-year', { year, month })
-  closeMonthYearPicker()
-}
-
-const handleYearChange = ({ year }) => {
-  emit('year-change', { year })
-}
 </script>
 
 <style lang="scss">
@@ -208,8 +90,7 @@ const handleYearChange = ({ year }) => {
     }
 
     &--logo {
-      justify-content: space-between;
-      gap: var(--spacing-md);
+      justify-content: flex-start;
       grid-column: 3;
     }
   }
@@ -250,83 +131,11 @@ const handleYearChange = ({ year }) => {
     flex-shrink: 0;
   }
 
-  &-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 0;
-  }
-
-  &-monthNav {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-  }
-
-  &-navButton {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: none;
-    background-color: var(--weekend-day-bg);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--brand-dark-green);
-    transition: background-color 0.2s ease;
-
-    &:hover:not(:disabled) {
-      background-color: #D4E8C4;
-    }
-
-    &--disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-  }
-
-  &-monthTriggerWrapper {
-    position: relative;
-  }
-
-  &-monthTrigger {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    background-color: var(--weekend-day-bg);
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    padding: var(--spacing-xs) var(--spacing-md);
-    transition: background-color 0.2s ease;
-    color: var(--brand-dark-green);
-    width: 12rem;
-    height: 34px;
-    justify-content: center;
-
-    &:hover {
-      background-color: #D4E8C4;
-    }
-  }
-
-  &-chevron {
-    color: var(--brand-dark-green);
-  }
-
-  &-month {
-    font-size: var(--font-size-lg);
-    font-weight: 700;
-    color: var(--brand-dark-green);
-  }
-
   &-whatsappButton {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    background-color: #25D366;
+    background-color: var(--whatsapp-green);
     border: none;
     border-radius: 999px;
     cursor: pointer;

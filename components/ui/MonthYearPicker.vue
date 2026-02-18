@@ -36,7 +36,6 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
 import { HEBREW_MONTHS } from '~/consts/dates.const'
 
 const props = defineProps({
