@@ -52,6 +52,14 @@ export const PUPPETEER_ARGS = [
   '--disable-gpu',
   '--disable-software-rasterizer',
   '--disable-extensions',
+  '--disable-background-networking',
+  '--disable-default-apps',
+  '--disable-translate',
+  '--disable-sync',
+  '--metrics-recording-only',
+  '--no-first-run',
+  '--single-process',
+  '--js-flags=--max-old-space-size=256',
 ]
 
 /**
