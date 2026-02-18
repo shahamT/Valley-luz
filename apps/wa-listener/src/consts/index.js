@@ -43,26 +43,6 @@ export const DEFAULTS = {
 }
 
 /**
- * Puppeteer browser arguments
- */
-export const PUPPETEER_ARGS = [
-  '--no-sandbox',
-  '--disable-setuid-sandbox',
-  '--disable-dev-shm-usage',
-  '--disable-gpu',
-  '--disable-software-rasterizer',
-  '--disable-extensions',
-  '--disable-background-networking',
-  '--disable-default-apps',
-  '--disable-translate',
-  '--disable-sync',
-  '--metrics-recording-only',
-  '--no-first-run',
-  '--single-process',
-  '--js-flags=--max-old-space-size=256',
-]
-
-/**
  * MIME type to file extension mapping
  */
 export const MIME_TYPE_EXTENSIONS = {

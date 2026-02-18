@@ -21,9 +21,6 @@ export const CONFIRMATION_REASONS = {
   PIPELINE_ERROR: 'pipeline_error',
 }
 
-/**
- * Maps reason codes to human-readable messages
- */
 const REASON_MESSAGES = {
   [CONFIRMATION_REASONS.NEW_EVENT]: '✅ אירוע חדש נוסף בהצלחה',
   [CONFIRMATION_REASONS.UPDATED_EVENT]: '🔄 אירוע קיים עודכן בהצלחה',
@@ -46,13 +43,12 @@ const REASON_MESSAGES = {
  * @returns {Promise<void>}
  */
 export async function sendEventConfirmation(messagePreview, reason) {
-  // If no confirmation groups configured, skip
   if (!config.confirmationGroupIds || config.confirmationGroupIds.length === 0) {
     return
   }
 
-  const client = getClient()
-  if (!client) {
+  const sock = getClient()
+  if (!sock) {
     logger.warn(LOG_PREFIXES.WHATSAPP, 'Cannot send confirmation: WhatsApp client not available')
     return
   }
@@ -60,17 +56,15 @@ export async function sendEventConfirmation(messagePreview, reason) {
   const reasonMessage = REASON_MESSAGES[reason] || `❌ נכשל - ${reason}`
   const messageText = `אירוע - ${messagePreview}\nסטטוס: ${reasonMessage}`
 
-  // Send to all configured confirmation groups
   for (const groupId of config.confirmationGroupIds) {
     try {
-      await client.sendMessage(groupId, messageText)
+      await sock.sendMessage(groupId, { text: messageText })
       if (config.logLevel === 'info') {
         logger.info(LOG_PREFIXES.WHATSAPP, `Sent confirmation to group ${groupId}: ${reason}`)
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send confirmation to group ${groupId}: ${errorMsg}`)
-      // Continue to next group even if one fails
     }
   }
 }

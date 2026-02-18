@@ -3,50 +3,43 @@ import { extractGroupId, getGroupName, getSenderName } from '../utils/messageHel
 import { LOG_PREFIXES } from '../consts/index.js'
 
 /**
- * Group Service Module
- * Provides safe discovery mode that prints only metadata, not message content
- */
-
-/**
  * Prints group metadata when a message arrives (discovery mode)
- * @param {Object} message - Message object from whatsapp-web.js
- * @param {Object} chat - Chat object from whatsapp-web.js
+ * @param {Object} msg - Baileys message object
+ * @param {Object} chat - Chat-like object with { id, name }
  */
-export function printGroupMetadata(message, chat) {
+export function printGroupMetadata(msg, chat) {
   const groupId = extractGroupId(chat)
   const groupName = getGroupName(chat)
-  const senderName = getSenderName(message)
+  const senderName = getSenderName(msg)
 
   logger.info(LOG_PREFIXES.GROUP_SERVICE, '\n--- Group Message Detected (Discovery Mode) ---')
   logger.info(LOG_PREFIXES.GROUP_SERVICE, `Group Name: ${groupName}`)
   logger.info(LOG_PREFIXES.GROUP_SERVICE, `Group ID: ${groupId}`)
   logger.info(LOG_PREFIXES.GROUP_SERVICE, `Sender: ${senderName}`)
   logger.info(LOG_PREFIXES.GROUP_SERVICE, '---')
-  logger.info(LOG_PREFIXES.GROUP_SERVICE, '⚠️  Message content is NOT displayed for privacy')
+  logger.info(LOG_PREFIXES.GROUP_SERVICE, 'Message content is NOT displayed for privacy')
   logger.info(LOG_PREFIXES.GROUP_SERVICE, '')
 }
 
 /**
  * Lists all groups the user is part of
- * @param {Object} client - WhatsApp client instance
+ * @param {Object} sock - Baileys socket instance
  */
-export async function listAllGroups(client) {
+export async function listAllGroups(sock) {
   try {
     logger.info(LOG_PREFIXES.GROUP_SERVICE, '\n=== Listing All Groups ===')
-    const chats = await client.getChats()
-    const groups = chats.filter((chat) => chat.isGroup)
+    const groups = await sock.groupFetchAllParticipating()
+    const groupList = Object.values(groups)
 
-    if (groups.length === 0) {
+    if (groupList.length === 0) {
       logger.info(LOG_PREFIXES.GROUP_SERVICE, 'No groups found.')
       return
     }
 
-    logger.info(LOG_PREFIXES.GROUP_SERVICE, `Found ${groups.length} group(s):\n`)
-    groups.forEach((group, index) => {
-      const groupId = extractGroupId(group)
-      const groupName = getGroupName(group)
-      logger.info(LOG_PREFIXES.GROUP_SERVICE, `${index + 1}. ${groupName}`)
-      logger.info(LOG_PREFIXES.GROUP_SERVICE, `   ID: ${groupId}`)
+    logger.info(LOG_PREFIXES.GROUP_SERVICE, `Found ${groupList.length} group(s):\n`)
+    groupList.forEach((group, index) => {
+      logger.info(LOG_PREFIXES.GROUP_SERVICE, `${index + 1}. ${group.subject || 'Unknown Group'}`)
+      logger.info(LOG_PREFIXES.GROUP_SERVICE, `   ID: ${group.id}`)
       logger.info(LOG_PREFIXES.GROUP_SERVICE, '')
     })
 

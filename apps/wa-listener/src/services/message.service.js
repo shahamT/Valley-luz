@@ -1,83 +1,78 @@
+import { getContentType } from '@whiskeysockets/baileys'
 import { logger } from '../utils/logger.js'
 import { extractMessageId, timestampToISO } from '../utils/messageHelpers.js'
 import { LOG_PREFIXES, ALLOWED_MESSAGE_TYPES } from '../consts/index.js'
 import { config } from '../config.js'
 
-/**
- * Checks if message type is allowed for processing
- * @param {Object} message - Message object from whatsapp-web.js
- * @returns {boolean} True if message type is allowed
- */
-export function isMessageTypeAllowed(message) {
-  const messageType = message.type || message._data?.type || null
-  return messageType && ALLOWED_MESSAGE_TYPES.includes(messageType)
+const BAILEYS_TO_LEGACY_TYPE = {
+  conversation: 'text',
+  extendedTextMessage: 'text',
+  imageMessage: 'image',
+  videoMessage: 'video',
+  stickerMessage: 'sticker',
+  audioMessage: 'audio',
+  documentMessage: 'document',
 }
 
 /**
- * Serializes raw message data from WhatsApp message object
- * Flattens the structure: moves _data fields to top level along with hasMedia and mediaKey
- * Handles text vs media messages:
- * - No media: body -> text
- * - Has media: body -> imgBody, caption -> text
- * @param {Object} message - Message object from whatsapp-web.js
+ * Checks if message type is allowed for processing
+ * @param {Object} msg - Baileys message object (proto.IWebMessageInfo)
+ * @returns {boolean} True if message type is allowed
+ */
+export function isMessageTypeAllowed(msg) {
+  const contentType = getContentType(msg.message)
+  const legacyType = BAILEYS_TO_LEGACY_TYPE[contentType] || contentType
+  return legacyType && ALLOWED_MESSAGE_TYPES.includes(legacyType)
+}
+
+/**
+ * Serializes a Baileys message into the same flat structure the rest of the pipeline expects.
+ * Preserves field names from the old whatsapp-web.js format so MongoDB documents stay compatible.
+ * @param {Object} msg - Baileys message object (proto.IWebMessageInfo)
  * @returns {Object} Serialized message data with flattened structure
  */
-export function serializeMessage(message) {
+export function serializeMessage(msg) {
   const serialized = {}
-  const hasMedia = message.hasMedia === true
-  
-  // Keep hasMedia if it exists
-  if (message.hasMedia !== undefined) {
-    serialized.hasMedia = message.hasMedia
+  const contentType = getContentType(msg.message)
+  const inner = msg.message?.[contentType]
+
+  const hasMedia = ['imageMessage', 'videoMessage', 'audioMessage', 'stickerMessage', 'documentMessage'].includes(contentType)
+
+  serialized.hasMedia = hasMedia
+  if (hasMedia && inner?.mediaKey) {
+    serialized.mediaKey = inner.mediaKey
   }
-  
-  // Keep mediaKey if it exists
-  if (message.mediaKey !== undefined) {
-    serialized.mediaKey = message.mediaKey
-  }
-  
-  // Flatten _data fields to top level
-  if (message._data) {
-    const allowedDataFields = ['id', 'type', 't', 'notifyName', 'from', 'to', 'author', 'links']
-    
-    for (const field of allowedDataFields) {
-      if (message._data[field] !== undefined) {
-        serialized[field] = message._data[field]
-      }
+
+  serialized.id = msg.key?.id || null
+  serialized.type = BAILEYS_TO_LEGACY_TYPE[contentType] || contentType || null
+  serialized.t = msg.messageTimestamp ? Number(msg.messageTimestamp) : null
+  serialized.notifyName = msg.pushName || null
+  serialized.from = msg.key?.remoteJid || null
+  serialized.to = msg.key?.remoteJid || null
+  serialized.author = msg.key?.participant || null
+
+  if (hasMedia) {
+    serialized.imgBody = inner?.jpegThumbnail ? Buffer.from(inner.jpegThumbnail).toString('base64') : null
+    const caption = inner?.caption || null
+    if (caption) {
+      serialized.text = caption
     }
-    
-    // Handle body/caption based on media presence
-    if (hasMedia) {
-      // For media messages: body -> imgBody, caption -> text
-      if (message._data.body !== undefined) {
-        serialized.imgBody = message._data.body
-      }
-      // Get caption from message (could be in _data.caption or message.caption)
-      const caption = message._data.caption || message.caption || null
-      if (caption !== null && caption !== undefined) {
-        serialized.text = caption
-      }
-    } else {
-      // For non-media messages: body -> text
-      if (message._data.body !== undefined) {
-        serialized.text = message._data.body
-      }
-    }
+  } else {
+    const text = inner?.text || msg.message?.conversation || inner || null
+    serialized.text = typeof text === 'string' ? text : null
   }
-  
+
   return serialized
 }
 
 /**
  * Processes message and logs processing info
- * Note: Cloudinary data is NOT added to rawMessage - it's stored separately in MongoDB
  * @param {Object} rawMessage - Raw message object
- * @param {Object|null} cloudinaryResult - Cloudinary upload result with url and data
+ * @param {Object|null} cloudinaryResult - Cloudinary upload result
  */
 export function processMessage(rawMessage, cloudinaryResult = null) {
   if (config.logLevel === 'info') {
     const messageId = extractMessageId(rawMessage)
-    // Get timestamp from t field (flattened structure)
     const timestamp = rawMessage.t ? timestampToISO(rawMessage.t) : 'unknown'
     const mediaInfo = cloudinaryResult ? ` (media: ${cloudinaryResult.cloudinaryUrl})` : ''
     logger.info(

@@ -3,61 +3,33 @@ import { LOG_PREFIXES } from '../consts/index.js'
 
 /**
  * Resolves WhatsApp author ID to phone number
- * Attempts multiple methods to get contact information
- * @param {string} authorId - Author ID from message (e.g., "82734072487978@lid")
- * @param {Object} message - WhatsApp message object from whatsapp-web.js
- * @param {Object} client - WhatsApp client instance
- * @returns {Promise<string|undefined>} Phone number string or undefined if resolution fails
+ * In Baileys, participant JIDs are typically "972501234567@s.whatsapp.net"
+ * @param {string} authorId - Participant JID from message
+ * @param {Object} message - Baileys message object (unused but kept for API compatibility)
+ * @param {Object} sock - Baileys socket instance
+ * @returns {Promise<string|undefined>} Phone number string or undefined
  */
-export async function resolvePublisherPhone(authorId, message, client) {
-  if (!authorId || !message || !client) {
+export async function resolvePublisherPhone(authorId, message, sock) {
+  if (!authorId) {
     return undefined
   }
 
   try {
-    // Method 1: Try to get contact from message
-    if (message.getContact) {
-      try {
-        const contact = await message.getContact()
-        if (contact && contact.number) {
-          return contact.number
-        }
-        // Try to extract from contact ID if number not available
-        if (contact && contact.id) {
-          const contactId = contact.id._serialized || contact.id
-          const phone = extractPhoneFromId(contactId)
-          if (phone) {
-            return phone
-          }
-        }
-      } catch (error) {
-        // Continue to next method
-      }
-    }
-
-    // Method 2: Try client.getContactById if available
-    if (client.getContactById) {
-      try {
-        const contact = await client.getContactById(authorId)
-        if (contact && contact.number) {
-          return contact.number
-        }
-        if (contact && contact.id) {
-          const contactId = contact.id._serialized || contact.id
-          const phone = extractPhoneFromId(contactId)
-          if (phone) {
-            return phone
-          }
-        }
-      } catch (error) {
-        // Continue to next method
-      }
-    }
-
-    // Method 3: Extract phone directly from authorId
-    const phone = extractPhoneFromId(authorId)
+    // Method 1: Extract phone directly from participant JID (most reliable in Baileys)
+    const phone = extractPhoneFromJid(authorId)
     if (phone) {
       return phone
+    }
+
+    // Method 2: Try onWhatsApp lookup if sock is available
+    if (sock?.onWhatsApp) {
+      try {
+        const [result] = await sock.onWhatsApp(authorId)
+        if (result?.jid) {
+          const resolved = extractPhoneFromJid(result.jid)
+          if (resolved) return resolved
+        }
+      } catch (_) { /* continue */ }
     }
 
     logger.warn(LOG_PREFIXES.CONTACT_SERVICE, `Could not resolve phone for authorId: ${authorId}`)
@@ -70,38 +42,25 @@ export async function resolvePublisherPhone(authorId, message, client) {
 }
 
 /**
- * Extracts phone number from WhatsApp ID
+ * Extracts phone number from a WhatsApp JID
  * Handles formats like:
+ * - "972501234567@s.whatsapp.net" -> "972501234567"
  * - "972501234567@c.us" -> "972501234567"
  * - "82734072487978@lid" -> tries to extract digits
- * @param {string} id - WhatsApp ID string
+ * @param {string} jid - WhatsApp JID string
  * @returns {string|undefined} Phone number or undefined
  */
-function extractPhoneFromId(id) {
-  if (!id || typeof id !== 'string') {
+function extractPhoneFromJid(jid) {
+  if (!jid || typeof jid !== 'string') {
     return undefined
   }
 
-  // If it's a @c.us format, extract the number part
-  if (id.includes('@c.us')) {
-    const number = id.split('@')[0]
-    // Validate it looks like a phone number (digits only, reasonable length)
-    if (/^\d+$/.test(number) && number.length >= 7 && number.length <= 15) {
-      return number
-    }
+  const number = jid.split('@')[0]
+  if (/^\d+$/.test(number) && number.length >= 7 && number.length <= 15) {
+    return number
   }
 
-  // For @lid format, try to extract digits (may not be reliable)
-  if (id.includes('@lid')) {
-    const digits = id.split('@')[0]
-    // Only return if it looks like a phone number
-    if (/^\d+$/.test(digits) && digits.length >= 7 && digits.length <= 15) {
-      return digits
-    }
-  }
-
-  // Try to extract any sequence of digits that looks like a phone number
-  const digitMatch = id.match(/\d{7,15}/)
+  const digitMatch = jid.match(/\d{7,15}/)
   if (digitMatch) {
     return digitMatch[0]
   }
