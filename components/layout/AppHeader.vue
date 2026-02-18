@@ -92,6 +92,7 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     &--logo {
       justify-content: flex-start;
       grid-column: 3;
+      direction: ltr;
     }
   }
 
