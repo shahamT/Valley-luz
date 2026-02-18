@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { dirname, join, isAbsolute } from 'path'
 import { existsSync, mkdirSync } from 'fs'
 import { logError, logErrors } from './utils/errorLogger.js'
 
@@ -97,9 +97,11 @@ function loadConfig() {
     },
   }
 
-  // Resolve paths relative to wa-listener directory
-  const baseDir = join(__dirname, '..')
-  config.authPath = join(baseDir, config.authPath)
+  // Resolve relative paths against wa-listener directory; absolute paths (e.g. Render disk) stay as-is
+  if (!isAbsolute(config.authPath)) {
+    const baseDir = join(__dirname, '..')
+    config.authPath = join(baseDir, config.authPath)
+  }
 
   // Create auth directory if it doesn't exist
   if (!existsSync(config.authPath)) {
