@@ -38,6 +38,7 @@ defineOptions({ name: 'AppShell' })
     @media (max-width: 768px) {
       padding-inline: 0;
       padding-block: var(--spacing-md);
+      padding-bottom: calc(var(--spacing-md) - var(--spacing-sm));
     }
   }
 }

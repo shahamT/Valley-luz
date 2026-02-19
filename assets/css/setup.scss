@@ -10,29 +10,34 @@ html {
   height: 100%;
   direction: rtl;
   overflow-y: scroll;
+}
 
-  /* Custom scrollbar styling */
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
-
-  &::-webkit-scrollbar {
-    width: var(--scrollbar-width);
+/* Global scrollbar: green thumb and track for all scroll containers.
+   Standard props only in Firefox (Chrome 121+ ignores webkit when scrollbar-color is set). */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
   }
+}
 
-  &::-webkit-scrollbar-track {
-    background: var(--scrollbar-track-bg);
-    border-radius: var(--scrollbar-border-radius);
-    margin: var(--scrollbar-margin);
-  }
+*::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
 
-  &::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb-bg);
-    border-radius: var(--scrollbar-border-radius);
-  }
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-bg);
+  border-radius: var(--scrollbar-border-radius);
+  margin: 0;
+}
 
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover-bg);
-  }
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: var(--scrollbar-border-radius);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-bg);
 }
 
 body {

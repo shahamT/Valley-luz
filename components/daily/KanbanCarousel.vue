@@ -184,6 +184,7 @@ watch(
   position: relative;
   overflow: hidden;
   direction: rtl; // Ensure RTL direction
+  box-sizing: border-box;
 
   &-swiper {
     width: 100%;
@@ -198,6 +199,26 @@ watch(
     align-items: flex-start;
     justify-content: center;
     min-width: 0;
+  }
+
+  @media (max-width: 768px) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--spacing-sm);
+
+    .KanbanCarousel-swiper {
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .swiper-wrapper,
+      .swiper-slide {
+        height: 100%;
+      }
+    }
   }
 }
 

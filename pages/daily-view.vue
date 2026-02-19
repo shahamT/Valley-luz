@@ -32,16 +32,17 @@
             <div v-if="isError" class="DailyView-error">
               <p>{{ UI_TEXT.error }}</p>
             </div>
-            <DailyKanbanCarousel
-              v-else
-              :key="dateParam"
-              :visible-days="visibleDays"
-              :events-by-date="eventsByDate"
-              :current-date="dateParam"
-              :today="today"
-              :slide-to-date-request="slideToDateRequest"
-              @date-change="handleDateChange"
-            />
+            <div v-else class="DailyView-kanbanWrapper">
+              <DailyKanbanCarousel
+                :key="dateParam"
+                :visible-days="visibleDays"
+                :events-by-date="eventsByDate"
+                :current-date="dateParam"
+                :today="today"
+                :slide-to-date-request="slideToDateRequest"
+                @date-change="handleDateChange"
+              />
+            </div>
           </template>
         </CalendarViewContent>
       </div>
@@ -225,6 +226,26 @@ const handleViewChange = ({ view }) => {
     grid-row: 2;
     min-height: 0;
     min-width: 0;
+
+    @media (max-width: 768px) {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  &-kanbanWrapper {
+    @media (max-width: 768px) {
+      height: calc(
+        100dvh
+        - var(--header-height)
+        - (2 * var(--spacing-md))
+        - var(--daily-view-header-height)
+        - var(--spacing-md)
+      );
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
   }
 
   &-error {

@@ -327,29 +327,6 @@ watch(
   overflow-y: auto;
   direction: ltr;
 
-  /* Custom scrollbar styling (matching html scrollbar) */
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb-bg) var(--scrollbar-track-bg);
-
-  &::-webkit-scrollbar {
-    width: var(--scrollbar-width);
-  }
-
-  &::-webkit-scrollbar-track {
-    background: var(--scrollbar-track-bg);
-    border-radius: var(--scrollbar-border-radius);
-    margin: var(--scrollbar-margin);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb-bg);
-    border-radius: var(--scrollbar-border-radius);
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover-bg);
-  }
-
   @media (max-width: 768px) {
     padding: 0;
     overflow-y: auto;

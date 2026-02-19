@@ -57,11 +57,13 @@ const isWeekend = computed(() => isWeekendDay(props.date))
   background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  overflow: hidden;
 
   @media (max-width: 768px) {
     width: 85vw;
     max-width: 85vw;
     min-width: 85vw;
+    height: 100%;
   }
 
   &--disabled {
@@ -102,6 +104,28 @@ const isWeekend = computed(() => isWeekendDay(props.date))
     direction: ltr; // Inner wrapper restores RTL for cards
     padding: 12px;
     overflow-x: hidden;
+
+    @media (max-width: 768px) {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+      padding-inline-start: 12px;
+      padding-inline-end: 6px; /* 12px - 6px scrollbar so scrollbar side total matches other side */
+      padding-block: 12px;
+
+      &::-webkit-scrollbar-track {
+        background: rgba(11, 151, 74, 0.11);
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(11, 151, 74, 0.3);
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: rgba(11, 151, 74, 0.4);
+      }
+    }
   }
 
   &-events-inner {
