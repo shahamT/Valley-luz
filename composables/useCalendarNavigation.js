@@ -30,25 +30,25 @@ export const useCalendarNavigation = () => {
    */
   const navigateToMonth = (year, month) => {
     const currentQuery = router.currentRoute.value.query
-    
+
     calendarStore.setCurrentDate({ year, month })
     navigateTo({
-      path: '/',
+      path: '/monthly-view',
       query: { ...currentQuery, year, month },
     })
   }
 
   /**
-   * Navigate to daily view for a specific date
+   * Navigate to daily view for a specific date (date in query param)
    * Preserves filter query parameters
    * @param {string} dateString - Date in YYYY-MM-DD format
    */
   const navigateToDay = (dateString) => {
     const currentQuery = router.currentRoute.value.query
-    
+
     navigateTo({
-      path: `/daily-view/${dateString}`,
-      query: currentQuery,
+      path: '/daily-view',
+      query: { ...currentQuery, date: dateString },
     })
   }
 

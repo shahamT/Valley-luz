@@ -1,22 +1,26 @@
 import { parseCategories, serializeCategories, parseTimeFilter, isValidMonthYear } from '~/utils/validation.helpers'
 import { MINUTES_PER_DAY } from '~/consts/calendar.const'
+import { getTodayDateString } from '~/utils/date.helpers'
+
+const MONTHLY_PATH = '/monthly-view'
+const DAILY_PATH = '/daily-view'
 
 /**
  * Composable for syncing calendar state with URL query parameters
- * Provides bidirectional sync between store and URL for filters and date selection
- * 
+ * Monthly: /monthly-view?year=...&month=... ; Daily: /daily-view?date=...
+ *
  * @param {Object} options - Configuration options
- * @param {boolean} options.syncMonth - Whether to sync currentDate to URL (monthly view only)
+ * @param {boolean} options.syncMonth - Whether to sync currentDate (year/month) to URL (monthly view only)
  * @returns {Object} - URL state management functions
  */
 export const useUrlState = (options = {}) => {
   const { syncMonth = false } = options
-  
+
   const route = useRoute()
   const router = useRouter()
   const calendarStore = useCalendarStore()
   const { selectedCategories, timeFilterStart, timeFilterEnd, timeFilterPreset, currentDate } = storeToRefs(calendarStore)
-  
+
   const isInitialized = ref(false)
 
   /**
@@ -54,53 +58,51 @@ export const useUrlState = (options = {}) => {
   }
 
   /**
-   * Build query parameters from current store state
-   * @returns {Object} - Query parameters object
+   * Build query parameters from current store state (and preserve date on daily view)
    */
   const buildQueryParams = () => {
     const params = {}
-    
-    // Add month/year if syncing month
+
     if (syncMonth && currentDate.value) {
       params.year = currentDate.value.year
       params.month = currentDate.value.month
     }
-    
-    // Add categories if any selected
+
+    if (!syncMonth && route.path === DAILY_PATH) {
+      params.date = route.query.date || getTodayDateString()
+    }
+
     const categoriesParam = serializeCategories(selectedCategories.value)
     if (categoriesParam) {
       params.categories = categoriesParam
     }
-    
-    // Add time filter if not default (0 to MINUTES_PER_DAY)
+
     if (timeFilterStart.value !== 0 || timeFilterEnd.value !== MINUTES_PER_DAY) {
       params.timeStart = timeFilterStart.value
       params.timeEnd = timeFilterEnd.value
-      
-      // Add preset if set
       if (timeFilterPreset.value) {
         params.timePreset = timeFilterPreset.value
       }
     }
-    
+
     return params
   }
 
   /**
-   * Update URL with current store state
-   * Uses replace to avoid creating history entries
+   * Update URL with current store state. Only runs when on the matching route.
    */
   const updateUrl = () => {
     if (!isInitialized.value) return
-    
+    if (syncMonth && route.path !== MONTHLY_PATH) return
+    if (!syncMonth && route.path !== DAILY_PATH) return
+
     const newQuery = buildQueryParams()
-    
-    // Only update if query actually changed
     const currentQuery = route.query
     const queryChanged = JSON.stringify(currentQuery) !== JSON.stringify(newQuery)
-    
+
     if (queryChanged) {
-      router.replace({ query: newQuery })
+      const path = syncMonth ? MONTHLY_PATH : DAILY_PATH
+      router.replace({ path, query: newQuery })
     }
   }
 
@@ -135,7 +137,8 @@ export const useUrlState = (options = {}) => {
    */
   const startUrlSync = () => {
     isInitialized.value = true
-    
+    updateUrl()
+
     // Watch filters and sync to URL
     watch(
       () => [

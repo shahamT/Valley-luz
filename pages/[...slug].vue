@@ -14,7 +14,7 @@
 import { UI_TEXT } from '~/consts/calendar.const'
 
 const goToMonthly = () => {
-  navigateTo('/')
+  navigateTo('/monthly-view')
 }
 </script>
 

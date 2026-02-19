@@ -34,6 +34,7 @@
             </div>
             <DailyKanbanCarousel
               v-else
+              :key="dateParam"
               :visible-days="visibleDays"
               :events-by-date="eventsByDate"
               :current-date="dateParam"
@@ -54,6 +55,7 @@ import { getTodayDateString, formatMonthYear, parseDateString, formatDateToYYYYM
 import { isValidRouteDate } from '~/utils/validation.helpers'
 
 const route = useRoute()
+const router = useRouter()
 
 // Get events and categories data with loading/error states
 const { events, isLoading, isError } = useCalendarViewData()
@@ -62,29 +64,25 @@ const calendarStore = useCalendarStore()
 const uiStore = useUiStore()
 
 const { getFilteredEventsByDate } = useEventFilters(events)
-const { navigateToMonth, navigateToMonthInDailyView, goToPrevDay, goToNextDay } = useCalendarNavigation()
+const { navigateToMonth, navigateToMonthInDailyView, navigateToDay, goToPrevDay, goToNextDay } = useCalendarNavigation()
 
-// Initialize URL state sync (without month sync for daily view - date is in path)
+// Initialize URL state sync (without month sync for daily view - date is in query)
 const { initializeFromUrl, startUrlSync } = useUrlState({ syncMonth: false })
 
 onMounted(() => {
-  // Initialize filter state from URL params
+  const dateFromQuery = route.query.date
+  if (!dateFromQuery || !isValidRouteDate(String(dateFromQuery).trim())) {
+    router.replace({ path: '/daily-view', query: { ...route.query, date: getTodayDateString() } })
+  }
   initializeFromUrl()
-  // Start watching store and syncing filters to URL
   startUrlSync()
-  // Initialize modal from URL if event param exists
   uiStore.initializeModalFromUrl()
 })
 
-// Validate and redirect invalid dates
-if (route.params.date && !isValidRouteDate(route.params.date)) {
-  await navigateTo(`/daily-view/${getTodayDateString()}`, { replace: true })
-}
-
 const dateParam = computed(() => {
-  const param = route.params.date
-  if (param && isValidRouteDate(param)) {
-    return param
+  const param = route.query.date
+  if (param && isValidRouteDate(String(param).trim())) {
+    return String(param).trim().slice(0, 10)
   }
   return getTodayDateString()
 })
@@ -154,7 +152,7 @@ const handlePrevDay = () => {
   if (visibleDays.value.includes(targetDate)) {
     slideToDateRequest.value = targetDate
   } else {
-    navigateTo(`/daily-view/${targetDate}`)
+    navigateToDay(targetDate)
   }
 }
 
@@ -163,7 +161,7 @@ const handleNextDay = () => {
   if (visibleDays.value.includes(targetDate)) {
     slideToDateRequest.value = targetDate
   } else {
-    navigateTo(`/daily-view/${targetDate}`)
+    navigateToDay(targetDate)
   }
 }
 
@@ -179,7 +177,7 @@ const handleYearChange = ({ year }) => {
 }
 
 const handleDateChange = (newDate) => {
-  navigateTo(`/daily-view/${newDate}`)
+  navigateToDay(newDate)
   slideToDateRequest.value = null
 }
 

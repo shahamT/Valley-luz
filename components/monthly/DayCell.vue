@@ -50,6 +50,7 @@ const props = defineProps({
 
 // data
 const { categories } = useCalendarViewData()
+const { navigateToDay } = useCalendarNavigation()
 const isMobile = useScreenWidth(DAY_CELL_BREAKPOINT)
 
 // computed
@@ -82,7 +83,7 @@ const isWeekend = computed(() => {
 // methods
 const handleClick = () => {
   if (props.day.isOutsideMonth || isPast.value) return
-  navigateTo(`/daily-view/${props.day.dateString}`)
+  navigateToDay(props.day.dateString)
 }
 
 const getEventChipColor = (mainCategory) => {
