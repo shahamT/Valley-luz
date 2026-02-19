@@ -110,6 +110,13 @@ const COMPARISON_SCHEMA = {
   },
 }
 
+/** Normalized phrase for justifications when a field has no source in message or image. */
+const NOT_STATED_JUSTIFICATION = 'Not stated in message or image.'
+
+function isNotStatedJustification(str) {
+  return typeof str === 'string' && str.trim().toLowerCase() === NOT_STATED_JUSTIFICATION.toLowerCase()
+}
+
 // ─── OpenAI retry helpers ───────────────────────────────────────────────────
 
 const MAX_OPENAI_ATTEMPTS = 3
@@ -239,6 +246,35 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
     corrections.push(`mainCategory corrected to ${event.mainCategory}`)
   }
 
+  // -- Justifications: reject event if startTime has no justification; clear other fields if they have data but no justification --
+  if (event.occurrence?.startTime && typeof event.occurrence.startTime === 'string' && event.occurrence.startTime.trim()) {
+    if (isNotStatedJustification(event.justifications?.startTime)) {
+      return { event: null, corrections: ['No justification for date (startTime) - event rejected'] }
+    }
+  }
+  if (event.location) {
+    const hasLocationData = (event.location.City && String(event.location.City).trim()) ||
+      (event.location.addressLine1 && String(event.location.addressLine1).trim()) ||
+      (event.location.addressLine2 && String(event.location.addressLine2).trim()) ||
+      (event.location.locationDetails && String(event.location.locationDetails).trim())
+    if (hasLocationData && isNotStatedJustification(event.justifications?.location)) {
+      event.location.City = ''
+      event.location.CityEvidence = null
+      event.location.addressLine1 = null
+      event.location.addressLine2 = null
+      event.location.locationDetails = null
+      corrections.push('Location had data but no justification - cleared to empty state')
+    }
+  }
+  if (typeof event.price === 'number' && isNotStatedJustification(event.justifications?.price)) {
+    event.price = null
+    corrections.push('Price had value but no justification - cleared to null')
+  }
+  if (event.occurrence?.endTime != null && isNotStatedJustification(event.justifications?.endTime)) {
+    event.occurrence.endTime = null
+    corrections.push('endTime had value but no justification - cleared to null')
+  }
+
   // -- Location City + CityEvidence: verify evidence appears in source; else clear both --
   if (event.location) {
     const evidence = event.location.CityEvidence != null && String(event.location.CityEvidence).trim()
@@ -354,17 +390,27 @@ Determine if a WhatsApp message describes a SPECIFIC event and extract search ke
 ${dateCtx}
 
 RULES:
-1. An event MUST have a SPECIFIC calendar date (day+month or full date). Reject relative-only dates ("מחר", "בשבוע הבא") and recurring schedules ("כל יום שני").
+1. An event MUST have a SPECIFIC calendar date (day+month or full date, e.g. 19.2, 25/02). Reject relative-only dates: "היום", "מחר", "בשבוע הבא", etc. Reject recurring-only schedules: when the only date info is weekdays (e.g. "ימי ראשון", "ימי שני", "כל יום שני") with no specific calendar date, set isEvent to false (e.g. reason: "recurring_schedule_no_specific_date").
 2. An event MUST describe a specific gathering, activity, or happening — not business hours, menus, or ads.
 3. If the message text has no date, and an image is provided, check the image for dates. If still none, reject.
-4. Extract 3-5 Hebrew search key phrases (location, event type, date references, venue names).
+4. The message must describe ONE specific event. If it describes more than one distinct event (e.g. a listing or roundup with several events, each with its own date, venue, or name), set isEvent to false and reason to "multiple_events". We only process single-event messages.
+5. Extract 3-5 Hebrew search key phrases (location, event type, date references, venue names).
 
 EXAMPLE:
 Message: "הופעה של עידן רייכל ב-25 לפברואר בהיכל התרבות חיפה, כרטיסים מ-120 ₪"
 → { "isEvent": true, "searchKeys": ["עידן רייכל", "היכל התרבות", "חיפה", "הופעה", "פברואר"], "reason": null }
 
 Message: "שעות פתיחה: א-ה 9:00-17:00"
-→ { "isEvent": false, "searchKeys": [], "reason": "business_hours_no_specific_date" }`
+→ { "isEvent": false, "searchKeys": [], "reason": "business_hours_no_specific_date" }
+
+Message with "19.2 | Event A | Venue 1" and "20-21.2 | Event B | Venue 2" (two or more distinct events)
+→ { "isEvent": false, "searchKeys": [], "reason": "multiple_events" }
+
+Message with only "היום ב7 בערב" (today at 7 PM) and no calendar date
+→ { "isEvent": false, "searchKeys": [], "reason": "relative_date_no_calendar" }
+
+Message with only "ימי ראשון ... ימי שני" (Sundays ... Mondays) and no specific calendar date
+→ { "isEvent": false, "searchKeys": [], "reason": "recurring_schedule_no_specific_date" }`
 
   let userContent
   if (hasImage) {
@@ -445,10 +491,10 @@ The message body you receive is in HTML format. For Title, shortDescription, loc
 
 ACCURACY (date, location, price, time): Use only information explicitly stated in the message or clearly readable in the image. Do not infer or guess. If not clearly stated or readable, set the field to null (or empty string for location.City). When the date appears only in the image (e.g. "17/2", "יום שלישי 17/2"), use that date for startTime and cite the image in justifications.
 
-- Title: Event name ONLY. No price, no date, no location.
+- Title: Event name ONLY. No price. No date or time or when — strip from the title: מחר, בשבוע הבא, day names (e.g. יום שלישי), numeric dates (e.g. 17/2), times (e.g. בשעה 20:00). Location is allowed only when the advertiser presents it as part of the event name (e.g. "פסטיבל הגולן", "חן מזרחי מגיע לצפון הגולן"); do not add location if it appears only as a separate detail (e.g. "בחיפה" in another sentence).
 - shortDescription: What the event is about. No price, no date, no location.
-- fullDescription: When relevant, preserve the provided HTML if it supprts the readability and clarity of info. Use only these tags: <p>, <br>, <strong>, <em>, <del>, <code>, <pre>, <blockquote>, <ul>, <ol>, <li>. No other tags (no div, span, a, script, etc.). Do not re-interpret or strip formatting; keep the structure. You may: remove raw URL strings (every https:// or http:// — they are in urls); remove a short purely redundant phrase that only points at the link (e.g. "היכנסו לכאן"); fix obvious typos (e.g. "הרצאטבע" → "הרצאת טבע"). ALWAYS REMOVE: raw URL strings. REMOVE ONLY WHEN: a short phrase does nothing but point to the link and appears right next to it; do NOT remove text that describes what the link is for (e.g. tickets, registration). NEVER REMOVE: (1) Substantive ticket/registration references, e.g. "כרטיסים והרשמה - בקישור המצורף". (2) Emojis. (3) Taglines or context lines. (4) Any other event content. Do not summarize or shorten. Output must be HTML only; do not output raw * _ backtick or ~ (input is already HTML).
-- fullDescription examples: KEEP "כרטיסים והרשמה - בקישור המצורף" even when a link follows. REMOVE only the raw URL and, if present, a purely redundant phrase like "היכנסו לכאן" when it only points at the link.
+- fullDescription: When relevant, preserve the provided HTML if it supprts the readability and clarity of info. Use only these tags: <p>, <br>, <strong>, <em>, <del>, <code>, <pre>, <blockquote>, <ul>, <ol>, <li>. No other tags (no div, span, a, script, etc.). Do not re-interpret or strip formatting; keep the structure. You may fix obvious typos (e.g. "הרצאטבע" → "הרצאת טבע"). ALWAYS REMOVE from fullDescription: (1) Every raw URL (they go in urls). (2) The label/title text for each extracted link when it appears attached to that link in the message — for each entry in urls, remove both the URL and the phrase you used as that entry's Title when they appear together (e.g. "כרטיסים אחרונים" next to the URL); remove any arrow/symbol that only links them. The link and its title live in urls only; do not duplicate them in fullDescription. KEEP in fullDescription: Generic phrases that do not repeat a specific link or its title (e.g. "כרטיסים למטה בלינק", "בקישור המצורף", "כרטיסים והרשמה - בקישור המצורף"). NEVER REMOVE: Emojis; taglines or context lines; other event content. Do not summarize or shorten. Before returning, verify: no URL in urls appears in fullDescription, and no link title (urls[].Title) that was the label for that link in the message appears in fullDescription. Output must be HTML only; do not output raw * _ backtick or ~ (input is already HTML).
+- fullDescription examples: REMOVE "כרטיסים אחרונים" and the URL when they appear together and you extracted that link to urls with Title "כרטיסים אחרונים". KEEP "כרטיסים למטה בלינק" or "בקישור המצורף" when they are generic and do not repeat the link. KEEP "כרטיסים והרשמה - בקישור המצורף" even when a link follows.
 - location.City: NORMALIZED city/town name (e.g. "תל אביב" even if message says "ת"א"). Use standard Hebrew spelling. If not found, use "".
 - location.CityEvidence: The VERBATIM snippet from the message/image that indicates the city (e.g. "ת"א" or "חיפה"). Required for verification. null only if no city is mentioned at all.
 - location.addressLine1: Venue/place name only — if explicitly stated. Otherwise null.
@@ -462,11 +508,11 @@ ACCURACY (date, location, price, time): Use only information explicitly stated i
 - occurrence.endTime: ISO UTC string or null.
 - media: Always return an empty array []. Media (images from the message) are added by the system from the actual WhatsApp attachment only. Do NOT put links or URLs here; links go in urls.
 - urls: Array of {Title, Url} for links found in the message.
-- justifications: For each key state source (text or image) and the exact snippet. If from image, quote the relevant text as read from the image; if from message, quote the relevant part of the message. If from multiple places, list them. If the field was set to null because not stated, write e.g. "Not stated in message or image."
-  - justifications.location: Source and exact snippet(s). If null/empty location, "Not stated in message or image."
-  - justifications.startTime: Source and exact snippet(s); focus on the selected date (e.g. "Image: '17/2'", "Text: 'החל משעה 17:00'").
-  - justifications.endTime: Source and snippet(s), or "Not stated in message or image."
-  - justifications.price: Source and snippet(s), or "Not stated in message or image."
+- justifications: For each key state source (text or image) and the exact snippet. If from image, quote the relevant text as read from the image; if from message, quote the relevant part of the message. If from multiple places, list them. When a field has no source in message or image, you MUST use exactly this phrase (no variants): "Not stated in message or image."
+  - justifications.location: Source and exact snippet(s). If null/empty location, use exactly: "Not stated in message or image."
+  - justifications.startTime: Source and exact snippet(s); focus on the selected date (e.g. "Image: '17/2'", "Text: 'החל משעה 17:00'"). If no date in message or image, use exactly: "Not stated in message or image."
+  - justifications.endTime: Source and snippet(s), or exactly: "Not stated in message or image."
+  - justifications.price: Source and snippet(s), or exactly: "Not stated in message or image."
 
 IMAGE RULES:
 - Message text is PRIMARY source.
@@ -684,7 +730,11 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
 
     if (!classification.isEvent) {
       logger.info(LOG_PREFIXES.EVENT_SERVICE, `Not an event (${classification.reason}) — ${messageId}`)
-      const reason = classification.reason?.includes('date') ? CONFIRMATION_REASONS.NO_DATE : CONFIRMATION_REASONS.NOT_EVENT
+      const reason = classification.reason === 'multiple_events' || classification.reason?.includes('multiple')
+        ? CONFIRMATION_REASONS.MULTIPLE_EVENTS
+        : classification.reason?.includes('date')
+          ? CONFIRMATION_REASONS.NO_DATE
+          : CONFIRMATION_REASONS.NOT_EVENT
       await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason)
       return
     }

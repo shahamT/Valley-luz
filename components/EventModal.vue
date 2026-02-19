@@ -89,6 +89,11 @@
                 {{ MODAL_TEXT.contactPublisher }}
               </button>
             </div>
+
+            <!-- Dev only: event id -->
+            <DevOnly>
+              <div class="EventModal-devId">id: {{ selectedEvent?.id }}</div>
+            </DevOnly>
           </div>
 
           <!-- Actions Bar -->
@@ -332,6 +337,12 @@ watch(galleryRef, (el) => {
       flex: 1;
       padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
     }
+  }
+
+  &-devId {
+    margin-top: var(--spacing-md);
+    font-size: 0.75rem;
+    color: var(--color-text-muted, #888);
   }
 
   &-notFoundWrapper {
