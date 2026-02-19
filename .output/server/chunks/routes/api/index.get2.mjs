@@ -10,6 +10,15 @@ import 'node:crypto';
 import 'node:url';
 import 'mongodb';
 
+function getDateInIsraelFromIso(isoString) {
+  if (!isoString) return void 0;
+  const d = new Date(isoString);
+  if (Number.isNaN(d.getTime())) return void 0;
+  const formatted = d.toLocaleDateString("en-CA", { timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit" });
+  const parts = formatted.split("-");
+  if (parts.length !== 3) return void 0;
+  return `${parts[0]}-${parts[1]}-${parts[2]}`;
+}
 function transformEventForFrontend(doc) {
   var _a, _b, _c, _d, _e, _f, _g, _h;
   const backendEvent = doc.event;
@@ -18,7 +27,11 @@ function transformEventForFrontend(doc) {
   }
   const eventId = ((_a = doc._id) == null ? void 0 : _a.toString()) || String(doc._id);
   const dateCreated = doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt);
-  const occurrences = backendEvent.occurrence ? [backendEvent.occurrence] : backendEvent.occurrences && Array.isArray(backendEvent.occurrences) ? backendEvent.occurrences : [];
+  const rawOccurrences = backendEvent.occurrence ? [backendEvent.occurrence] : backendEvent.occurrences && Array.isArray(backendEvent.occurrences) ? backendEvent.occurrences : [];
+  const occurrences = rawOccurrences.map((occ) => {
+    const date = (occ == null ? void 0 : occ.date) && /^\d{4}-\d{2}-\d{2}$/.test(String(occ.date).trim().slice(0, 10)) ? String(occ.date).trim().slice(0, 10) : getDateInIsraelFromIso(occ == null ? void 0 : occ.startTime);
+    return { ...occ, ...date ? { date } : {} };
+  });
   if (occurrences.length > 0 && !occurrences[0].startTime) {
     console.warn("[EventsAPI] Occurrence missing startTime:", occurrences[0]);
   }

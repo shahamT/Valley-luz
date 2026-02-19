@@ -79,12 +79,14 @@ const HASH_RE = /#/g;
 const AMPERSAND_RE = /&/g;
 const SLASH_RE = /\//g;
 const EQUAL_RE = /=/g;
+const IM_RE = /\?/g;
 const PLUS_RE = /\+/g;
 const ENC_CARET_RE = /%5e/gi;
 const ENC_BACKTICK_RE = /%60/gi;
 const ENC_PIPE_RE = /%7c/gi;
 const ENC_SPACE_RE = /%20/gi;
 const ENC_SLASH_RE = /%2f/gi;
+const ENC_ENC_SLASH_RE = /%252f/gi;
 function encode(text) {
   return encodeURI("" + text).replace(ENC_PIPE_RE, "|");
 }
@@ -93,6 +95,9 @@ function encodeQueryValue(input) {
 }
 function encodeQueryKey(text) {
   return encodeQueryValue(text).replace(EQUAL_RE, "%3D");
+}
+function encodePath(text) {
+  return encode(text).replace(HASH_RE, "%23").replace(IM_RE, "%3F").replace(ENC_ENC_SLASH_RE, "%2F").replace(AMPERSAND_RE, "%26").replace(PLUS_RE, "%2B");
 }
 function decode(text = "") {
   try {
@@ -4006,7 +4011,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "71c49587-a04d-49cb-9e7c-ff6b0231dde0",
+    "buildId": "6abfb20c-b258-4369-9aee-e6214643704e",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -4035,7 +4040,7 @@ const _inlineRuntimeConfig = {
   },
   "public": {},
   "mongodbUri": "mongodb+srv://shahamt_db_user:38UvWxQkxUx2kVk6@valley-luz-app.z42llxh.mongodb.net/?appName=valley-luz-app",
-  "mongodbDbName": "valley_luz_app",
+  "mongodbDbName": "valley_luz_app_dev",
   "mongodbCollectionEvents": "events",
   "mongodbCollectionRawMessages": "raw_messages"
 };
@@ -4336,8 +4341,8 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
 	// remove proto/hostname/port from URL
 	const url = new URL(errorObject.url);
 	errorObject.url = withoutBase(url.pathname, useRuntimeConfig(event).app.baseURL) + url.search + url.hash;
-	// add default server message
-	errorObject.message ||= "Server Error";
+	// add default server message (keep sanitized for unhandled errors)
+	errorObject.message = error.unhandled ? errorObject.message || "Server Error" : error.message || errorObject.message || "Server Error";
 	// we will be rendering this error internally so we can pass along the error.data safely
 	errorObject.data ||= error.data;
 	errorObject.statusText ||= error.statusText || error.statusMessage;
@@ -4477,13 +4482,6 @@ const plugins = [
 ];
 
 const assets = {
-  "/.gitkeep": {
-    "type": "text/plain; charset=utf-8",
-    "etag": "\"ba-eK2nJCSRL0I0TFFqxp+ghOxpZ/4\"",
-    "mtime": "2026-02-08T17:29:25.764Z",
-    "size": 186,
-    "path": "../public/.gitkeep"
-  },
   "/icons/google-calendar.png": {
     "type": "image/png",
     "etag": "\"75a9-S+bl+hd7NxNv0bJxyvDxneRGuDA\"",
@@ -4491,19 +4489,26 @@ const assets = {
     "size": 30121,
     "path": "../public/icons/google-calendar.png"
   },
-  "/icons/google-maps-icon.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"2fd-oo5zewqg7xpi/3EK7PuFtbcURdE\"",
-    "mtime": "2026-02-18T08:48:14.719Z",
-    "size": 765,
-    "path": "../public/icons/google-maps-icon.svg"
-  },
   "/icons/ical.svg": {
     "type": "image/svg+xml",
     "etag": "\"14f-3msyD8xPSepRQ9dTsRgcqUFxoC4\"",
     "mtime": "2026-02-17T18:17:09.663Z",
     "size": 335,
     "path": "../public/icons/ical.svg"
+  },
+  "/.gitkeep": {
+    "type": "text/plain; charset=utf-8",
+    "etag": "\"ba-eK2nJCSRL0I0TFFqxp+ghOxpZ/4\"",
+    "mtime": "2026-02-08T17:29:25.764Z",
+    "size": 186,
+    "path": "../public/.gitkeep"
+  },
+  "/icons/google-maps-icon.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"2fd-oo5zewqg7xpi/3EK7PuFtbcURdE\"",
+    "mtime": "2026-02-18T08:48:14.719Z",
+    "size": 765,
+    "path": "../public/icons/google-maps-icon.svg"
   },
   "/icons/outlook.png": {
     "type": "image/png",
@@ -4533,47 +4538,12 @@ const assets = {
     "size": 45126,
     "path": "../public/imgs/default-event-bg.webp"
   },
-  "/_nuxt/2U0PHdgo.js": {
+  "/_nuxt/BhFwhlbw.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"25129-p7sxGaHkFu6Dun4wBmc6iHgZ9TI\"",
-    "mtime": "2026-02-18T09:49:25.218Z",
-    "size": 151849,
-    "path": "../public/_nuxt/2U0PHdgo.js"
-  },
-  "/_nuxt/entry.Bm80KcdA.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"550e-WFL3B7SZbAA+DQ1YuJWKz1qO2vo\"",
-    "mtime": "2026-02-18T09:49:25.217Z",
-    "size": 21774,
-    "path": "../public/_nuxt/entry.Bm80KcdA.css"
-  },
-  "/logos/valleyluz-icon.svg": {
-    "type": "image/svg+xml",
-    "etag": "\"50d23-Z0eukUcmmO7JCoO4QdUEp0xoWU4\"",
-    "mtime": "2026-02-04T20:35:11.627Z",
-    "size": 331043,
-    "path": "../public/logos/valleyluz-icon.svg"
-  },
-  "/_nuxt/index.DJjhcjKJ.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"1285-4dUpO+VwvL2X0qDoFhIARd9ONuw\"",
-    "mtime": "2026-02-18T09:49:25.215Z",
-    "size": 4741,
-    "path": "../public/_nuxt/index.DJjhcjKJ.css"
-  },
-  "/_nuxt/wUrRUf1X.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1a5-s0FysXa1x8n6qWf7xqGky7wQOx8\"",
-    "mtime": "2026-02-18T09:49:25.218Z",
-    "size": 421,
-    "path": "../public/_nuxt/wUrRUf1X.js"
-  },
-  "/_nuxt/useUrlState.Bd9iS3N4.css": {
-    "type": "text/css; charset=utf-8",
-    "etag": "\"5b67-J6qCE1DNBy1pmnrqqpNMwpaQB98\"",
-    "mtime": "2026-02-18T09:49:25.217Z",
-    "size": 23399,
-    "path": "../public/_nuxt/useUrlState.Bd9iS3N4.css"
+    "etag": "\"1f2b-zyarFyskVgDz0urwCLsteGqfNF8\"",
+    "mtime": "2026-02-19T13:16:10.895Z",
+    "size": 7979,
+    "path": "../public/_nuxt/BhFwhlbw.js"
   },
   "/logos/valleyluz-logo.png": {
     "type": "image/png",
@@ -4582,61 +4552,89 @@ const assets = {
     "size": 258200,
     "path": "../public/logos/valleyluz-logo.png"
   },
-  "/_nuxt/ZFI-RIUb.js": {
+  "/_nuxt/D-bGISVY.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1f2b-VwPFIe4BmNfvv36lk1XKHPvzJU8\"",
-    "mtime": "2026-02-18T09:49:25.217Z",
-    "size": 7979,
-    "path": "../public/_nuxt/ZFI-RIUb.js"
-  },
-  "/_nuxt/Yne84F4-.js": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1d83-n2zu9kAVEvSH25t+61nOArK3rnc\"",
-    "mtime": "2026-02-18T09:49:25.218Z",
+    "etag": "\"1d83-AOkGlHHRwrZIo8GJFqEjOeTeF9E\"",
+    "mtime": "2026-02-19T13:16:10.895Z",
     "size": 7555,
-    "path": "../public/_nuxt/Yne84F4-.js"
+    "path": "../public/_nuxt/D-bGISVY.js"
+  },
+  "/_nuxt/entry.D92Z7_eB.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"5bef-5Y3skSX5ZXqlrS9KXdHkhIsMprs\"",
+    "mtime": "2026-02-19T13:16:10.893Z",
+    "size": 23535,
+    "path": "../public/_nuxt/entry.D92Z7_eB.css"
+  },
+  "/_nuxt/CImTDOX4.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"24be0-CWEpOxN5GBGnXG43T0QgpnOxWRE\"",
+    "mtime": "2026-02-19T13:16:10.895Z",
+    "size": 150496,
+    "path": "../public/_nuxt/CImTDOX4.js"
+  },
+  "/_nuxt/index.DJjhcjKJ.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"1285-4dUpO+VwvL2X0qDoFhIARd9ONuw\"",
+    "mtime": "2026-02-19T13:16:10.893Z",
+    "size": 4741,
+    "path": "../public/_nuxt/index.DJjhcjKJ.css"
+  },
+  "/logos/valleyluz-icon.svg": {
+    "type": "image/svg+xml",
+    "etag": "\"50d23-Z0eukUcmmO7JCoO4QdUEp0xoWU4\"",
+    "mtime": "2026-02-04T20:35:11.627Z",
+    "size": 331043,
+    "path": "../public/logos/valleyluz-icon.svg"
+  },
+  "/_nuxt/useUrlState.Bd9iS3N4.css": {
+    "type": "text/css; charset=utf-8",
+    "etag": "\"5b67-J6qCE1DNBy1pmnrqqpNMwpaQB98\"",
+    "mtime": "2026-02-19T13:16:10.894Z",
+    "size": 23399,
+    "path": "../public/_nuxt/useUrlState.Bd9iS3N4.css"
+  },
+  "/_nuxt/x305gfe5.js": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1a5-8y4UiFbggZ4lZjHwSlsQx92/x3s\"",
+    "mtime": "2026-02-19T13:16:10.894Z",
+    "size": 421,
+    "path": "../public/_nuxt/x305gfe5.js"
   },
   "/_nuxt/_...B4vAkJll.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"272-iSQXhQQ2jmEMDM+ncsnWZ9IUof0\"",
-    "mtime": "2026-02-18T09:49:25.217Z",
+    "mtime": "2026-02-19T13:16:10.893Z",
     "size": 626,
     "path": "../public/_nuxt/_...B4vAkJll.css"
   },
-  "/_nuxt/C2sg3Rmh.js": {
+  "/_nuxt/C0e_lt4H.js": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"53d20-Wam6mdD/vU1YAUk11I5Ldk/GDGY\"",
-    "mtime": "2026-02-18T09:49:25.217Z",
-    "size": 343328,
-    "path": "../public/_nuxt/C2sg3Rmh.js"
+    "etag": "\"54fac-tiU5XvRnLpBcZe9rCcPoGqUa7rM\"",
+    "mtime": "2026-02-19T13:16:10.893Z",
+    "size": 348076,
+    "path": "../public/_nuxt/C0e_lt4H.js"
   },
   "/_nuxt/_date_.6zvOPt5X.css": {
     "type": "text/css; charset=utf-8",
     "etag": "\"10ba-fwSzRf8lVwBFpN44mo9koZWw70A\"",
-    "mtime": "2026-02-18T09:49:25.217Z",
+    "mtime": "2026-02-19T13:16:10.893Z",
     "size": 4282,
     "path": "../public/_nuxt/_date_.6zvOPt5X.css"
   },
   "/_nuxt/builds/latest.json": {
     "type": "application/json",
-    "etag": "\"47-Gh5JNRkzFrlAe01I7OxdmNSeMik\"",
-    "mtime": "2026-02-18T09:49:29.052Z",
+    "etag": "\"47-KrnCv2JzyXpBdS9m8pZn88LImLw\"",
+    "mtime": "2026-02-19T13:16:15.973Z",
     "size": 71,
     "path": "../public/_nuxt/builds/latest.json"
   },
-  "/_nuxt/builds/meta/71c49587-a04d-49cb-9e7c-ff6b0231dde0.json": {
+  "/_nuxt/builds/meta/6abfb20c-b258-4369-9aee-e6214643704e.json": {
     "type": "application/json",
-    "etag": "\"58-R+CKtrRlNuN4UoirZ37FTZ5KflE\"",
-    "mtime": "2026-02-18T09:49:29.053Z",
+    "etag": "\"58-/78qeyl4S4+Yk6YBcxLA2YBNGo0\"",
+    "mtime": "2026-02-19T13:16:15.973Z",
     "size": 88,
-    "path": "../public/_nuxt/builds/meta/71c49587-a04d-49cb-9e7c-ff6b0231dde0.json"
-  },
-  "/_nuxt/builds/meta/dev.json": {
-    "type": "application/json",
-    "etag": "\"37-2Wr7s+lgwllGRcReZ5uFW0L7OFo\"",
-    "mtime": "2026-02-18T09:49:21.631Z",
-    "size": 55,
-    "path": "../public/_nuxt/builds/meta/dev.json"
+    "path": "../public/_nuxt/builds/meta/6abfb20c-b258-4369-9aee-e6214643704e.json"
   },
   "/icons/apple-calendar.png": {
     "type": "image/png",
@@ -4841,6 +4839,7 @@ const _SxA8c9 = defineEventHandler(() => {});
 
 const _lazy_9PueEQ = () => import('../routes/api/index.get.mjs');
 const _lazy_fO7rgS = () => import('../routes/api/index.get2.mjs');
+const _lazy_PuzPvs = () => import('../routes/api/health.get.mjs');
 const _lazy_wKwfEY = () => import('../routes/api/whatsapp-media/_filename_.get.mjs');
 const _lazy_FQzII2 = () => import('../routes/api/whatsapp-messages.get.mjs');
 const _lazy_EM0R44 = () => import('../routes/renderer.mjs').then(function (n) { return n.r; });
@@ -4849,6 +4848,7 @@ const handlers = [
   { route: '', handler: _i_ZtEW, lazy: false, middleware: true, method: undefined },
   { route: '/api/categories', handler: _lazy_9PueEQ, lazy: true, middleware: false, method: "get" },
   { route: '/api/events', handler: _lazy_fO7rgS, lazy: true, middleware: false, method: "get" },
+  { route: '/api/health', handler: _lazy_PuzPvs, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-media/:filename', handler: _lazy_wKwfEY, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-messages', handler: _lazy_FQzII2, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_EM0R44, lazy: true, middleware: false, method: undefined },
@@ -5282,5 +5282,5 @@ function setupGracefulShutdown(listener, nitroApp) {
   });
 }
 
-export { $fetch as $, defu as A, trapUnhandledNodeErrors as a, useNitroApp as b, defineEventHandler as c, destr as d, createError$1 as e, sendRedirect as f, getRouterParam as g, getQuery as h, getResponseStatusText as i, joinRelativeURL as j, getResponseStatus as k, decodePath as l, defineRenderHandler as m, getRouteRules as n, joinURL as o, hasProtocol as p, isScriptProtocol as q, sanitizeStatusCode as r, setupGracefulShutdown as s, toNodeListener as t, useRuntimeConfig as u, getContext as v, withQuery as w, hash$1 as x, createHooks as y, executeAsync as z };
+export { $fetch as $, createHooks as A, executeAsync as B, defu as C, trapUnhandledNodeErrors as a, useNitroApp as b, defineEventHandler as c, destr as d, createError$1 as e, sendRedirect as f, getRouterParam as g, getQuery as h, getResponseStatusText as i, joinRelativeURL as j, getResponseStatus as k, defineRenderHandler as l, getRouteRules as m, joinURL as n, hasProtocol as o, isScriptProtocol as p, sanitizeStatusCode as q, parseURL as r, setupGracefulShutdown as s, toNodeListener as t, useRuntimeConfig as u, encodePath as v, withQuery as w, decodePath as x, getContext as y, hash$1 as z };
 //# sourceMappingURL=nitro.mjs.map

@@ -1,5 +1,5 @@
 import { MINUTES_PER_DAY } from '~/consts/calendar.const'
-import { formatDateToYYYYMMDD } from './date.helpers'
+import { formatDateToYYYYMMDD, getDateInIsraelFromIso } from './date.helpers'
 
 /**
  * Filters events to only active ones
@@ -31,8 +31,11 @@ export function getEventOccurrencesOnDate(event, dateString) {
   if (!event.occurrences || event.occurrences.length === 0) return []
 
   return event.occurrences.filter((occurrence) => {
-    if (!occurrence.startTime) return false
-    const occurrenceDate = getDateFromISO(occurrence.startTime)
+    const occurrenceDate = occurrence.date && /^\d{4}-\d{2}-\d{2}$/.test(String(occurrence.date).trim().slice(0, 10))
+      ? String(occurrence.date).trim().slice(0, 10)
+      : occurrence.startTime
+        ? getDateInIsraelFromIso(occurrence.startTime)
+        : null
     return occurrenceDate === dateString
   })
 }
@@ -74,14 +77,26 @@ export function getEventsByDate(events, year, month) {
     if (!event.occurrences) return
 
     event.occurrences.forEach((occurrence) => {
-      if (!occurrence.startTime) return
-
-      const occurrenceDate = new Date(occurrence.startTime)
-      const occurrenceYear = occurrenceDate.getFullYear()
-      const occurrenceMonth = occurrenceDate.getMonth() + 1
-
-      if (occurrenceYear === year && occurrenceMonth === month) {
-        const dateString = formatDateToYYYYMMDD(occurrenceDate)
+      let dateString
+      let occurrenceYear
+      let occurrenceMonth
+      if (occurrence.date && String(occurrence.date).trim()) {
+        const match = String(occurrence.date).trim().slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        if (match) {
+          occurrenceYear = Number(match[1])
+          occurrenceMonth = Number(match[2])
+          dateString = match[0]
+        }
+      }
+      if (dateString == null && occurrence.startTime) {
+        dateString = getDateInIsraelFromIso(occurrence.startTime) || null
+        if (dateString) {
+          const [y, m] = dateString.split('-').map(Number)
+          occurrenceYear = y
+          occurrenceMonth = m
+        }
+      }
+      if (dateString != null && occurrenceYear === year && occurrenceMonth === month) {
         if (!eventsMap[dateString]) {
           eventsMap[dateString] = []
         }
@@ -169,10 +184,27 @@ export function filterEventsByTimeRangeForMonth(events, year, month, startMinute
   return activeEvents.filter((event) => {
     if (!event.occurrences) return false
     return event.occurrences.some((occurrence) => {
-      if (!occurrence.startTime) return false
-      const d = new Date(occurrence.startTime)
-      if (d.getFullYear() !== year || d.getMonth() + 1 !== month) return false
-      return occurrenceOverlapsTimeRange(occurrence, startMinutes, endMinutes)
+      let occYear
+      let occMonth
+      if (occurrence.date && String(occurrence.date).trim()) {
+        const match = String(occurrence.date).trim().slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        if (match) {
+          occYear = Number(match[1])
+          occMonth = Number(match[2])
+        }
+      }
+      if (occYear == null && occurrence.startTime) {
+        const dateStr = getDateInIsraelFromIso(occurrence.startTime)
+        if (dateStr) {
+          const [y, m] = dateStr.split('-').map(Number)
+          occYear = y
+          occMonth = m
+        }
+      }
+      if (occYear != null && occMonth != null && occYear === year && occMonth === month) {
+        return occurrenceOverlapsTimeRange(occurrence, startMinutes, endMinutes)
+      }
+      return false
     })
   })
 }

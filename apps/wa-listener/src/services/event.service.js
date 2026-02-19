@@ -63,9 +63,10 @@ const EVENT_SCHEMA_PROPERTIES = {
   price: { type: ['number', 'null'] },
   occurrence: {
     type: 'object',
-    required: ['hasTime', 'startTime', 'endTime'],
+    required: ['date', 'hasTime', 'startTime', 'endTime'],
     additionalProperties: false,
     properties: {
+      date: { type: 'string' },
       hasTime: { type: 'boolean' },
       startTime: { type: 'string' },
       endTime: { type: ['string', 'null'] },
@@ -73,9 +74,10 @@ const EVENT_SCHEMA_PROPERTIES = {
   },
   justifications: {
     type: 'object',
-    required: ['location', 'startTime', 'endTime', 'price'],
+    required: ['date', 'location', 'startTime', 'endTime', 'price'],
     additionalProperties: false,
     properties: {
+      date: { type: 'string' },
       location: { type: 'string' },
       startTime: { type: 'string' },
       endTime: { type: 'string' },
@@ -161,9 +163,11 @@ function validateEventStructure(event) {
   if (!event.categories.includes(event.mainCategory)) return { valid: false, reason: 'mainCategory not in categories' }
   if (!event.location || typeof event.location !== 'object') return { valid: false, reason: 'Missing location' }
   if (!event.occurrence || typeof event.occurrence !== 'object') return { valid: false, reason: 'Missing occurrence' }
+  if (typeof event.occurrence.date !== 'string' || !event.occurrence.date.trim()) return { valid: false, reason: 'Missing occurrence.date' }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(event.occurrence.date.trim().slice(0, 10))) return { valid: false, reason: 'occurrence.date must be YYYY-MM-DD' }
   if (typeof event.occurrence.hasTime !== 'boolean') return { valid: false, reason: 'Missing occurrence.hasTime' }
   if (typeof event.occurrence.startTime !== 'string' || !event.occurrence.startTime.trim()) return { valid: false, reason: 'Missing startTime' }
-  const justKeys = ['location', 'startTime', 'endTime', 'price']
+  const justKeys = ['date', 'location', 'startTime', 'endTime', 'price']
   if (!event.justifications || typeof event.justifications !== 'object') return { valid: false, reason: 'Missing justifications' }
   for (const k of justKeys) {
     if (typeof event.justifications[k] !== 'string') return { valid: false, reason: `Missing or invalid justifications.${k}` }
@@ -191,6 +195,20 @@ function israelMidnightToUtcIso(dateOrIso) {
   const offsetHours = israelHour - 12
   const utcIsraelMidnight = new Date(Date.UTC(y, m - 1, d) - offsetHours * 3600 * 1000)
   return utcIsraelMidnight.toISOString()
+}
+
+/**
+ * Returns YYYY-MM-DD in Israel (Asia/Jerusalem) for an ISO UTC string.
+ * @param {string} isoString - ISO UTC date-time string
+ * @returns {string|null} YYYY-MM-DD or null
+ */
+function getDateInIsraelFromIso(isoString) {
+  if (!isoString || typeof isoString !== 'string') return null
+  const d = new Date(isoString)
+  if (isNaN(d.getTime())) return null
+  const parts = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).split('-')
+  if (parts.length !== 3) return null
+  return `${parts[0]}-${parts[1]}-${parts[2]}`
 }
 
 /**
@@ -246,10 +264,25 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
     corrections.push(`mainCategory corrected to ${event.mainCategory}`)
   }
 
-  // -- Justifications: reject event if startTime has no justification; clear other fields if they have data but no justification --
-  if (event.occurrence?.startTime && typeof event.occurrence.startTime === 'string' && event.occurrence.startTime.trim()) {
-    if (isNotStatedJustification(event.justifications?.startTime)) {
-      return { event: null, corrections: ['No justification for date (startTime) - event rejected'] }
+  // -- Justifications: reject if date has no justification; for time-of-day, clear to all-day if no justification --
+  if (event.occurrence?.date && typeof event.occurrence.date === 'string' && event.occurrence.date.trim()) {
+    if (isNotStatedJustification(event.justifications?.date)) {
+      return { event: null, corrections: ['No justification for calendar date - event rejected'] }
+    }
+  }
+  if (event.occurrence?.hasTime === true && event.occurrence?.startTime) {
+    const startDateIsrael = getDateInIsraelFromIso(event.occurrence.startTime)
+    const isMidnightIsrael = startDateIsrael != null && event.occurrence.startTime && (() => {
+      const d = new Date(event.occurrence.startTime)
+      const hrs = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
+      const min = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' }), 10)
+      return hrs === 0 && min === 0
+    })()
+    if (!isMidnightIsrael && isNotStatedJustification(event.justifications?.startTime)) {
+      event.occurrence.hasTime = false
+      event.occurrence.startTime = israelMidnightToUtcIso(event.occurrence.date || event.occurrence.startTime)
+      event.occurrence.endTime = null
+      corrections.push('Time of day had no justification - cleared to all-day')
     }
   }
   if (event.location) {
@@ -325,8 +358,37 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
     }
   }
 
-  // -- All-day rule: if hasTime is false, set startTime to Israel midnight UTC and endTime to null --
-  if (event.occurrence && event.occurrence.hasTime === false && event.occurrence.startTime) {
+  // -- Date–startTime consistency: occurrence.date must match date part of startTime in Israel --
+  if (event.occurrence?.date && event.occurrence?.startTime) {
+    const expectedDate = (event.occurrence.date || '').trim().slice(0, 10)
+    const startTimeDateIsrael = getDateInIsraelFromIso(event.occurrence.startTime)
+    if (expectedDate && startTimeDateIsrael && expectedDate !== startTimeDateIsrael) {
+      if (event.occurrence.hasTime === false) {
+        event.occurrence.startTime = israelMidnightToUtcIso(event.occurrence.date)
+        corrections.push('All-day: startTime normalized to occurrence.date at Israel midnight UTC')
+      } else {
+        const d = new Date(event.occurrence.startTime)
+        const h = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
+        const m = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' }), 10)
+        const timeStr = `${h}:${String(m).padStart(2, '0')}`
+        const rebuilt = localTimeIsraelToUtcIso(event.occurrence.date, timeStr)
+        if (rebuilt) {
+          event.occurrence.startTime = rebuilt
+          corrections.push('startTime date normalized to match occurrence.date')
+        }
+      }
+    }
+  }
+
+  // -- All-day rule: if hasTime is false, set startTime to Israel midnight UTC for occurrence.date and endTime to null --
+  if (event.occurrence && event.occurrence.hasTime === false && event.occurrence.date) {
+    const normalized = israelMidnightToUtcIso(event.occurrence.date)
+    if (normalized !== event.occurrence.startTime) {
+      corrections.push('All-day event: startTime set to occurrence.date at Israel midnight UTC')
+    }
+    event.occurrence.startTime = normalized
+    event.occurrence.endTime = null
+  } else if (event.occurrence && event.occurrence.hasTime === false && event.occurrence.startTime) {
     const normalized = israelMidnightToUtcIso(event.occurrence.startTime)
     if (normalized !== event.occurrence.startTime) {
       corrections.push('All-day event: startTime normalized to Israel midnight UTC')
@@ -489,7 +551,7 @@ ${categoriesText}
 FIELD RULES:
 The message body you receive is in HTML format. For Title, shortDescription, location, price, dates, and all other fields: extract from the text content; ignore HTML tags.
 
-ACCURACY (date, location, price, time): Use only information explicitly stated in the message or clearly readable in the image. Do not infer or guess. If not clearly stated or readable, set the field to null (or empty string for location.City). When the date appears only in the image (e.g. "17/2", "יום שלישי 17/2"), use that date for startTime and cite the image in justifications.
+ACCURACY (date, location, price, time): Use only information explicitly stated in the message or clearly readable in the image. Do not infer or guess. If not clearly stated or readable, set the field to null (or empty string for location.City). When the date appears only in the image (e.g. "17/2", "יום שלישי 17/2"), use that date for occurrence.date and startTime and cite the image in justifications. The calendar date is stored in occurrence.date (YYYY-MM-DD Israel); startTime is built from that date plus time (Israel) converted to UTC.
 
 - Title: Event name ONLY. No price. No date or time or when — strip from the title: מחר, בשבוע הבא, day names (e.g. יום שלישי), numeric dates (e.g. 17/2), times (e.g. בשעה 20:00). Location is allowed only when the advertiser presents it as part of the event name (e.g. "פסטיבל הגולן", "חן מזרחי מגיע לצפון הגולן"); do not add location if it appears only as a separate detail (e.g. "בחיפה" in another sentence).
 - shortDescription: What the event is about. No price, no date, no location.
@@ -503,14 +565,16 @@ ACCURACY (date, location, price, time): Use only information explicitly stated i
 - location.wazeNavLink: Waze URL found in message text. Otherwise null.
 - location.gmapsNavLink: Google Maps URL found in message text. Otherwise null.
 - price: Event/entrance price (what attendees pay to participate). Usually when a price appears in the message it is the event price — it does not need to appear next to כניסה, מחיר כניסה, or דמי כניסה. Ignore a price only when it is clearly the price of items sold at the event (e.g. costumes — תחפושות ב-X, מכירת תחפושות ב-X; food — פופקורן, דוכני אוכל; merchandise). In that case do not use that number; if no other price is given, set price to null. 0 if free is explicitly stated. null if no price is mentioned or unclear.
+- occurrence.date: REQUIRED. YYYY-MM-DD (Israel local calendar date). Must match the date used for startTime when startTime is converted to Israel local.
 - occurrence.hasTime: true if a specific time is mentioned; false if only a date is given (all-day event).
-- occurrence.startTime: ISO UTC string. If hasTime true: convert stated time from Israel local. If hasTime false: use event date at Israel local 00:00 converted to UTC.
+- occurrence.startTime: ISO UTC string. If hasTime true: combine occurrence.date with stated time (Israel local), convert to UTC. If hasTime false: occurrence.date at Israel local 00:00 converted to UTC.
 - occurrence.endTime: ISO UTC string or null.
 - media: Always return an empty array []. Media (images from the message) are added by the system from the actual WhatsApp attachment only. Do NOT put links or URLs here; links go in urls.
 - urls: Array of {Title, Url} for links found in the message.
 - justifications: For each key state source (text or image) and the exact snippet. If from image, quote the relevant text as read from the image; if from message, quote the relevant part of the message. If from multiple places, list them. When a field has no source in message or image, you MUST use exactly this phrase (no variants): "Not stated in message or image."
+  - justifications.date: Source and exact snippet for the CALENDAR DATE only (e.g. "Text: '25/02'", "Image: '17/2'", "Text: 'יום שלישי 17/2'"). If no date in message or image, use exactly: "Not stated in message or image."
   - justifications.location: Source and exact snippet(s). If null/empty location, use exactly: "Not stated in message or image."
-  - justifications.startTime: Source and exact snippet(s); focus on the selected date (e.g. "Image: '17/2'", "Text: 'החל משעה 17:00'"). If no date in message or image, use exactly: "Not stated in message or image."
+  - justifications.startTime: Source and exact snippet for the TIME OF DAY only (e.g. "Text: 'ב 20:00'", "Text: 'החל משעה 17:00'"). If no time or all-day event, use exactly: "Not stated in message or image."
   - justifications.endTime: Source and snippet(s), or exactly: "Not stated in message or image."
   - justifications.price: Source and snippet(s), or exactly: "Not stated in message or image."
 
@@ -530,12 +594,13 @@ Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתח
   "mainCategory": "music",
   "location": { "City": "חיפה", "CityEvidence": "חיפה", "addressLine1": "מתחם שוק תלפיות", "addressLine2": null, "locationDetails": null, "wazeNavLink": "https://ul.waze.com/ul?place=abc", "gmapsNavLink": null },
   "price": 30,
-  "occurrence": { "hasTime": true, "startTime": "2026-02-25T18:00:00.000Z", "endTime": null },
+  "occurrence": { "date": "2026-02-25", "hasTime": true, "startTime": "2026-02-25T18:00:00.000Z", "endTime": null },
   "media": [],
   "urls": [{ "Title": "ניווט Waze", "Url": "https://ul.waze.com/ul?place=abc" }],
   "justifications": {
+    "date": "Text: '25/02'",
     "location": "Text: 'מתחם שוק תלפיות, חיפה'",
-    "startTime": "Text: '25/02 בשעה 20:00'",
+    "startTime": "Text: 'בשעה 20:00'",
     "endTime": "Not stated in message or image.",
     "price": "Text: 'כניסה: 30 ₪'"
   }
@@ -591,8 +656,10 @@ export async function callOpenAIForComparison(extractedEvent, messageText, candi
     const text = c.rawMessage?.text || '(no text)'
     const title = c.event?.Title || '(no title)'
     const city = c.event?.location?.City || ''
-    const start = c.event?.occurrence?.startTime || ''
-    return `Candidate ${i + 1}:\nID: ${id}\nTitle: ${title}\nCity: ${city}\nStartTime: ${start}\nMessage: ${text}`
+    const occ = c.event?.occurrence
+    const date = occ?.date || '(none)'
+    const start = occ?.startTime || ''
+    return `Candidate ${i + 1}:\nID: ${id}\nTitle: ${title}\nCity: ${city}\nDate: ${date}\nStartTime: ${start}\nMessage: ${text}`
   }).join('\n\n')
 
   const systemPrompt = `You are an event comparison assistant. Given a newly extracted event and a list of candidate events from the database, decide if the new event is:
@@ -613,6 +680,7 @@ New event is "סדנת קרמיקה" but candidate is "ערב מוזיקה" → 
   const userContent = `NEW EVENT:
 Title: ${extractedEvent.Title}
 City: ${extractedEvent.location?.City || '(none)'}
+Date: ${extractedEvent.occurrence?.date || '(none)'}
 StartTime: ${extractedEvent.occurrence?.startTime || '(none)'}
 Categories: ${(extractedEvent.categories || []).join(', ')}
 Message text: ${messageText || '(empty)'}

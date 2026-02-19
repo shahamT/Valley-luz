@@ -24,7 +24,9 @@ export interface EventLocation {
  * Event occurrence - a specific instance of an event
  */
 export interface Occurrence {
-  startTime: string // ISO 8601 date-time string
+  /** Calendar date (Israel) YYYY-MM-DD. When present, use for date matching; otherwise derive from startTime. */
+  date?: string
+  startTime: string // ISO 8601 date-time string (UTC)
   endTime?: string // ISO 8601 date-time string
   hasTime: boolean // If false, it's an all-day event
 }

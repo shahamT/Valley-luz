@@ -42,7 +42,7 @@ export { useUrlState } from '../composables/useUrlState';
 export { getDisplayEvents, getAdditionalEventsCount, isWeekendDay, getCategoryColor, getMoreEventsText } from '../utils/calendar-display.helpers';
 export { generateCalendarDays } from '../utils/calendar.helpers';
 export { downloadIcsFile, getGoogleCalendarUrl, handleCalendarSelection } from '../utils/calendar.service';
-export { formatDateToYYYYMMDD, parseDateString, getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isMonthBefore, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, isBeforeToday, formatKanbanDateHeader, formatMinutesToTime, isSameMonth } from '../utils/date.helpers';
+export { formatDateToYYYYMMDD, getDateInIsraelFromIso, parseDateString, getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isMonthBefore, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, isBeforeToday, formatKanbanDateHeader, formatMinutesToTime, isSameMonth } from '../utils/date.helpers';
 export { formatEventTime, formatEventPrice, formatEventLocation, formatEventLocationForChip, transformEventForCard, PRICE_UNKNOWN_TEXT } from '../utils/events.helpers';
 export { getActiveEvents, getDateFromISO, getEventOccurrencesOnDate, getEventsForDate, getEventsByDate, eventMatchesCategories, filterEventsByCategories, getOccurrenceMinutesOfDay, occurrenceOverlapsTimeRange, filterEventsByTimeRangeForMonth, filterEventOccurrencesByTimeRange } from '../utils/events.service';
 export { logger } from '../utils/logger';
@@ -51,4 +51,3 @@ export { isValidDateString, isValidRouteDate, parseCategories, serializeCategori
 export { useCalendarStore } from '../stores/calendar.store';
 export { useUiStore } from '../stores/ui.store';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
-export { useNuxtDevTools } from '../node_modules/nuxt/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';

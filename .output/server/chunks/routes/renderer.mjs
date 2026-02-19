@@ -1,5 +1,5 @@
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { j as joinRelativeURL, u as useRuntimeConfig, i as getResponseStatusText, k as getResponseStatus, l as decodePath, m as defineRenderHandler, h as getQuery, e as createError, n as getRouteRules, o as joinURL, b as useNitroApp } from '../_/nitro.mjs';
+import { j as joinRelativeURL, u as useRuntimeConfig, i as getResponseStatusText, k as getResponseStatus, l as defineRenderHandler, h as getQuery, e as createError, m as getRouteRules, n as joinURL, b as useNitroApp } from '../_/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
@@ -28,10 +28,9 @@ function vueInstall(head) {
 function injectHead() {
   if (hasInjectionContext()) {
     const instance = inject(headSymbol);
-    if (!instance) {
-      throw new Error("useHead() was called without provide context, ensure you call it through the setup() function.");
+    if (instance) {
+      return instance;
     }
-    return instance;
   }
   throw new Error("useHead() was called without provide context, ensure you call it through the setup() function.");
 }
@@ -245,7 +244,7 @@ const unheadOptions = {
 
 function createSSRContext(event) {
 	const ssrContext = {
-		url: decodePath(event.path),
+		url: event.path,
 		event,
 		runtimeConfig: useRuntimeConfig(event),
 		noSSR: event.context.nuxt?.noSSR || (false),

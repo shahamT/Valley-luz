@@ -16,6 +16,22 @@ export function formatDateToYYYYMMDD(date) {
 }
 
 /**
+ * Returns YYYY-MM-DD in Israel (Asia/Jerusalem) for an ISO UTC date-time string.
+ * Use when deriving calendar date from occurrence.startTime for consistency with occurrence.date.
+ * @param {string} isoString - ISO date-time string (e.g. UTC)
+ * @returns {string|null} YYYY-MM-DD or null if invalid
+ */
+export function getDateInIsraelFromIso(isoString) {
+  if (!isoString || typeof isoString !== 'string') return null
+  const d = new Date(isoString)
+  if (Number.isNaN(d.getTime())) return null
+  const formatted = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' })
+  const parts = formatted.split('-')
+  if (parts.length !== 3) return null
+  return `${parts[0]}-${parts[1]}-${parts[2]}`
+}
+
+/**
  * Parse a date string in YYYY-MM-DD format to a Date object
  * @param {string} dateString - Date string in YYYY-MM-DD format
  * @returns {Date} Parsed date object

@@ -68,8 +68,10 @@ async function main() {
     console.log('Extracted Title:', extracted.Title)
     console.log('Extracted location.City:', extracted.location?.City)
     console.log('Extracted location.CityEvidence:', extracted.location?.CityEvidence)
+    console.log('Extracted occurrence.date:', extracted.occurrence?.date)
     console.log('Extracted occurrence.hasTime:', extracted.occurrence?.hasTime)
     console.log('Extracted occurrence.startTime:', extracted.occurrence?.startTime)
+    console.log('Extracted justifications.date:', extracted.justifications?.date)
     console.log('Extracted location.locationDetails:', extracted.location?.locationDetails ?? '(null)')
 
     const { event: validated, corrections } = validateEventProgrammatic(
@@ -82,6 +84,7 @@ async function main() {
     } else {
       if (corrections.length) console.log('Corrections:', corrections)
       console.log('Validated location.City:', validated.location?.City)
+      console.log('Validated occurrence.date:', validated.occurrence?.date)
       console.log('Validated occurrence.startTime:', validated.occurrence?.startTime)
     }
     console.log('')

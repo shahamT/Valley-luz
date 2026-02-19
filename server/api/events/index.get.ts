@@ -1,11 +1,23 @@
 import { getMongoConnection } from '~/server/utils/mongodb'
 
+/** Returns YYYY-MM-DD in Israel (Asia/Jerusalem) from an ISO date-time string. Used when deriving occurrence.date from startTime. */
+function getDateInIsraelFromIso(isoString: string | undefined): string | undefined {
+  if (!isoString) return undefined
+  const d = new Date(isoString)
+  if (Number.isNaN(d.getTime())) return undefined
+  const formatted = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' })
+  const parts = formatted.split('-')
+  if (parts.length !== 3) return undefined
+  return `${parts[0]}-${parts[1]}-${parts[2]}`
+}
+
 /**
  * Transforms backend event structure to frontend format
  * - Title → title
  * - occurrence (singular) → occurrences (array)
  * - location.City → location.city
  * - _id → id (string)
+ * - Preserve occurrence.date when present; when missing, derive from startTime for backward compatibility
  */
 function transformEventForFrontend(doc: any) {
   const backendEvent = doc.event
@@ -17,12 +29,18 @@ function transformEventForFrontend(doc: any) {
   const dateCreated = doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt)
 
   // Transform occurrence (singular) to occurrences (array)
-  // Preserve the occurrence object structure (hasTime, startTime, endTime)
-  const occurrences = backendEvent.occurrence
+  // Preserve the occurrence object structure (date, hasTime, startTime, endTime)
+  const rawOccurrences = backendEvent.occurrence
     ? [backendEvent.occurrence]
     : backendEvent.occurrences && Array.isArray(backendEvent.occurrences)
     ? backendEvent.occurrences
     : []
+  const occurrences = rawOccurrences.map((occ: any) => {
+    const date = occ?.date && /^\d{4}-\d{2}-\d{2}$/.test(String(occ.date).trim().slice(0, 10))
+      ? String(occ.date).trim().slice(0, 10)
+      : getDateInIsraelFromIso(occ?.startTime)
+    return { ...occ, ...(date ? { date } : {}) }
+  })
 
   // Validate occurrence structure
   if (occurrences.length > 0 && !occurrences[0].startTime) {

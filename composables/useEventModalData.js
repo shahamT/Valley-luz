@@ -1,4 +1,5 @@
 import { formatEventTime, formatEventPrice } from '~/utils/events.helpers'
+import { getDateInIsraelFromIso } from '~/utils/date.helpers'
 import { MODAL_TEXT } from '~/consts/ui.const'
 
 /**
@@ -109,8 +110,13 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
   // --- Calendar dates ---
 
   const calendarStartDate = computed(() => {
-    if (!selectedOccurrence.value?.startTime) return ''
-    return new Date(selectedOccurrence.value.startTime).toISOString().split('T')[0]
+    const occ = selectedOccurrence.value
+    if (occ?.date && String(occ.date).trim()) {
+      const d = String(occ.date).trim().slice(0, 10)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d
+    }
+    if (!occ?.startTime) return ''
+    return getDateInIsraelFromIso(occ.startTime) || new Date(occ.startTime).toISOString().split('T')[0]
   })
 
   const calendarStartTime = computed(() => {
