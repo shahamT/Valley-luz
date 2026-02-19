@@ -2148,7 +2148,22 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"7284a-ERd6FrC1IKr+JjGun2EjgQfbb1k\"",
+    "mtime": "2026-02-18T12:01:14.738Z",
+    "size": 469066,
+    "path": "index.mjs.map"
+  },
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1ca79-xzkp3Q+Ew78XqMT1b/0VNtoX3Zs\"",
+    "mtime": "2026-02-18T12:01:14.738Z",
+    "size": 117369,
+    "path": "index.mjs"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2599,6 +2614,7 @@ async function getIslandContext(event) {
 
 const _lazy_9PueEQ = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_fO7rgS = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_PuzPvs = () => Promise.resolve().then(function () { return health_get$1; });
 const _lazy_wKwfEY = () => Promise.resolve().then(function () { return _filename__get$1; });
 const _lazy_FQzII2 = () => Promise.resolve().then(function () { return whatsappMessages_get$1; });
 const _lazy_EM0R44 = () => Promise.resolve().then(function () { return renderer$1; });
@@ -2607,6 +2623,7 @@ const handlers = [
   { route: '', handler: _i_ZtEW, lazy: false, middleware: true, method: undefined },
   { route: '/api/categories', handler: _lazy_9PueEQ, lazy: true, middleware: false, method: "get" },
   { route: '/api/events', handler: _lazy_fO7rgS, lazy: true, middleware: false, method: "get" },
+  { route: '/api/health', handler: _lazy_PuzPvs, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-media/:filename', handler: _lazy_wKwfEY, lazy: true, middleware: false, method: "get" },
   { route: '/api/whatsapp-messages', handler: _lazy_FQzII2, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_EM0R44, lazy: true, middleware: false, method: undefined },
@@ -3163,6 +3180,15 @@ const index_get = defineEventHandler(async (event) => {
 const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: index_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const health_get = defineEventHandler(() => {
+  return { ok: true };
+});
+
+const health_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: health_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _filename__get = defineEventHandler(async (event) => {

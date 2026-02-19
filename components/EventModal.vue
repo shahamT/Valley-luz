@@ -32,11 +32,23 @@
               :formatted-location="formattedLocation"
             />
 
-            <!-- Event Image Thumbnail (if exists) -->
-            <div v-if="hasEventImage" class="EventModal-imageThumbSection">
-              <div class="EventModal-imageThumb" @click="openImagePopup">
-                <img :src="eventContentImage" :alt="selectedEvent.title" class="EventModal-thumbImage" />
-              </div>
+            <!-- Event Image Gallery -->
+            <div v-if="eventImages.length" ref="galleryRef" class="EventModal-imageGallery">
+              <template v-for="(img, idx) in visibleImages" :key="idx">
+                <div
+                  v-if="showOverflow && idx === visibleImages.length - 1"
+                  class="EventModal-galleryThumb"
+                  @click="openImagePopup(idx)"
+                >
+                  <img :src="img" :alt="selectedEvent.title" class="EventModal-galleryThumbImage" />
+                  <div class="EventModal-galleryOverlay">
+                    <span class="EventModal-galleryOverlayText">+{{ overflowCount }}</span>
+                  </div>
+                </div>
+                <div v-else class="EventModal-galleryThumb" @click="openImagePopup(idx)">
+                  <img :src="img" :alt="selectedEvent.title" class="EventModal-galleryThumbImage" />
+                </div>
+              </template>
             </div>
 
             <!-- Description Section -->
@@ -98,8 +110,9 @@
   <!-- Image Full-Size Popup -->
   <Teleport to="body">
     <UiImagePopup
-      v-if="isImagePopupOpen && eventContentImage"
-      :image-url="eventContentImage"
+      v-if="isImagePopupOpen && eventImages.length"
+      :images="eventImages"
+      :current-index="currentImageIndex"
       :alt-text="selectedEvent?.title"
       @close="closeImagePopup"
     />
@@ -119,9 +132,17 @@ const { events, categories } = useCalendarViewData()
 
 const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 const isImagePopupOpen = ref(false)
+const currentImageIndex = ref(0)
 const canShare = ref(false)
+const galleryRef = ref(null)
+const galleryWidth = ref(0)
+
+const THUMB_WIDTH = 93
+const THUMB_GAP = 16
 
 // --- Lifecycle ---
+let resizeObserver = null
+
 onMounted(() => {
   if (import.meta.client && navigator.share) {
     canShare.value = true
@@ -131,6 +152,10 @@ onMounted(() => {
 onUnmounted(() => {
   if (import.meta.client) {
     document.body.style.overflow = ''
+  }
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
   }
 })
 
@@ -146,8 +171,7 @@ const selectedOccurrence = computed(() => {
 
 const {
   eventImage,
-  hasEventImage,
-  eventContentImage,
+  eventImages,
   eventTime,
   eventPrice,
   eventDescription,
@@ -161,18 +185,42 @@ const {
   calendarEndTime,
 } = useEventModalData(selectedEvent, selectedOccurrence)
 
+const maxVisibleThumbs = computed(() => {
+  if (galleryWidth.value <= 0) return 1
+  return Math.max(1, Math.floor((galleryWidth.value + THUMB_GAP) / (THUMB_WIDTH + THUMB_GAP)))
+})
+
+const showOverflow = computed(() => eventImages.value.length > maxVisibleThumbs.value)
+
+const overflowCount = computed(() => eventImages.value.length - maxVisibleThumbs.value + 1)
+
+const visibleImages = computed(() => {
+  if (!showOverflow.value) return eventImages.value
+  return eventImages.value.slice(0, maxVisibleThumbs.value)
+})
+
 // --- Methods ---
 const closeModal = () => {
   uiStore.closeEventModal()
   isImagePopupOpen.value = false
 }
 
-const openImagePopup = () => {
+const openImagePopup = (index = 0) => {
+  currentImageIndex.value = index
   isImagePopupOpen.value = true
 }
 
 const closeImagePopup = () => {
   isImagePopupOpen.value = false
+}
+
+const measureGallery = () => {
+  if (galleryRef.value) {
+    const style = getComputedStyle(galleryRef.value)
+    const paddingLeft = parseFloat(style.paddingLeft) || 0
+    const paddingRight = parseFloat(style.paddingRight) || 0
+    galleryWidth.value = galleryRef.value.clientWidth - paddingLeft - paddingRight
+  }
 }
 
 const handleShare = async () => {
@@ -195,6 +243,18 @@ watch(isEventModalShowing, (isShowing) => {
   if (import.meta.server) return
   document.body.style.overflow = isShowing ? 'hidden' : ''
 }, { immediate: true })
+
+watch(galleryRef, (el) => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+  if (el) {
+    measureGallery()
+    resizeObserver = new ResizeObserver(measureGallery)
+    resizeObserver.observe(el)
+  }
+})
 </script>
 
 <style lang="scss">
@@ -253,6 +313,7 @@ watch(isEventModalShowing, (isShowing) => {
 
     @media (max-width: 768px) {
       width: 100%;
+      max-width: none;
       min-height: 100vh;
       border-radius: 0;
       display: flex;
@@ -305,12 +366,13 @@ watch(isEventModalShowing, (isShowing) => {
     text-align: center;
   }
 
-  &-imageThumbSection {
+  &-imageGallery {
     background-color: var(--color-background);
     padding: var(--spacing-lg);
     padding-bottom: 0;
     display: flex;
     justify-content: flex-start;
+    gap: var(--spacing-md);
 
     @media (max-width: 768px) {
       padding: var(--spacing-md);
@@ -318,10 +380,11 @@ watch(isEventModalShowing, (isShowing) => {
     }
   }
 
-  &-imageThumb {
-    max-height: 140px;
-    max-width: 100%;
-    display: inline-block;
+  &-galleryThumb {
+    position: relative;
+    width: 93px;
+    height: 140px;
+    flex-shrink: 0;
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
@@ -330,19 +393,31 @@ watch(isEventModalShowing, (isShowing) => {
 
     &:hover {
       box-shadow: var(--shadow-md);
-      transform: scale(1.01);
+      transform: scale(1.02);
     }
   }
 
-  &-thumbImage {
-    max-height: 140px;
-    max-width: 100%;
-    height: auto;
-    width: auto;
-    object-fit: contain;
-    object-position: center;
+  &-galleryThumbImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
     background-color: var(--color-surface);
+  }
+
+  &-galleryOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &-galleryOverlayText {
+    color: var(--chip-text-white);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
   }
 
   &-descriptionSection {

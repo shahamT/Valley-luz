@@ -92,7 +92,7 @@ function loadConfig() {
     },
     // OpenAI configuration
     openai: {
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 2000,
     },
   }

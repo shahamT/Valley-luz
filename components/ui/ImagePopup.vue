@@ -3,19 +3,44 @@
     <button class="ImagePopup-closeButton" @click="emit('close')" aria-label="Close">
       <UiIcon name="close" size="lg" />
     </button>
+
+    <button
+      class="ImagePopup-arrow ImagePopup-arrow--prev"
+      :class="{ 'ImagePopup-arrow--disabled': !hasMultiple }"
+      :disabled="!hasMultiple"
+      aria-label="Previous image"
+      @click="goPrev"
+    >
+      <UiIcon name="chevron_right" size="xl" />
+    </button>
+
     <div class="ImagePopup-container">
-      <img :src="imageUrl" :alt="altText" class="ImagePopup-image" />
+      <img :src="images[localIndex]" :alt="altText" class="ImagePopup-image" />
     </div>
+
+    <button
+      class="ImagePopup-arrow ImagePopup-arrow--next"
+      :class="{ 'ImagePopup-arrow--disabled': !hasMultiple }"
+      :disabled="!hasMultiple"
+      aria-label="Next image"
+      @click="goNext"
+    >
+      <UiIcon name="chevron_left" size="xl" />
+    </button>
   </div>
 </template>
 
 <script setup>
 defineOptions({ name: 'ImagePopup' })
 
-defineProps({
-  imageUrl: {
-    type: String,
+const props = defineProps({
+  images: {
+    type: Array,
     required: true,
+  },
+  currentIndex: {
+    type: Number,
+    default: 0,
   },
   altText: {
     type: String,
@@ -24,6 +49,26 @@ defineProps({
 })
 
 const emit = defineEmits(['close'])
+
+// --- Data ---
+const localIndex = ref(props.currentIndex)
+
+// --- Computed ---
+const hasMultiple = computed(() => props.images.length > 1)
+
+// --- Methods ---
+const goPrev = () => {
+  localIndex.value = (localIndex.value - 1 + props.images.length) % props.images.length
+}
+
+const goNext = () => {
+  localIndex.value = (localIndex.value + 1) % props.images.length
+}
+
+// --- Watchers ---
+watch(() => props.currentIndex, (val) => {
+  localIndex.value = val
+})
 </script>
 
 <style lang="scss">
@@ -64,6 +109,41 @@ const emit = defineEmits(['close'])
     
     &:hover {
       background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  &-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    cursor: pointer;
+    color: white;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+    z-index: 10;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &--prev {
+      right: var(--spacing-md);
+    }
+
+    &--next {
+      left: var(--spacing-md);
+    }
+
+    &--disabled {
+      opacity: 0.3;
+      cursor: default;
     }
   }
 

@@ -46,10 +46,12 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
     return !!(media && media.length > 0)
   })
 
-  const eventContentImage = computed(() => {
-    if (!hasEventImage.value) return null
-    const firstMedia = selectedEvent.value.media[0]
-    return typeof firstMedia === 'string' ? firstMedia : firstMedia?.url || null
+  const eventImages = computed(() => {
+    const media = selectedEvent.value?.media
+    if (!media || media.length === 0) return []
+    return media
+      .map((item) => (typeof item === 'string' ? item : item?.url))
+      .filter(Boolean)
   })
 
   // --- Display info ---
@@ -129,7 +131,7 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
   return {
     eventImage,
     hasEventImage,
-    eventContentImage,
+    eventImages,
     eventTime,
     eventPrice,
     eventDescription,

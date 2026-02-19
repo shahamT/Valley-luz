@@ -9,6 +9,9 @@ declare module "nitropack/types" {
     '/api/events': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/events/index.get').default>>>>
     }
+    '/api/health': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/health.get').default>>>>
+    }
     '/api/whatsapp-media/:filename': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/whatsapp-media/[filename].get').default>>>>
     }
