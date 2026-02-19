@@ -1,24 +1,32 @@
-import { MAX_EVENTS_TO_DISPLAY, MAX_REGULAR_CHIPS, WEEKEND_DAYS, MORE_EVENTS_TEXT } from '~/consts/calendar.const'
+import {
+  MAX_EVENTS_TO_DISPLAY,
+  MAX_REGULAR_CHIPS,
+  MAX_EVENTS_TO_DISPLAY_MOBILE,
+  MAX_REGULAR_CHIPS_MOBILE,
+  WEEKEND_DAYS,
+  MORE_EVENTS_TEXT,
+} from '~/consts/calendar.const'
 
 /**
  * Gets events to display in calendar day cell with "more" chip logic
  * @param {Array} events - Array of event objects
  * @param {number} totalCount - Total number of events for the day
+ * @param {boolean} [isMobile] - Whether to use mobile limits (4 events, 4th chip "x+")
  * @returns {Array} Array of events to display, with optional "more" chip object
  */
-export function getDisplayEvents(events, totalCount) {
+export function getDisplayEvents(events, totalCount, isMobile = false) {
   if (!events || totalCount === 0) {
     return []
   }
 
+  const maxDisplay = isMobile ? MAX_EVENTS_TO_DISPLAY_MOBILE : MAX_EVENTS_TO_DISPLAY
+  const maxRegular = isMobile ? MAX_REGULAR_CHIPS_MOBILE : MAX_REGULAR_CHIPS
   const eventsToShow = []
 
-  if (totalCount <= MAX_EVENTS_TO_DISPLAY) {
-    // Show all events (up to MAX_EVENTS_TO_DISPLAY)
+  if (totalCount <= maxDisplay) {
     eventsToShow.push(...events.slice(0, totalCount))
   } else {
-    // Show first MAX_REGULAR_CHIPS events + "more" chip
-    eventsToShow.push(...events.slice(0, MAX_REGULAR_CHIPS))
+    eventsToShow.push(...events.slice(0, maxRegular))
     eventsToShow.push({ isMore: true })
   }
 
@@ -28,13 +36,16 @@ export function getDisplayEvents(events, totalCount) {
 /**
  * Calculates the count of additional events for the "more" chip
  * @param {number} totalCount - Total number of events for the day
+ * @param {boolean} [isMobile] - Whether to use mobile limits
  * @returns {number} Number of additional events (0 if no "more" chip needed)
  */
-export function getAdditionalEventsCount(totalCount) {
-  if (totalCount <= MAX_EVENTS_TO_DISPLAY) {
+export function getAdditionalEventsCount(totalCount, isMobile = false) {
+  const maxDisplay = isMobile ? MAX_EVENTS_TO_DISPLAY_MOBILE : MAX_EVENTS_TO_DISPLAY
+  if (totalCount <= maxDisplay) {
     return 0
   }
-  return totalCount - MAX_REGULAR_CHIPS
+  const maxRegular = isMobile ? MAX_REGULAR_CHIPS_MOBILE : MAX_REGULAR_CHIPS
+  return totalCount - maxRegular
 }
 
 /**
@@ -80,13 +91,13 @@ export function sortCategoryIdsWithMainFirst(categoryIds, mainCategoryId) {
 
 /**
  * Gets the text for the "more" events chip
- * @param {number} count - Number of additional events
- * @param {boolean} isMobile - Whether to use mobile format
+ * @param {number} additionalCount - Number of additional events (total − shown: e.g. total − 3 on mobile, total − 2 on desktop)
+ * @param {boolean} isMobile - Whether to use mobile format ("x+" where x is additionalCount)
  * @returns {string} Formatted text for the "more" chip
  */
-export function getMoreEventsText(count, isMobile = false) {
+export function getMoreEventsText(additionalCount, isMobile = false) {
   if (isMobile) {
-    return `+${count}`
+    return `${additionalCount}+`
   }
-  return MORE_EVENTS_TEXT(count)
+  return MORE_EVENTS_TEXT(additionalCount)
 }

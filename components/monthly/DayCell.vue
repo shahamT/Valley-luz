@@ -66,11 +66,11 @@ const displayEvents = computed(() => {
   if (props.day.isOutsideMonth || props.day.eventsCount === 0) {
     return []
   }
-  return getDisplayEvents(props.day.events, props.day.eventsCount)
+  return getDisplayEvents(props.day.events, props.day.eventsCount, isMobile.value)
 })
 
 const additionalEventsCount = computed(() => {
-  return getAdditionalEventsCount(props.day.eventsCount)
+  return getAdditionalEventsCount(props.day.eventsCount, isMobile.value)
 })
 
 const isWeekend = computed(() => {
@@ -111,7 +111,7 @@ const getMoreChipText = () => {
   @media (max-width: 768px) {
     padding: 4px 2px;
     border-radius: 8px;
-    min-height: 5.75rem;
+    min-height: 7rem;
   }
 
   &:hover {
@@ -139,7 +139,7 @@ const getMoreChipText = () => {
     }
   }
 
-  &--past#{&}--weekend {
+  &.DayCell--past.DayCell--weekend {
     &:hover {
       background-color: var(--weekend-day-bg);
     }
@@ -172,7 +172,7 @@ const getMoreChipText = () => {
     }
   }
 
-  &--weekend#{&}--no-events {
+  &.DayCell--weekend.DayCell--no-events {
     &:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
