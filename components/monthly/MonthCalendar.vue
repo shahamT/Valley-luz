@@ -66,6 +66,10 @@ const calendarDays = computed(() => {
     min-height: 0;
     padding-top: 4px; // Allow hover transition and shadow to show
     padding-left: 8px; // Allow shadow to show on left side
+
+    @media (max-width: 767px) {
+      padding-left: 0;
+    }
   }
 
   &-grid {

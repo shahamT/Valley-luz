@@ -10,6 +10,9 @@ export const MORE_EVENTS_TEXT = (count) => `עוד ${count} אירועים...`
 // Time filter: minutes in a day (24 * 60)
 export const MINUTES_PER_DAY = 24 * 60
 
+// localStorage key for persisting user filter preference (categories + time range)
+export const FILTER_PREFERENCE_STORAGE_KEY = 'valley-luz-calendar-filters'
+
 // Daily carousel configuration
 export const DAILY_CAROUSEL_DAYS_RANGE = 4 // Number of days on each side of the center date (total: 2*range + 1 = 9 days)
 

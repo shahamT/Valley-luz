@@ -1,5 +1,5 @@
 import { parseCategories, serializeCategories, parseTimeFilter, isValidMonthYear } from '~/utils/validation.helpers'
-import { MINUTES_PER_DAY } from '~/consts/calendar.const'
+import { MINUTES_PER_DAY, FILTER_PREFERENCE_STORAGE_KEY } from '~/consts/calendar.const'
 import { getTodayDateString } from '~/utils/date.helpers'
 
 const MONTHLY_PATH = '/monthly-view'
@@ -58,6 +58,59 @@ export const useUrlState = (options = {}) => {
   }
 
   /**
+   * Whether the route query contains any filter parameters (categories or time)
+   */
+  const hasFilterParamsInQuery = (query) => {
+    return (
+      'categories' in query ||
+      'timeStart' in query ||
+      'timeEnd' in query ||
+      'timePreset' in query
+    )
+  }
+
+  /**
+   * Read filter preference from localStorage (client-only). Returns parsed filter state or null.
+   */
+  const readFilterPreference = () => {
+    if (!import.meta.client) return null
+    try {
+      const raw = localStorage.getItem(FILTER_PREFERENCE_STORAGE_KEY)
+      if (!raw) return null
+      const stored = JSON.parse(raw)
+      if (!stored || typeof stored !== 'object') return null
+      const filters = parseUrlParams(stored)
+      return filters
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * Save current store filter state to localStorage (client-only). Same shape as URL query.
+   */
+  const saveFilterPreference = () => {
+    if (!import.meta.client) return
+    try {
+      const payload = {}
+      const categoriesParam = serializeCategories(selectedCategories.value)
+      if (categoriesParam) {
+        payload.categories = categoriesParam
+      }
+      if (timeFilterStart.value !== 0 || timeFilterEnd.value !== MINUTES_PER_DAY) {
+        payload.timeStart = timeFilterStart.value
+        payload.timeEnd = timeFilterEnd.value
+        if (timeFilterPreset.value) {
+          payload.timePreset = timeFilterPreset.value
+        }
+      }
+      localStorage.setItem(FILTER_PREFERENCE_STORAGE_KEY, JSON.stringify(payload))
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  /**
    * Build query parameters from current store state (and preserve date on daily view)
    */
   const buildQueryParams = () => {
@@ -107,12 +160,12 @@ export const useUrlState = (options = {}) => {
   }
 
   /**
-   * Initialize store from URL parameters
+   * Initialize store from URL parameters (or from localStorage when URL has no filter params)
    * Called once on mount before watchers are set up
    */
   const initializeFromUrl = () => {
     const query = route.query
-    
+
     // Initialize month/year if syncing month and valid in URL
     if (syncMonth) {
       const dateFromUrl = parseMonthYearFromUrl(query)
@@ -120,15 +173,28 @@ export const useUrlState = (options = {}) => {
         calendarStore.setCurrentDate(dateFromUrl)
       }
     }
-    
-    // Initialize filters from URL
-    const filters = parseUrlParams(query)
-    calendarStore.setFiltersFromUrl(
-      filters.categories,
-      filters.timeStart,
-      filters.timeEnd,
-      filters.timePreset
-    )
+
+    // Filters: URL wins when it has filter params; otherwise apply saved preference
+    if (hasFilterParamsInQuery(query)) {
+      const filters = parseUrlParams(query)
+      calendarStore.setFiltersFromUrl(
+        filters.categories,
+        filters.timeStart,
+        filters.timeEnd,
+        filters.timePreset
+      )
+      saveFilterPreference()
+    } else {
+      const filters = readFilterPreference()
+      if (filters) {
+        calendarStore.setFiltersFromUrl(
+          filters.categories,
+          filters.timeStart,
+          filters.timeEnd,
+          filters.timePreset
+        )
+      }
+    }
   }
 
   /**
@@ -139,7 +205,7 @@ export const useUrlState = (options = {}) => {
     isInitialized.value = true
     updateUrl()
 
-    // Watch filters and sync to URL
+    // Watch filters and sync to URL and localStorage
     watch(
       () => [
         selectedCategories.value,
@@ -149,6 +215,7 @@ export const useUrlState = (options = {}) => {
       ],
       () => {
         updateUrl()
+        saveFilterPreference()
       },
       { deep: true }
     )
