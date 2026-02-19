@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { getCategoryColor } from '~/utils/calendar-display.helpers'
+import { getCategoryColor, sortCategoryIdsWithMainFirst } from '~/utils/calendar-display.helpers'
 
 defineOptions({ name: 'KanbanEventCard' })
 
@@ -50,13 +50,9 @@ const categoryColor = computed(() => {
   return getCategoryColor(props.event.mainCategory, categories.value)
 })
 
-const orderedCategoryIds = computed(() => {
-  const main = props.event.mainCategory
-  const list = props.event.categories ?? []
-  if (!main && !list.length) return []
-  const rest = list.filter((id) => id !== main)
-  return main ? [main, ...rest] : list
-})
+const orderedCategoryIds = computed(() =>
+  sortCategoryIdsWithMainFirst(props.event.categories, props.event.mainCategory)
+)
 
 const categoryChips = computed(() => {
   const ordered = orderedCategoryIds.value

@@ -35,10 +35,9 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
   // --- Media ---
 
   const eventImage = computed(() => {
-    const media = selectedEvent.value?.media
+    const media = eventMedia.value
     if (media && media.length > 0) {
-      const firstMedia = media[0]
-      return typeof firstMedia === 'string' ? firstMedia : firstMedia?.url || '/imgs/default-event-bg.webp'
+      return media[0].displayUrl
     }
     return '/imgs/default-event-bg.webp'
   })

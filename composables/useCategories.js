@@ -5,7 +5,7 @@ const LOG_PREFIX = '[CategoriesAPI]'
 export const useCategories = () => {
   const { data, pending, error, refresh } = useFetch('/api/categories', {
     key: 'categories',
-    server: true,
+    server: false,
   })
 
   if (import.meta.client) {

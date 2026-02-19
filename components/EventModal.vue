@@ -1,7 +1,18 @@
 <template>
   <Teleport to="body">
     <div v-if="isEventModalShowing" class="EventModal" @click.self="closeModal">
-      <div class="EventModal-content" :class="{ 'EventModal-content--mobile': isMobile }">
+      <!-- Light overlay while gallery media load (screen looks disabled) -->
+      <div
+        v-if="selectedEvent && eventMedia.length && !isGalleryMediaLoaded"
+        class="EventModal-loadingOverlay"
+        aria-hidden="true"
+      />
+      <!-- Modal content: only after loading (or when no event / no media) -->
+      <div
+        v-else
+        class="EventModal-content"
+        :class="{ 'EventModal-content--mobile': isMobile }"
+      >
         <div v-if="!selectedEvent" class="EventModal-notFoundWrapper">
           <p class="EventModal-notFound">{{ MODAL_TEXT.noEventSelected }}</p>
         </div>
@@ -144,6 +155,7 @@ const currentImageIndex = ref(0)
 const canShare = ref(false)
 const galleryRef = ref(null)
 const galleryWidth = ref(0)
+const isGalleryMediaLoaded = ref(true)
 
 const THUMB_WIDTH = 93
 const THUMB_GAP = 16
@@ -263,6 +275,39 @@ watch(galleryRef, (el) => {
     resizeObserver.observe(el)
   }
 })
+
+// Preload all gallery media (displayUrl = image or video thumbnail); show full modal only when ready
+let galleryLoadId = 0
+watch(
+  () => eventMedia.value,
+  (media) => {
+    if (!import.meta.client || !media?.length) {
+      isGalleryMediaLoaded.value = true
+      return
+    }
+    isGalleryMediaLoaded.value = false
+    const currentId = ++galleryLoadId
+    const urls = media.map((item) => item.displayUrl).filter(Boolean)
+    if (urls.length === 0) {
+      isGalleryMediaLoaded.value = true
+      return
+    }
+    let done = 0
+    const checkComplete = () => {
+      done += 1
+      if (currentId === galleryLoadId && done >= urls.length) {
+        isGalleryMediaLoaded.value = true
+      }
+    }
+    urls.forEach((url) => {
+      const img = new Image()
+      img.onload = checkComplete
+      img.onerror = checkComplete
+      img.src = url
+    })
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss">
@@ -356,6 +401,13 @@ watch(galleryRef, (el) => {
     text-align: center;
     color: var(--color-text-light);
     padding: var(--spacing-xl);
+  }
+
+  &-loadingOverlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
   }
 
   &-disclaimer {

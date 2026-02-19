@@ -114,5 +114,7 @@ const filterButtonLabel = computed(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  min-width: 0;
+  max-width: 100%;
 }
 </style>

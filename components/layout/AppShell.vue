@@ -14,6 +14,8 @@ defineOptions({ name: 'AppShell' })
 <style lang="scss">
 .AppShell {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: var(--color-background);
   background-image: linear-gradient(
     135deg,
@@ -22,6 +24,9 @@ defineOptions({ name: 'AppShell' })
   );
 
   &-content {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
     max-width: var(--content-max-width);
     width: 100%;
     margin: 0 auto;

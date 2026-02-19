@@ -180,6 +180,15 @@ const handleNavigationSelect = (navType) => {
     &:active {
       transform: scale(0.98);
     }
+
+    @media (max-width: 768px) {
+      padding-block: 0.75rem;
+      font-size: var(--font-size-base);
+
+      .Icon {
+        font-size: 1.375rem;
+      }
+    }
   }
 
   &-navigateButton {
@@ -205,6 +214,15 @@ const handleNavigationSelect = (navType) => {
 
     &:active {
       transform: scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+      padding-block: 0.75rem;
+      font-size: var(--font-size-base);
+
+      .Icon {
+        font-size: 1.375rem;
+      }
     }
   }
 }

@@ -23,9 +23,9 @@
     </div>
     <div class="EventModal-headerContent">
       <h1 class="EventModal-eventTitle">{{ event.title }}</h1>
-      <div v-if="event.categories?.length" class="EventModal-categories">
+      <div v-if="sortedCategoryIds.length" class="EventModal-categories">
         <span
-          v-for="categoryId in event.categories"
+          v-for="categoryId in sortedCategoryIds"
           :key="categoryId"
           class="EventModal-categoryChip"
           :style="{ backgroundColor: getCategoryColor(categoryId, categories) }"
@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { getCategoryColor } from '~/utils/calendar-display.helpers'
+import { getCategoryColor, sortCategoryIdsWithMainFirst } from '~/utils/calendar-display.helpers'
 import { MODAL_TEXT } from '~/consts/ui.const'
 
 defineOptions({ name: 'EventModalHeader' })
@@ -63,6 +63,10 @@ const props = defineProps({
     default: false,
   },
 })
+
+const sortedCategoryIds = computed(() =>
+  sortCategoryIdsWithMainFirst(props.event.categories, props.event.mainCategory)
+)
 
 const getCategoryLabel = (categoryId) => {
   return props.categories?.[categoryId]?.label ?? categoryId

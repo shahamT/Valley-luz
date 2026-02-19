@@ -1,6 +1,9 @@
 <template>
   <LayoutAppShell>
-    <div class="MonthlyView">
+    <div v-if="isLoading && !events?.length" class="ContentViewLoader">
+      <UiLoader size="md" />
+    </div>
+    <div v-else class="MonthlyView">
       <div class="MonthlyView-header">
         <ControlsCalendarViewHeader
           view-mode="month"
@@ -26,8 +29,7 @@
           @next="handleNextMonth"
         >
           <template #month>
-            <UiLoadingSpinner v-if="isLoading && !events?.length" :message="UI_TEXT.loading" />
-            <div v-else-if="isError" class="MonthlyView-error">
+            <div v-if="isError" class="MonthlyView-error">
               <p>{{ UI_TEXT.error }}</p>
             </div>
             <MonthlyMonthCarousel
@@ -155,6 +157,15 @@ const filteredEvents = computed(() => {
 </script>
 
 <style lang="scss">
+.ContentViewLoader {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .MonthlyView {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -169,6 +180,8 @@ const filteredEvents = computed(() => {
 
   &-header {
     grid-row: 1;
+    min-width: 0;
+    max-width: 100%;
 
     @media (max-width: 768px) {
       padding-inline: 1rem;

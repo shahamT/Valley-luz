@@ -236,10 +236,13 @@ const handleNext = () => {
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   gap: var(--spacing-md);
 
   &-gridWrapper {
     width: 100%;
+    min-width: 0;
   }
 
   &-row {
@@ -249,6 +252,7 @@ const handleNext = () => {
     gap: var(--spacing-md);
     direction: rtl;
     margin-bottom: var(--spacing-sm);
+    min-width: 0;
 
     @media (max-width: 768px) {
       margin-bottom: 0;
@@ -266,6 +270,7 @@ const handleNext = () => {
   &-filterTriggerWrapper {
     justify-self: end;
     position: relative;
+    min-width: 0;
   }
 
   @media (max-width: 768px) {
@@ -350,6 +355,15 @@ const handleNext = () => {
       cursor: not-allowed;
       pointer-events: none;
     }
+
+    @media (max-width: 768px) {
+      width: 40px;
+      height: 40px;
+
+      .Icon {
+        font-size: 1.375rem;
+      }
+    }
   }
 
   &-separator {
@@ -382,6 +396,15 @@ const handleNext = () => {
     &:hover {
       background-color: var(--day-cell-hover-bg);
     }
+
+    @media (max-width: 768px) {
+      height: 40px;
+      font-size: var(--font-size-base);
+
+      .Icon {
+        font-size: 1.375rem;
+      }
+    }
   }
 
   &-month {
@@ -401,7 +424,8 @@ const handleNext = () => {
     justify-content: center;
     gap: var(--spacing-xs);
     height: 34px;
-    min-width: 168px;
+    min-width: 0;
+    max-width: 100%;
     padding: 0 var(--spacing-md);
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -412,6 +436,10 @@ const handleNext = () => {
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
     white-space: nowrap;
+
+    @media (min-width: 769px) {
+      min-width: 168px;
+    }
 
     &:hover:not(.CalendarViewNav-filterButton--active) {
       background-color: var(--day-cell-hover-bg);
@@ -425,6 +453,15 @@ const handleNext = () => {
         color: var(--chip-text-white);
       }
     }
+
+    @media (max-width: 768px) {
+      height: 40px;
+      font-size: var(--font-size-base);
+
+      .Icon {
+        font-size: 1.375rem;
+      }
+    }
   }
 
   &-filterButtonIcon {
@@ -432,6 +469,9 @@ const handleNext = () => {
   }
 
   &-filterButtonText {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -442,6 +482,10 @@ const handleNext = () => {
     border-radius: var(--radius-md);
     overflow: hidden;
     background-color: var(--light-bg);
+
+    @media (max-width: 768px) {
+      height: 40px;
+    }
   }
 
   &-viewToggleSegment {
@@ -467,6 +511,14 @@ const handleNext = () => {
 
       .CalendarViewNav-viewToggleIcon {
         color: var(--chip-text-white);
+      }
+    }
+
+    @media (max-width: 768px) {
+      font-size: var(--font-size-base);
+
+      .Icon {
+        font-size: 1.375rem;
       }
     }
   }

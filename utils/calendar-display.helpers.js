@@ -66,6 +66,19 @@ export function getCategoryColor(categoryId, categories, fallbackColor = 'var(--
 }
 
 /**
+ * Returns category IDs with main category first (for RTL: main appears on the right), then the rest in original order.
+ * @param {string[]} categoryIds - Array of category IDs (e.g. event.categories)
+ * @param {string} [mainCategoryId] - Main category ID (e.g. event.mainCategory)
+ * @returns {string[]} Sorted array: [main, ...rest]
+ */
+export function sortCategoryIdsWithMainFirst(categoryIds, mainCategoryId) {
+  if (!categoryIds?.length) return []
+  if (!mainCategoryId) return [...categoryIds]
+  const rest = categoryIds.filter((id) => id !== mainCategoryId)
+  return [mainCategoryId, ...rest]
+}
+
+/**
  * Gets the text for the "more" events chip
  * @param {number} count - Number of additional events
  * @param {boolean} isMobile - Whether to use mobile format

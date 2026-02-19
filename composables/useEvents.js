@@ -4,11 +4,11 @@ import { flattenEventsByOccurrence } from '~/utils/events.service'
 const LOG_PREFIX = '[EventsAPI]'
 
 export const useEvents = () => {
-  // useFetch with server: true runs on the server during SSR, so the initial load
-  // does not appear as a client network request; data is serialized into the page payload.
+  // useFetch with server: false runs only on the client, so the first paint shows the loader
+  // and the full view appears after data is fetched.
   const { data, pending, error, refresh } = useFetch('/api/events', {
     key: 'events',
-    server: true,
+    server: false,
   })
 
   // Log on client side only

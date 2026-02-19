@@ -1,6 +1,9 @@
 <template>
   <LayoutAppShell>
-    <div class="DailyView">
+    <div v-if="isLoading && !events?.length" class="ContentViewLoader">
+      <UiLoader size="md" />
+    </div>
+    <div v-else class="DailyView">
       <div class="DailyView-header">
         <ControlsCalendarViewHeader
           view-mode="day"
@@ -26,8 +29,7 @@
           @next="handleNextDay"
         >
           <template #day>
-            <UiLoadingSpinner v-if="isLoading && !events?.length" :message="UI_TEXT.loading" />
-            <div v-else-if="isError" class="DailyView-error">
+            <div v-if="isError" class="DailyView-error">
               <p>{{ UI_TEXT.error }}</p>
             </div>
             <DailyKanbanCarousel
@@ -185,6 +187,15 @@ const handleViewChange = ({ view }) => {
 </script>
 
 <style lang="scss">
+.ContentViewLoader {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .DailyView {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -198,6 +209,8 @@ const handleViewChange = ({ view }) => {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
+    min-width: 0;
+    max-width: 100%;
 
     @media (max-width: 768px) {
       padding-inline: 1rem;
