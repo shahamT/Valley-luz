@@ -61,15 +61,19 @@ const EVENT_SCHEMA_PROPERTIES = {
     },
   },
   price: { type: ['number', 'null'] },
-  occurrence: {
-    type: 'object',
-    required: ['date', 'hasTime', 'startTime', 'endTime'],
-    additionalProperties: false,
-    properties: {
-      date: { type: 'string' },
-      hasTime: { type: 'boolean' },
-      startTime: { type: 'string' },
-      endTime: { type: ['string', 'null'] },
+  occurrences: {
+    type: 'array',
+    minItems: 1,
+    items: {
+      type: 'object',
+      required: ['date', 'hasTime', 'startTime', 'endTime'],
+      additionalProperties: false,
+      properties: {
+        date: { type: 'string' },
+        hasTime: { type: 'boolean' },
+        startTime: { type: 'string' },
+        endTime: { type: ['string', 'null'] },
+      },
     },
   },
   justifications: {
@@ -162,11 +166,15 @@ function validateEventStructure(event) {
   if (typeof event.mainCategory !== 'string' || !event.mainCategory.trim()) return { valid: false, reason: 'Missing mainCategory' }
   if (!event.categories.includes(event.mainCategory)) return { valid: false, reason: 'mainCategory not in categories' }
   if (!event.location || typeof event.location !== 'object') return { valid: false, reason: 'Missing location' }
-  if (!event.occurrence || typeof event.occurrence !== 'object') return { valid: false, reason: 'Missing occurrence' }
-  if (typeof event.occurrence.date !== 'string' || !event.occurrence.date.trim()) return { valid: false, reason: 'Missing occurrence.date' }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(event.occurrence.date.trim().slice(0, 10))) return { valid: false, reason: 'occurrence.date must be YYYY-MM-DD' }
-  if (typeof event.occurrence.hasTime !== 'boolean') return { valid: false, reason: 'Missing occurrence.hasTime' }
-  if (typeof event.occurrence.startTime !== 'string' || !event.occurrence.startTime.trim()) return { valid: false, reason: 'Missing startTime' }
+  if (!Array.isArray(event.occurrences) || event.occurrences.length === 0) return { valid: false, reason: 'Missing or empty occurrences' }
+  for (let i = 0; i < event.occurrences.length; i++) {
+    const occ = event.occurrences[i]
+    if (!occ || typeof occ !== 'object') return { valid: false, reason: `occurrences[${i}] is not an object` }
+    if (typeof occ.date !== 'string' || !occ.date.trim()) return { valid: false, reason: `occurrences[${i}].date missing or empty` }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(occ.date.trim().slice(0, 10))) return { valid: false, reason: `occurrences[${i}].date must be YYYY-MM-DD` }
+    if (typeof occ.hasTime !== 'boolean') return { valid: false, reason: `occurrences[${i}].hasTime missing or not boolean` }
+    if (typeof occ.startTime !== 'string' || !occ.startTime.trim()) return { valid: false, reason: `occurrences[${i}].startTime missing or empty` }
+  }
   const justKeys = ['date', 'location', 'startTime', 'endTime', 'price']
   if (!event.justifications || typeof event.justifications !== 'object') return { valid: false, reason: 'Missing justifications' }
   for (const k of justKeys) {
@@ -234,12 +242,17 @@ function localTimeIsraelToUtcIso(dateStr, timeHHMM) {
 
 // ─── Cleanup helper ─────────────────────────────────────────────────────────
 
-async function cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason) {
+async function cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason, reasonDetail, sourceGroupId, sourceGroupName) {
   if (cloudinaryData?.public_id) {
     try { await deleteMediaFromCloudinary(cloudinaryData.public_id) } catch (_) { /* logged elsewhere */ }
   }
   try { await deleteEventDocument(eventId) } catch (_) { /* logged elsewhere */ }
-  try { await sendEventConfirmation(messagePreview, reason) } catch (_) { /* logged elsewhere */ }
+  const context = {
+    eventId: eventId?.toString?.() ?? String(eventId),
+    sourceGroupId: sourceGroupId || undefined,
+    sourceGroupName: sourceGroupName || undefined,
+  }
+  try { await sendEventConfirmation(messagePreview, reason, reasonDetail, context) } catch (_) { /* logged elsewhere */ }
 }
 
 // ─── Programmatic validation (replaces AI Call #3) ──────────────────────────
@@ -254,35 +267,48 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
   const corrections = []
   const validCatIds = categoriesList.map(c => c.id)
 
+  if (!Array.isArray(event.occurrences) || event.occurrences.length === 0) {
+    return { event: null, corrections: ['Missing or empty occurrences'] }
+  }
+
   // -- Categories --
+  const FALLBACK_CATEGORY_ID = 'community_meetup'
   event.categories = (event.categories || []).filter(c => validCatIds.includes(c))
   if (event.categories.length === 0) {
-    return { event: null, corrections: ['No valid categories remaining'] }
-  }
-  if (!event.categories.includes(event.mainCategory)) {
+    event.categories = [FALLBACK_CATEGORY_ID]
+    event.mainCategory = FALLBACK_CATEGORY_ID
+    corrections.push('No valid categories from extraction; assigned community_meetup as fallback')
+  } else if (!event.categories.includes(event.mainCategory)) {
     event.mainCategory = event.categories[0]
     corrections.push(`mainCategory corrected to ${event.mainCategory}`)
   }
 
-  // -- Justifications: reject if date has no justification; for time-of-day, clear to all-day if no justification --
-  if (event.occurrence?.date && typeof event.occurrence.date === 'string' && event.occurrence.date.trim()) {
+  // -- Justifications: reject if date has no justification (check first occurrence); per-occurrence: clear to all-day / clear endTime --
+  const firstOcc = event.occurrences[0]
+  if (firstOcc?.date && typeof firstOcc.date === 'string' && firstOcc.date.trim()) {
     if (isNotStatedJustification(event.justifications?.date)) {
       return { event: null, corrections: ['No justification for calendar date - event rejected'] }
     }
   }
-  if (event.occurrence?.hasTime === true && event.occurrence?.startTime) {
-    const startDateIsrael = getDateInIsraelFromIso(event.occurrence.startTime)
-    const isMidnightIsrael = startDateIsrael != null && event.occurrence.startTime && (() => {
-      const d = new Date(event.occurrence.startTime)
-      const hrs = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
-      const min = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' }), 10)
-      return hrs === 0 && min === 0
-    })()
-    if (!isMidnightIsrael && isNotStatedJustification(event.justifications?.startTime)) {
-      event.occurrence.hasTime = false
-      event.occurrence.startTime = israelMidnightToUtcIso(event.occurrence.date || event.occurrence.startTime)
-      event.occurrence.endTime = null
-      corrections.push('Time of day had no justification - cleared to all-day')
+  for (const occ of event.occurrences) {
+    if (occ.hasTime === true && occ.startTime) {
+      const startDateIsrael = getDateInIsraelFromIso(occ.startTime)
+      const isMidnightIsrael = startDateIsrael != null && occ.startTime && (() => {
+        const d = new Date(occ.startTime)
+        const hrs = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
+        const min = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' }), 10)
+        return hrs === 0 && min === 0
+      })()
+      if (!isMidnightIsrael && isNotStatedJustification(event.justifications?.startTime)) {
+        occ.hasTime = false
+        occ.startTime = israelMidnightToUtcIso(occ.date || occ.startTime)
+        occ.endTime = null
+        corrections.push('Time of day had no justification - cleared to all-day')
+      }
+    }
+    if (occ.endTime != null && isNotStatedJustification(event.justifications?.endTime)) {
+      occ.endTime = null
+      corrections.push('endTime had value but no justification - cleared to null')
     }
   }
   if (event.location) {
@@ -302,10 +328,6 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
   if (typeof event.price === 'number' && isNotStatedJustification(event.justifications?.price)) {
     event.price = null
     corrections.push('Price had value but no justification - cleared to null')
-  }
-  if (event.occurrence?.endTime != null && isNotStatedJustification(event.justifications?.endTime)) {
-    event.occurrence.endTime = null
-    corrections.push('endTime had value but no justification - cleared to null')
   }
 
   // -- Location City + CityEvidence: verify evidence appears in source; else clear both --
@@ -336,65 +358,70 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
     }
   }
 
-  // -- Date reasonability --
-  if (event.occurrence?.startTime) {
-    const start = new Date(event.occurrence.startTime)
-    if (isNaN(start.getTime())) {
-      return { event: null, corrections: ['startTime is not a valid date'] }
+  // -- Date reasonability (per occurrence) --
+  for (const occ of event.occurrences) {
+    if (occ.startTime) {
+      const start = new Date(occ.startTime)
+      if (isNaN(start.getTime())) {
+        return { event: null, corrections: ['startTime is not a valid date'] }
+      }
+      const now = new Date()
+      const twoYearsFromNow = new Date(now)
+      twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2)
+      if (start > twoYearsFromNow) {
+        corrections.push(`startTime ${occ.startTime} is more than 2 years in the future - suspicious`)
+      }
     }
-    const now = new Date()
-    const twoYearsFromNow = new Date(now)
-    twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2)
-    if (start > twoYearsFromNow) {
-      corrections.push(`startTime ${event.occurrence.startTime} is more than 2 years in the future - suspicious`)
+    if (occ.endTime) {
+      const end = new Date(occ.endTime)
+      if (isNaN(end.getTime())) {
+        occ.endTime = null
+        corrections.push('endTime was invalid - cleared')
+      }
     }
   }
 
-  if (event.occurrence?.endTime) {
-    const end = new Date(event.occurrence.endTime)
-    if (isNaN(end.getTime())) {
-      event.occurrence.endTime = null
-      corrections.push('endTime was invalid - cleared')
-    }
-  }
-
-  // -- Date–startTime consistency: occurrence.date must match date part of startTime in Israel --
-  if (event.occurrence?.date && event.occurrence?.startTime) {
-    const expectedDate = (event.occurrence.date || '').trim().slice(0, 10)
-    const startTimeDateIsrael = getDateInIsraelFromIso(event.occurrence.startTime)
-    if (expectedDate && startTimeDateIsrael && expectedDate !== startTimeDateIsrael) {
-      if (event.occurrence.hasTime === false) {
-        event.occurrence.startTime = israelMidnightToUtcIso(event.occurrence.date)
-        corrections.push('All-day: startTime normalized to occurrence.date at Israel midnight UTC')
-      } else {
-        const d = new Date(event.occurrence.startTime)
-        const h = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
-        const m = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' }), 10)
-        const timeStr = `${h}:${String(m).padStart(2, '0')}`
-        const rebuilt = localTimeIsraelToUtcIso(event.occurrence.date, timeStr)
-        if (rebuilt) {
-          event.occurrence.startTime = rebuilt
-          corrections.push('startTime date normalized to match occurrence.date')
+  // -- Date–startTime consistency: each occurrence.date must match date part of startTime in Israel --
+  for (const occ of event.occurrences) {
+    if (occ.date && occ.startTime) {
+      const expectedDate = (occ.date || '').trim().slice(0, 10)
+      const startTimeDateIsrael = getDateInIsraelFromIso(occ.startTime)
+      if (expectedDate && startTimeDateIsrael && expectedDate !== startTimeDateIsrael) {
+        if (occ.hasTime === false) {
+          occ.startTime = israelMidnightToUtcIso(occ.date)
+          corrections.push('All-day: startTime normalized to occurrence.date at Israel midnight UTC')
+        } else {
+          const d = new Date(occ.startTime)
+          const h = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
+          const m = parseInt(d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' }), 10)
+          const timeStr = `${h}:${String(m).padStart(2, '0')}`
+          const rebuilt = localTimeIsraelToUtcIso(occ.date, timeStr)
+          if (rebuilt) {
+            occ.startTime = rebuilt
+            corrections.push('startTime date normalized to match occurrence.date')
+          }
         }
       }
     }
   }
 
-  // -- All-day rule: if hasTime is false, set startTime to Israel midnight UTC for occurrence.date and endTime to null --
-  if (event.occurrence && event.occurrence.hasTime === false && event.occurrence.date) {
-    const normalized = israelMidnightToUtcIso(event.occurrence.date)
-    if (normalized !== event.occurrence.startTime) {
-      corrections.push('All-day event: startTime set to occurrence.date at Israel midnight UTC')
+  // -- All-day rule: for each occurrence with hasTime false, set startTime to Israel midnight UTC and endTime to null --
+  for (const occ of event.occurrences) {
+    if (occ.hasTime === false && occ.date) {
+      const normalized = israelMidnightToUtcIso(occ.date)
+      if (normalized !== occ.startTime) {
+        corrections.push('All-day event: startTime set to occurrence.date at Israel midnight UTC')
+      }
+      occ.startTime = normalized
+      occ.endTime = null
+    } else if (occ.hasTime === false && occ.startTime) {
+      const normalized = israelMidnightToUtcIso(occ.startTime)
+      if (normalized !== occ.startTime) {
+        corrections.push('All-day event: startTime normalized to Israel midnight UTC')
+      }
+      occ.startTime = normalized
+      occ.endTime = null
     }
-    event.occurrence.startTime = normalized
-    event.occurrence.endTime = null
-  } else if (event.occurrence && event.occurrence.hasTime === false && event.occurrence.startTime) {
-    const normalized = israelMidnightToUtcIso(event.occurrence.startTime)
-    if (normalized !== event.occurrence.startTime) {
-      corrections.push('All-day event: startTime normalized to Israel midnight UTC')
-    }
-    event.occurrence.startTime = normalized
-    event.occurrence.endTime = null
   }
 
   // -- Media is set programmatically from WhatsApp attachment only; ignore AI value --
@@ -537,21 +564,31 @@ ${dateCtx}
 
 TIMEZONE RULE (CRITICAL):
 All times in messages are in Israel local time (${dateCtx.includes('UTC+3') ? 'UTC+3' : 'UTC+2'}).
-You MUST convert them to UTC before putting them in startTime / endTime. Never put the local hour unchanged into the UTC string — subtract the offset.
+You MUST convert them to UTC before putting them in startTime / endTime. For each entry in occurrences, never put the local hour unchanged into the UTC string — subtract the offset.
 Examples: message "20:00" Israel, offset UTC+2 → startTime "…T18:00:00.000Z". Message "17:30" Israel, offset UTC+2 → startTime "…T15:30:00.000Z".
 If the message mentions multiple times (e.g. activity at 17:30, lecture at 18:30), use the time when the main event actually starts. Interpret Hebrew like "8 בערב" as 20:00 Israel local, then convert that to UTC for startTime.
 
 ALL-DAY RULE (date but no time):
-If the message has a calendar DATE but NO explicit time (e.g. "יום שישי 7.3 פיקניק"), set occurrence.hasTime to false.
-Then set occurrence.startTime to that date at Israel local 00:00 (midnight) converted to UTC (e.g. for 2026-03-07 with UTC+2 → "2026-03-06T22:00:00.000Z"), and occurrence.endTime to null.
+If the message has a calendar DATE but NO explicit time (e.g. "יום שישי 7.3 פיקניק"), set hasTime to false for that occurrence.
+Then set startTime to that date at Israel local 00:00 (midnight) converted to UTC (e.g. for 2026-03-07 with UTC+2 → "2026-03-06T22:00:00.000Z"), and endTime to null.
+
+OCCURRENCES (REQUIRED):
+- occurrences: An array of one or more occurrence objects. Each object has date, hasTime, startTime, endTime.
+- Single-day event: Return exactly one object in occurrences, e.g. [{ "date": "2026-02-25", "hasTime": true, "startTime": "2026-02-25T18:00:00.000Z", "endTime": null }].
+- Multi-day event (e.g. "7–9 במרץ", "שישי-שבת 7-8.3", "פסטיבל 20–22.2"): Return one object per calendar day. Each object has that day's date (YYYY-MM-DD Israel), and the same hasTime/startTime/endTime rules. If the event is all-day on each day, use that date at Israel midnight → UTC for startTime and endTime null for each. If specific times are stated per day, set each occurrence accordingly.
 
 ALLOWED CATEGORIES:
 ${categoriesText}
 
+CATEGORIES RULE (REQUIRED):
+- categories and mainCategory MUST use only the exact category ids from the list above (e.g. party, music, workshop). Never use the label text or invent new ids.
+- You MUST assign at least one category that fits the event. If the event clearly fits one of the listed types, choose the best-matching id.
+- Mapping examples (use these ids): dance / ריקוד / אקסטטיק דאנס / מסיבה → party; תנועה / ספורט → sport; מוזיקה / הופעה → music or show; סדנה / סדנא → workshop; מפגש קהילתי → community_meetup; טיול / טבע → nature; הרצאה → lecture. When in doubt between two, pick the best fit and include it.
+
 FIELD RULES:
 The message body you receive is in HTML format. For Title, shortDescription, location, price, dates, and all other fields: extract from the text content; ignore HTML tags.
 
-ACCURACY (date, location, price, time): Use only information explicitly stated in the message or clearly readable in the image. Do not infer or guess. If not clearly stated or readable, set the field to null (or empty string for location.City). When the date appears only in the image (e.g. "17/2", "יום שלישי 17/2"), use that date for occurrence.date and startTime and cite the image in justifications. The calendar date is stored in occurrence.date (YYYY-MM-DD Israel); startTime is built from that date plus time (Israel) converted to UTC.
+ACCURACY (date, location, price, time): Use only information explicitly stated in the message or clearly readable in the image. Do not infer or guess. If not clearly stated or readable, set the field to null (or empty string for location.City). When the date appears only in the image (e.g. "17/2", "יום שלישי 17/2"), use that date for each occurrence's date and startTime and cite the image in justifications. For each entry in occurrences: date is YYYY-MM-DD (Israel); startTime is built from that date plus time (Israel) converted to UTC.
 
 - Title: Event name ONLY. No price. No date or time or when — strip from the title: מחר, בשבוע הבא, day names (e.g. יום שלישי), numeric dates (e.g. 17/2), times (e.g. בשעה 20:00). Location is allowed only when the advertiser presents it as part of the event name (e.g. "פסטיבל הגולן", "חן מזרחי מגיע לצפון הגולן"); do not add location if it appears only as a separate detail (e.g. "בחיפה" in another sentence).
 - shortDescription: What the event is about. No price, no date, no location.
@@ -565,10 +602,11 @@ ACCURACY (date, location, price, time): Use only information explicitly stated i
 - location.wazeNavLink: Waze URL found in message text. Otherwise null.
 - location.gmapsNavLink: Google Maps URL found in message text. Otherwise null.
 - price: Event/entrance price (what attendees pay to participate). Usually when a price appears in the message it is the event price — it does not need to appear next to כניסה, מחיר כניסה, or דמי כניסה. Ignore a price only when it is clearly the price of items sold at the event (e.g. costumes — תחפושות ב-X, מכירת תחפושות ב-X; food — פופקורן, דוכני אוכל; merchandise). In that case do not use that number; if no other price is given, set price to null. 0 if free is explicitly stated. null if no price is mentioned or unclear.
-- occurrence.date: REQUIRED. YYYY-MM-DD (Israel local calendar date). Must match the date used for startTime when startTime is converted to Israel local.
-- occurrence.hasTime: true if a specific time is mentioned; false if only a date is given (all-day event).
-- occurrence.startTime: ISO UTC string. If hasTime true: combine occurrence.date with stated time (Israel local), convert to UTC. If hasTime false: occurrence.date at Israel local 00:00 converted to UTC.
-- occurrence.endTime: ISO UTC string or null.
+- occurrences: Array of occurrence objects. Each object has:
+  - date: REQUIRED. YYYY-MM-DD (Israel local calendar date). Must match the date used for startTime when startTime is converted to Israel local.
+  - hasTime: true if a specific time is mentioned; false if only a date is given (all-day event).
+  - startTime: ISO UTC string. If hasTime true: combine date with stated time (Israel local), convert to UTC. If hasTime false: date at Israel local 00:00 converted to UTC.
+  - endTime: ISO UTC string or null.
 - media: Always return an empty array []. Media (images from the message) are added by the system from the actual WhatsApp attachment only. Do NOT put links or URLs here; links go in urls.
 - urls: Array of {Title, Url} for links found in the message.
 - justifications: For each key state source (text or image) and the exact snippet. If from image, quote the relevant text as read from the image; if from message, quote the relevant part of the message. If from multiple places, list them. When a field has no source in message or image, you MUST use exactly this phrase (no variants): "Not stated in message or image."
@@ -594,7 +632,7 @@ Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתח
   "mainCategory": "music",
   "location": { "City": "חיפה", "CityEvidence": "חיפה", "addressLine1": "מתחם שוק תלפיות", "addressLine2": null, "locationDetails": null, "wazeNavLink": "https://ul.waze.com/ul?place=abc", "gmapsNavLink": null },
   "price": 30,
-  "occurrence": { "date": "2026-02-25", "hasTime": true, "startTime": "2026-02-25T18:00:00.000Z", "endTime": null },
+  "occurrences": [{ "date": "2026-02-25", "hasTime": true, "startTime": "2026-02-25T18:00:00.000Z", "endTime": null }],
   "media": [],
   "urls": [{ "Title": "ניווט Waze", "Url": "https://ul.waze.com/ul?place=abc" }],
   "justifications": {
@@ -656,7 +694,7 @@ export async function callOpenAIForComparison(extractedEvent, messageText, candi
     const text = c.rawMessage?.text || '(no text)'
     const title = c.event?.Title || '(no title)'
     const city = c.event?.location?.City || ''
-    const occ = c.event?.occurrence
+    const occ = c.event?.occurrences?.[0]
     const date = occ?.date || '(none)'
     const start = occ?.startTime || ''
     return `Candidate ${i + 1}:\nID: ${id}\nTitle: ${title}\nCity: ${city}\nDate: ${date}\nStartTime: ${start}\nMessage: ${text}`
@@ -677,11 +715,12 @@ New event title "ערב מוזיקה אתיופית" in חיפה on 2026-02-25, 
 Same but candidate price was 30 and new message says 50 → "updated_event"
 New event is "סדנת קרמיקה" but candidate is "ערב מוזיקה" → "new_event"`
 
+  const extractedOcc = extractedEvent.occurrences?.[0]
   const userContent = `NEW EVENT:
 Title: ${extractedEvent.Title}
 City: ${extractedEvent.location?.City || '(none)'}
-Date: ${extractedEvent.occurrence?.date || '(none)'}
-StartTime: ${extractedEvent.occurrence?.startTime || '(none)'}
+Date: ${extractedOcc?.date || '(none)'}
+StartTime: ${extractedOcc?.startTime || '(none)'}
 Categories: ${(extractedEvent.categories || []).join(', ')}
 Message text: ${messageText || '(empty)'}
 
@@ -742,8 +781,13 @@ function validatePipelineInputs(eventId, rawMessage, cloudinaryUrl, cloudinaryDa
 
 // ─── Sub-handlers ───────────────────────────────────────────────────────────
 
-async function handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, event, originalMessage, client, messagePreview) {
+async function handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, event, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName) {
   logger.info(LOG_PREFIXES.EVENT_SERVICE, 'Handling new event — enriching and saving')
+  const context = {
+    eventId: eventId?.toString?.() ?? String(eventId),
+    sourceGroupId: sourceGroupId || undefined,
+    sourceGroupName: sourceGroupName || undefined,
+  }
   try {
     const authorId = rawMessage.author || null
     const enrichedEvent = await enrichEvent(event, authorId, cloudinaryUrl, originalMessage, client)
@@ -751,15 +795,15 @@ async function handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData
     const updated = await updateEventDocument(eventId, enrichedEvent)
     if (updated) {
       logger.info(LOG_PREFIXES.EVENT_SERVICE, 'New event saved successfully')
-      await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.NEW_EVENT)
+      await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.NEW_EVENT, undefined, context)
     } else {
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.DATABASE_ERROR)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.DATABASE_ERROR, undefined, sourceGroupId, sourceGroupName)
     }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     logger.error(LOG_PREFIXES.EVENT_SERVICE, `Error saving new event: ${errorMsg}`)
     const reason = errorMsg.includes('enrich') || errorMsg.includes('Invalid event') ? CONFIRMATION_REASONS.ENRICHMENT_ERROR : CONFIRMATION_REASONS.DATABASE_ERROR
-    await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason)
+    await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason, undefined, sourceGroupId, sourceGroupName)
   }
 }
 
@@ -771,6 +815,8 @@ async function handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData
  */
 export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, cloudinaryData, originalMessage, client) {
   const messageId = extractMessageId(rawMessage)
+  let sourceGroupId = null
+  let sourceGroupName = null
 
   try {
     logger.info(LOG_PREFIXES.EVENT_SERVICE, `Pipeline start for ${messageId}`)
@@ -780,10 +826,21 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
     const messageText = rawMessage.text || ''
     const messagePreview = messageText.substring(0, 20) || '(no text)'
 
+    const remoteJid = originalMessage?.key?.remoteJid
+    if (remoteJid && typeof remoteJid === 'string' && remoteJid.endsWith('@g.us')) {
+      sourceGroupId = remoteJid
+      if (client) {
+        try {
+          const meta = await client.groupMetadata(sourceGroupId)
+          sourceGroupName = meta.subject || null
+        } catch (_) { /* ignore */ }
+      }
+    }
+
     // Skip empty messages
     if (!messageText.trim()) {
       logger.info(LOG_PREFIXES.EVENT_SERVICE, `Skipping ${messageId} — no text`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.NO_TEXT)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.NO_TEXT, undefined, sourceGroupId, sourceGroupName)
       return
     }
 
@@ -792,7 +849,7 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
     const classification = await callOpenAIForClassification(messageText, cloudinaryUrl)
 
     if (!classification) {
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.AI_CLASSIFICATION_FAILED)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.AI_CLASSIFICATION_FAILED, undefined, sourceGroupId, sourceGroupName)
       return
     }
 
@@ -803,7 +860,7 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
         : classification.reason?.includes('date')
           ? CONFIRMATION_REASONS.NO_DATE
           : CONFIRMATION_REASONS.NOT_EVENT
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason, undefined, sourceGroupId, sourceGroupName)
       return
     }
 
@@ -819,7 +876,7 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
 
     if (!extractedEvent) {
       logger.error(LOG_PREFIXES.EVENT_SERVICE, `Extraction failed for ${messageId}`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.AI_COMPARISON_FAILED)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.AI_COMPARISON_FAILED, undefined, sourceGroupId, sourceGroupName)
       return
     }
 
@@ -828,8 +885,9 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
     const { event: validatedEvent, corrections } = validateEventProgrammatic(extractedEvent, messageText, categoriesList)
 
     if (!validatedEvent) {
-      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Validation failed for ${messageId}: ${corrections.join('; ')}`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED)
+      const validationReason = corrections.join('; ')
+      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Validation failed for ${messageId}: ${validationReason}`)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, validationReason, sourceGroupId, sourceGroupName)
       return
     }
 
@@ -841,14 +899,14 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
     const structureCheck = validateEventStructure(validatedEvent)
     if (!structureCheck.valid) {
       logger.error(LOG_PREFIXES.EVENT_SERVICE, `Structure invalid after validation: ${structureCheck.reason}`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, structureCheck.reason, sourceGroupId, sourceGroupName)
       return
     }
 
     // ── No candidates → save as new ──
     if (!candidates || candidates.length === 0) {
       logger.info(LOG_PREFIXES.EVENT_SERVICE, `No candidates — new event for ${messageId}`)
-      await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview)
+      await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName)
       return
     }
 
@@ -858,24 +916,24 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
 
     if (!comparison) {
       logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Comparison failed — treating as new for ${messageId}`)
-      await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview)
+      await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName)
       return
     }
 
     logger.info(LOG_PREFIXES.EVENT_SERVICE, `Comparison: ${comparison.status} (${comparison.reason})`)
 
     if (comparison.status === 'existing_event' || comparison.status === 'updated_event') {
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.ALREADY_EXISTING)
+      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.ALREADY_EXISTING, undefined, sourceGroupId, sourceGroupName)
       return
     }
 
     // new_event or fallback
-    await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview)
+    await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName)
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     logger.error(LOG_PREFIXES.EVENT_SERVICE, `Pipeline error for ${messageId}: ${errorMsg}`)
     const messagePreview = (rawMessage?.text || '').substring(0, 20) || '(error)'
-    try { await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.PIPELINE_ERROR) } catch (_) { /* already logged */ }
+    try { await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.PIPELINE_ERROR, undefined, sourceGroupId, sourceGroupName) } catch (_) { /* already logged */ }
   }
 }
 

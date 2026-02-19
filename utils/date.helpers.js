@@ -32,6 +32,20 @@ export function getDateInIsraelFromIso(isoString) {
 }
 
 /**
+ * Returns time as "HH:mm" in Israel (Asia/Jerusalem) for an ISO UTC date-time string.
+ * @param {string} isoString - ISO date-time string (e.g. UTC)
+ * @returns {string} "HH:mm" or empty string if invalid
+ */
+export function getTimeInIsraelFromIso(isoString) {
+  if (!isoString || typeof isoString !== 'string') return ''
+  const d = new Date(isoString)
+  if (Number.isNaN(d.getTime())) return ''
+  const hours = d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false })
+  const minutes = d.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', minute: '2-digit' })
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`
+}
+
+/**
  * Parse a date string in YYYY-MM-DD format to a Date object
  * @param {string} dateString - Date string in YYYY-MM-DD format
  * @returns {Date} Parsed date object

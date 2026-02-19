@@ -3,17 +3,20 @@
  * Note: formatDateToYYYYMMDD and parseDateString live in date.helpers.js - import from there
  */
 
+import { getTimeInIsraelFromIso } from '~/utils/date.helpers'
+
 const ALL_DAY_TEXT = 'כל היום'
 const FREE_TEXT = 'חינם'
-const PRICE_UNKNOWN_TEXT = 'אין מידע'
+const PRICE_UNKNOWN_TEXT = 'מחיר לא ידוע'
 const UNKNOWN_LOCATION_TEXT = 'לא ידוע'
 
 export { PRICE_UNKNOWN_TEXT }
 
 /**
- * Format event occurrence time for display
+ * Format event occurrence time for display (e.g. event modal).
+ * Shows start time only, or "HH:mm-HH:mm" range when end time is present.
  * @param {Object} occurrence - Event occurrence with startTime, endTime, hasTime
- * @returns {string} Formatted time string or "כל היום" for all-day events
+ * @returns {string} Start time (e.g. "10:00"), range (e.g. "10:00-11:00"), "כל היום", or ""
  */
 export function formatEventTime(occurrence) {
   if (!occurrence.hasTime) {
@@ -24,18 +27,12 @@ export function formatEventTime(occurrence) {
     return ''
   }
 
-  // Parse UTC ISO string and convert to local time for display
-  const startDate = new Date(occurrence.startTime)
-  const startHours = String(startDate.getHours()).padStart(2, '0')
-  const startMinutes = String(startDate.getMinutes()).padStart(2, '0')
-  const startTime = `${startHours}:${startMinutes}`
+  const startTime = getTimeInIsraelFromIso(occurrence.startTime)
+  if (!startTime) return ''
 
   if (occurrence.endTime) {
-    const endDate = new Date(occurrence.endTime)
-    const endHours = String(endDate.getHours()).padStart(2, '0')
-    const endMinutes = String(endDate.getMinutes()).padStart(2, '0')
-    const endTime = `${endHours}:${endMinutes}`
-    return `${startTime}-${endTime}`
+    const endTime = getTimeInIsraelFromIso(occurrence.endTime)
+    if (endTime) return `${startTime}-${endTime}`
   }
 
   return startTime
@@ -44,7 +41,7 @@ export function formatEventTime(occurrence) {
 /**
  * Format event price for display
  * @param {Object} event - Event object with price property
- * @returns {string} Formatted price string, "חינם" for free (0), or "אין מידע" when price is unknown
+ * @returns {string} Formatted price string, "חינם" for free (0), or "מחיר לא ידוע" when price is unknown
  */
 export function formatEventPrice(event) {
   if (event.price === null || event.price === undefined) {

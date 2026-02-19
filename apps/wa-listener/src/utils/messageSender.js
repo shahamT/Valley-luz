@@ -15,6 +15,7 @@ export const CONFIRMATION_REASONS = {
   NO_DATE: 'no_date',
   MULTIPLE_EVENTS: 'multiple_events',
   ALREADY_EXISTING: 'already_existing',
+  DUPLICATE_MESSAGE: 'duplicate_message',
   AI_CLASSIFICATION_FAILED: 'ai_classification_failed',
   AI_COMPARISON_FAILED: 'ai_comparison_failed',
   VALIDATION_FAILED: 'validation_failed',
@@ -32,6 +33,7 @@ const REASON_MESSAGES = {
   [CONFIRMATION_REASONS.NO_DATE]: '❌ נכשל - לא נמצא תאריך לאירוע בהודעה',
   [CONFIRMATION_REASONS.MULTIPLE_EVENTS]: '❌ נכשל - ההודעה מכילה יותר מאירוע אחד',
   [CONFIRMATION_REASONS.ALREADY_EXISTING]: '❌ נכשל - אירוע קיים כבר במערכת (כפילות)',
+  [CONFIRMATION_REASONS.DUPLICATE_MESSAGE]: '⚠️ הודעה כפולה - דילוג על עיבוד',
   [CONFIRMATION_REASONS.AI_CLASSIFICATION_FAILED]: '❌ נכשל - שגיאה בניתוח ההודעה (AI)',
   [CONFIRMATION_REASONS.AI_COMPARISON_FAILED]: '❌ נכשל - שגיאה בהשוואת אירועים (AI)',
   [CONFIRMATION_REASONS.VALIDATION_FAILED]: '❌ נכשל - שגיאת אימות נתונים',
@@ -41,13 +43,15 @@ const REASON_MESSAGES = {
 }
 
 /**
- * Sends a confirmation message to configured confirmation groups
+ * Sends a confirmation (log) message to the configured log group
  * @param {string} messagePreview - First 20 characters of the raw message text
  * @param {string} reason - Reason code from CONFIRMATION_REASONS
+ * @param {string} [reasonDetail] - Optional detail (e.g. for VALIDATION_FAILED: the exact validation reason)
+ * @param {{ eventId?: string, sourceGroupId?: string, sourceGroupName?: string }} [context] - Optional context for the log (event ID, source group ID and name)
  * @returns {Promise<void>}
  */
-export async function sendEventConfirmation(messagePreview, reason) {
-  if (!config.confirmationGroupIds || config.confirmationGroupIds.length === 0) {
+export async function sendEventConfirmation(messagePreview, reason, reasonDetail, context) {
+  if (!config.logGroupId) {
     return
   }
 
@@ -57,18 +61,27 @@ export async function sendEventConfirmation(messagePreview, reason) {
     return
   }
 
-  const reasonMessage = REASON_MESSAGES[reason] || `❌ נכשל - ${reason}`
-  const messageText = `אירוע - ${messagePreview}\nסטטוס: ${reasonMessage}`
-
-  for (const groupId of config.confirmationGroupIds) {
-    try {
-      await sock.sendMessage(groupId, { text: messageText })
-      if (config.logLevel === 'info') {
-        logger.info(LOG_PREFIXES.WHATSAPP, `Sent confirmation to group ${groupId}: ${reason}`)
-      }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error)
-      logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send confirmation to group ${groupId}: ${errorMsg}`)
+  let reasonMessage = REASON_MESSAGES[reason] || `❌ נכשל - ${reason}`
+  if (reasonDetail) {
+    reasonMessage = `${reasonMessage}: ${reasonDetail}`
+  }
+  let messageText = `אירוע - ${messagePreview}\nסטטוס: ${reasonMessage}`
+  if (context) {
+    if (context.eventId) {
+      messageText += `\nמזהה אירוע: ${context.eventId}`
     }
+    if (context.sourceGroupId) {
+      messageText += `\nקבוצה: ${context.sourceGroupId}${context.sourceGroupName ? ` (${context.sourceGroupName})` : ''}`
+    }
+  }
+
+  try {
+    await sock.sendMessage(config.logGroupId, { text: messageText })
+    if (config.logLevel === 'info') {
+      logger.info(LOG_PREFIXES.WHATSAPP, `Sent confirmation to log group: ${reason}`)
+    }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send confirmation to log group: ${errorMsg}`)
   }
 }

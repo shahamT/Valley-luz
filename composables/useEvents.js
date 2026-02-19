@@ -26,9 +26,9 @@ export const useEvents = () => {
         if (events.length > 0) {
           logger.info(LOG_PREFIX, `${events.length} events were fetched:`, events)
         }
-        // In development, log the full array so you can expand and explore it in the console
         if (import.meta.DEV) {
-          console.log('[EventsAPI] Events array (dev):', events)
+          const flat = flattenEventsByOccurrence(events)
+          console.log('[EventsAPI] Refactored events (flat):', flat)
         }
       }
     }, { immediate: true })
@@ -41,15 +41,17 @@ export const useEvents = () => {
     })
   }
 
+  const dataComputed = computed(() => {
+    if (error.value && !data.value) {
+      return []
+    }
+    const raw = data.value || []
+    if (!Array.isArray(raw)) return []
+    return flattenEventsByOccurrence(raw)
+  })
+
   return {
-    data: computed(() => {
-      if (error.value && !data.value) {
-        return []
-      }
-      const raw = data.value || []
-      if (!Array.isArray(raw)) return []
-      return flattenEventsByOccurrence(raw)
-    }),
+    data: dataComputed,
     isLoading: pending,
     isError: computed(() => {
       return !!error.value && !data.value

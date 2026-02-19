@@ -198,6 +198,26 @@ async function handleIncomingMessage(msg) {
     if (existingEvent) {
       const messageId = extractMessageId(rawMessage)
       logger.info(LOG_PREFIXES.DUPLICATE_DETECTION, `Duplicate message detected: ${messageId} (signature: ${messageSignature.substring(0, 8)}...) - skipping processing`)
+      const messagePreview = (messageText || '').substring(0, 20) || '(no text)'
+      const existingEventName = existingEvent.event?.Title || '(ללא כותרת)'
+      const existingEventId = existingEvent._id?.toString?.() ?? String(existingEvent._id)
+      const reasonDetail = `אירוע קיים: ${existingEventName}, מזהה: ${existingEventId}`
+      let groupName = null
+      try {
+        const meta = await sock.groupMetadata(groupId)
+        groupName = meta.subject || null
+      } catch (_) { /* ignore */ }
+      const context = {
+        eventId: existingEventId,
+        sourceGroupId: groupId,
+        sourceGroupName: groupName,
+      }
+      try {
+        await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.DUPLICATE_MESSAGE, reasonDetail, context)
+      } catch (sendError) {
+        const sendErrorMsg = sendError instanceof Error ? sendError.message : String(sendError)
+        logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send duplicate log to log group: ${sendErrorMsg}`)
+      }
       return
     }
   }
@@ -227,8 +247,18 @@ async function handleIncomingMessage(msg) {
         sock
       )
       const messagePreview = (rawMessage.text || '').substring(0, 20) || '(no text)'
+      let groupName = null
       try {
-        await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.PROCESSING_STARTED)
+        const meta = await sock.groupMetadata(groupId)
+        groupName = meta.subject || null
+      } catch (_) { /* ignore */ }
+      const context = {
+        eventId: eventDoc._id.toString(),
+        sourceGroupId: groupId,
+        sourceGroupName: groupName,
+      }
+      try {
+        await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.PROCESSING_STARTED, null, context)
       } catch (sendError) {
         const sendErrorMsg = sendError instanceof Error ? sendError.message : String(sendError)
         logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send processing-started confirmation: ${sendErrorMsg}`)

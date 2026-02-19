@@ -13,6 +13,7 @@ npm install
 NODE_ENV=development
 WA_AUTH_PATH=./auth
 WHATSAPP_GROUP_IDS=
+WHATSAPP_LOG_GROUP_ID=
 WA_DISCOVERY_MODE=true
 WA_LOG_LEVEL=info
 
@@ -29,6 +30,7 @@ MONGODB_COLLECTION_RAW_MESSAGES=raw_messages
 
 # Note: WHATSAPP_GROUP_IDS can be comma-separated for multiple groups
 # Example: WHATSAPP_GROUP_IDS=120363425326487718@g.us,120363425326487719@g.us
+# WHATSAPP_LOG_GROUP_ID: single group that receives event-processing logs (confirmations) for all groups in WHATSAPP_GROUP_IDS. Optional.
 ```
 
 3. Run the listener:

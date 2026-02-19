@@ -28,13 +28,8 @@ function transformEventForFrontend(doc: any) {
   const eventId = doc._id?.toString() || String(doc._id)
   const dateCreated = doc.createdAt instanceof Date ? doc.createdAt : new Date(doc.createdAt)
 
-  // Transform occurrence (singular) to occurrences (array)
-  // Preserve the occurrence object structure (date, hasTime, startTime, endTime)
-  const rawOccurrences = backendEvent.occurrence
-    ? [backendEvent.occurrence]
-    : backendEvent.occurrences && Array.isArray(backendEvent.occurrences)
-    ? backendEvent.occurrences
-    : []
+  // occurrences is always an array from the backend
+  const rawOccurrences = Array.isArray(backendEvent.occurrences) ? backendEvent.occurrences : []
   const occurrences = rawOccurrences.map((occ: any) => {
     const date = occ?.date && /^\d{4}-\d{2}-\d{2}$/.test(String(occ.date).trim().slice(0, 10))
       ? String(occ.date).trim().slice(0, 10)
@@ -94,13 +89,11 @@ export default defineEventHandler(async (event) => {
     cutoff.setDate(cutoff.getDate() - 5)
     const cutoffISO = cutoff.toISOString()
 
-    // Support both BSON Date and ISO string storage for startTime
+    // occurrences is always an array; support both BSON Date and ISO string for startTime
     const query = {
       isActive: true,
       event: { $ne: null },
       $or: [
-        { 'event.occurrence.startTime': { $gt: cutoff } },
-        { 'event.occurrence.startTime': { $gt: cutoffISO } },
         { 'event.occurrences.startTime': { $gt: cutoff } },
         { 'event.occurrences.startTime': { $gt: cutoffISO } },
       ],

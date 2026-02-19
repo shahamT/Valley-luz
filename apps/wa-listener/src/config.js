@@ -25,12 +25,9 @@ function loadConfig() {
     .map((id) => id.trim())
     .filter((id) => id !== '')
 
-  // Parse confirmation group IDs (comma-separated or single value)
-  const confirmationGroupIdsEnv = process.env.WHATSAPP_CONFIRMATION_GROUP_IDS || ''
-  const confirmationGroupIds = confirmationGroupIdsEnv
-    .split(',')
-    .map((id) => id.trim())
-    .filter((id) => id !== '')
+  // Single group that receives event-processing logs (from all WHATSAPP_GROUP_IDS)
+  const logGroupIdEnv = (process.env.WHATSAPP_LOG_GROUP_ID || '').trim()
+  const logGroupId = logGroupIdEnv || null
 
   // Fail closed in production if no groupIds are provided
   if (isProduction) {
@@ -73,7 +70,7 @@ function loadConfig() {
     isProduction,
     authPath: process.env.WA_AUTH_PATH || './auth',
     groupIds, // Array of group IDs to listen to
-    confirmationGroupIds, // Array of group IDs to send confirmations to
+    logGroupId, // Single group ID to send event-processing logs to (optional)
     discoveryMode: process.env.WA_DISCOVERY_MODE === 'true',
     logLevel: process.env.WA_LOG_LEVEL || 'info',
     // Cloudinary configuration
