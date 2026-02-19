@@ -1,5 +1,6 @@
 import { formatEventTime, formatEventPrice } from '~/utils/events.helpers'
 import { getDateInIsraelFromIso } from '~/utils/date.helpers'
+import { isVideoUrl, getCloudinaryVideoThumbnailUrl } from '~/utils/media.helpers'
 import { MODAL_TEXT } from '~/consts/ui.const'
 
 /**
@@ -53,6 +54,19 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
     return media
       .map((item) => (typeof item === 'string' ? item : item?.url))
       .filter(Boolean)
+  })
+
+  const eventMedia = computed(() => {
+    const urls = eventImages.value
+    if (!urls.length) return []
+    return urls.map((url) => {
+      const isVideo = isVideoUrl(url)
+      return {
+        url,
+        isVideo,
+        displayUrl: isVideo ? getCloudinaryVideoThumbnailUrl(url) : url,
+      }
+    })
   })
 
   // --- Display info ---
@@ -138,6 +152,7 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
     eventImage,
     hasEventImage,
     eventImages,
+    eventMedia,
     eventTime,
     eventPrice,
     eventDescription,

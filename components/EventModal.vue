@@ -33,20 +33,23 @@
             />
 
             <!-- Event Image Gallery -->
-            <div v-if="eventImages.length" ref="galleryRef" class="EventModal-imageGallery">
-              <template v-for="(img, idx) in visibleImages" :key="idx">
+            <div v-if="eventMedia.length" ref="galleryRef" class="EventModal-imageGallery">
+              <template v-for="(item, idx) in visibleMedia" :key="idx">
                 <div
-                  v-if="showOverflow && idx === visibleImages.length - 1"
+                  v-if="showOverflow && idx === visibleMedia.length - 1"
                   class="EventModal-galleryThumb"
                   @click="openImagePopup(idx)"
                 >
-                  <img :src="img" :alt="selectedEvent.title" class="EventModal-galleryThumbImage" />
+                  <img :src="item.displayUrl" :alt="selectedEvent.title" class="EventModal-galleryThumbImage" />
                   <div class="EventModal-galleryOverlay">
                     <span class="EventModal-galleryOverlayText">+{{ overflowCount }}</span>
                   </div>
                 </div>
                 <div v-else class="EventModal-galleryThumb" @click="openImagePopup(idx)">
-                  <img :src="img" :alt="selectedEvent.title" class="EventModal-galleryThumbImage" />
+                  <img :src="item.displayUrl" :alt="selectedEvent.title" class="EventModal-galleryThumbImage" />
+                  <div v-if="item.isVideo" class="EventModal-galleryOverlay EventModal-galleryOverlay--play">
+                    <UiIcon name="play_circle" size="xl" color="var(--chip-text-white)" class="EventModal-galleryPlayIcon" />
+                  </div>
                 </div>
               </template>
             </div>
@@ -112,11 +115,11 @@
     </div>
   </Teleport>
 
-  <!-- Image Full-Size Popup -->
+  <!-- Image/Video Full-Size Popup -->
   <Teleport to="body">
     <UiImagePopup
-      v-if="isImagePopupOpen && eventImages.length"
-      :images="eventImages"
+      v-if="isImagePopupOpen && eventMedia.length"
+      :items="eventMedia"
       :current-index="currentImageIndex"
       :alt-text="selectedEvent?.title"
       @close="closeImagePopup"
@@ -176,6 +179,7 @@ const selectedOccurrence = computed(() => selectedEvent.value || null)
 const {
   eventImage,
   eventImages,
+  eventMedia,
   eventTime,
   eventPrice,
   eventDescription,
@@ -194,13 +198,13 @@ const maxVisibleThumbs = computed(() => {
   return Math.max(1, Math.floor((galleryWidth.value + THUMB_GAP) / (THUMB_WIDTH + THUMB_GAP)))
 })
 
-const showOverflow = computed(() => eventImages.value.length > maxVisibleThumbs.value)
+const showOverflow = computed(() => eventMedia.value.length > maxVisibleThumbs.value)
 
-const overflowCount = computed(() => eventImages.value.length - maxVisibleThumbs.value + 1)
+const overflowCount = computed(() => eventMedia.value.length - maxVisibleThumbs.value + 1)
 
-const visibleImages = computed(() => {
-  if (!showOverflow.value) return eventImages.value
-  return eventImages.value.slice(0, maxVisibleThumbs.value)
+const visibleMedia = computed(() => {
+  if (!showOverflow.value) return eventMedia.value
+  return eventMedia.value.slice(0, maxVisibleThumbs.value)
 })
 
 // --- Methods ---
@@ -422,6 +426,14 @@ watch(galleryRef, (el) => {
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &--play {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  &-galleryPlayIcon {
+    font-size: 2.5rem;
   }
 
   &-galleryOverlayText {

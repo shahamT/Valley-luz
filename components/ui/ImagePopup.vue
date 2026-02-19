@@ -8,21 +8,33 @@
       class="ImagePopup-arrow ImagePopup-arrow--prev"
       :class="{ 'ImagePopup-arrow--disabled': !hasMultiple }"
       :disabled="!hasMultiple"
-      aria-label="Previous image"
+      aria-label="Previous media"
       @click="goPrev"
     >
       <UiIcon name="chevron_right" size="xl" />
     </button>
 
     <div class="ImagePopup-container">
-      <img :src="images[localIndex]" :alt="altText" class="ImagePopup-image" />
+      <img
+        v-if="currentItem && !currentItem.isVideo"
+        :src="currentItem.url"
+        :alt="altText"
+        class="ImagePopup-image"
+      />
+      <video
+        v-else-if="currentItem && currentItem.isVideo"
+        :src="currentItem.url"
+        controls
+        playsinline
+        class="ImagePopup-video"
+      />
     </div>
 
     <button
       class="ImagePopup-arrow ImagePopup-arrow--next"
       :class="{ 'ImagePopup-arrow--disabled': !hasMultiple }"
       :disabled="!hasMultiple"
-      aria-label="Next image"
+      aria-label="Next media"
       @click="goNext"
     >
       <UiIcon name="chevron_left" size="xl" />
@@ -34,7 +46,8 @@
 defineOptions({ name: 'ImagePopup' })
 
 const props = defineProps({
-  images: {
+  /** Array of { url, isVideo } (or { url, isVideo, displayUrl }) for image/video popup */
+  items: {
     type: Array,
     required: true,
   },
@@ -54,15 +67,20 @@ const emit = defineEmits(['close'])
 const localIndex = ref(props.currentIndex)
 
 // --- Computed ---
-const hasMultiple = computed(() => props.images.length > 1)
+const hasMultiple = computed(() => props.items.length > 1)
+
+const currentItem = computed(() => {
+  if (!props.items.length || localIndex.value < 0 || localIndex.value >= props.items.length) return null
+  return props.items[localIndex.value]
+})
 
 // --- Methods ---
 const goPrev = () => {
-  localIndex.value = (localIndex.value - 1 + props.images.length) % props.images.length
+  localIndex.value = (localIndex.value - 1 + props.items.length) % props.items.length
 }
 
 const goNext = () => {
-  localIndex.value = (localIndex.value + 1) % props.images.length
+  localIndex.value = (localIndex.value + 1) % props.items.length
 }
 
 // --- Watchers ---
@@ -156,6 +174,17 @@ watch(() => props.currentIndex, (val) => {
   }
 
   &-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+    border-radius: var(--radius-md);
+    display: block;
+  }
+
+  &-video {
     max-width: 100%;
     max-height: 100%;
     width: auto;
