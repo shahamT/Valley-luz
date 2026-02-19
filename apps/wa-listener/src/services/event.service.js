@@ -5,10 +5,10 @@ import { extractMessageId } from '../utils/messageHelpers.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 import { getCategoriesList, getDateTimeContext, isImageUrl } from '../consts/events.const.js'
 import { resolvePublisherPhone } from '../utils/contactHelpers.js'
-import { updateEventDocument, deleteEventDocument, findCandidateEvents, updateEventWithNewData, appendToPreviousVersions, getEventDocument } from './mongo.service.js'
+import { updateEventDocument, deleteEventDocument, findCandidateEvents } from './mongo.service.js'
 import { sendEventConfirmation, CONFIRMATION_REASONS } from '../utils/messageSender.js'
 import { deleteMediaFromCloudinary } from './cloudinary.service.js'
-import { ObjectId } from 'mongodb'
+import { convertMessageToHtml } from '../utils/whatsappFormatToHtml.js'
 
 // ─── JSON Schemas for Structured Outputs ────────────────────────────────────
 
@@ -69,6 +69,17 @@ const EVENT_SCHEMA_PROPERTIES = {
       hasTime: { type: 'boolean' },
       startTime: { type: 'string' },
       endTime: { type: ['string', 'null'] },
+    },
+  },
+  justifications: {
+    type: 'object',
+    required: ['location', 'startTime', 'endTime', 'price'],
+    additionalProperties: false,
+    properties: {
+      location: { type: 'string' },
+      startTime: { type: 'string' },
+      endTime: { type: 'string' },
+      price: { type: 'string' },
     },
   },
 }
@@ -145,6 +156,11 @@ function validateEventStructure(event) {
   if (!event.occurrence || typeof event.occurrence !== 'object') return { valid: false, reason: 'Missing occurrence' }
   if (typeof event.occurrence.hasTime !== 'boolean') return { valid: false, reason: 'Missing occurrence.hasTime' }
   if (typeof event.occurrence.startTime !== 'string' || !event.occurrence.startTime.trim()) return { valid: false, reason: 'Missing startTime' }
+  const justKeys = ['location', 'startTime', 'endTime', 'price']
+  if (!event.justifications || typeof event.justifications !== 'object') return { valid: false, reason: 'Missing justifications' }
+  for (const k of justKeys) {
+    if (typeof event.justifications[k] !== 'string') return { valid: false, reason: `Missing or invalid justifications.${k}` }
+  }
   return { valid: true }
 }
 
@@ -404,6 +420,7 @@ export async function callOpenAIForExtraction(messageText, cloudinaryUrl, catego
   const hasImage = isImageUrl(cloudinaryUrl)
   const categoriesText = categoriesList.map(c => `- ${c.id}: ${c.label}`).join('\n')
   const allUrls = extractUrlsFromText(messageText)
+  const messageBodyHtml = convertMessageToHtml(messageText || '')
 
   const systemPrompt = `You are an event extraction assistant for a Hebrew community calendar.
 Extract structured event data from a WhatsApp message. Return ONLY data that is EXPLICITLY stated in the message or image — never guess or infer.
@@ -424,9 +441,13 @@ ALLOWED CATEGORIES:
 ${categoriesText}
 
 FIELD RULES:
+The message body you receive is in HTML format. For Title, shortDescription, location, price, dates, and all other fields: extract from the text content; ignore HTML tags.
+
+ACCURACY (date, location, price, time): Use only information explicitly stated in the message or clearly readable in the image. Do not infer or guess. If not clearly stated or readable, set the field to null (or empty string for location.City). When the date appears only in the image (e.g. "17/2", "יום שלישי 17/2"), use that date for startTime and cite the image in justifications.
+
 - Title: Event name ONLY. No price, no date, no location.
 - shortDescription: What the event is about. No price, no date, no location.
-- fullDescription: Output as HTML. Use only: <p> for paragraphs (one <p>...</p> per logical paragraph), <br> for line breaks, <strong> for bold, <em> for emphasis, <ul>/<ol>/<li> for lists. No other tags. Keep body close to original; preserve structure and meaning; you may fix obvious typos (e.g. "הרצאטבע" → "הרצאת טבע"). ALWAYS REMOVE: raw URL strings (every https:// or http://); they are in urls. REMOVE ONLY WHEN: a short phrase does nothing but point to the link (e.g. "היכנסו לכאן", "לחצו כאן") and appears right next to that link — then you may remove that phrase; do NOT remove text that describes what the link is for (e.g. tickets, registration). NEVER REMOVE: (1) Substantive ticket/registration references, e.g. "כרטיסים והרשמה - בקישור המצורף". (2) Emojis. (3) Taglines or context lines (e.g. "הפעילות החודש היא חלק משבוע טבע עירוני ומקומי בסימן חיות הבר 2026"). (4) Any other event content. Do not summarize or shorten.
+- fullDescription: When relevant, preserve the provided HTML if it supprts the readability and clarity of info. Use only these tags: <p>, <br>, <strong>, <em>, <del>, <code>, <pre>, <blockquote>, <ul>, <ol>, <li>. No other tags (no div, span, a, script, etc.). Do not re-interpret or strip formatting; keep the structure. You may: remove raw URL strings (every https:// or http:// — they are in urls); remove a short purely redundant phrase that only points at the link (e.g. "היכנסו לכאן"); fix obvious typos (e.g. "הרצאטבע" → "הרצאת טבע"). ALWAYS REMOVE: raw URL strings. REMOVE ONLY WHEN: a short phrase does nothing but point to the link and appears right next to it; do NOT remove text that describes what the link is for (e.g. tickets, registration). NEVER REMOVE: (1) Substantive ticket/registration references, e.g. "כרטיסים והרשמה - בקישור המצורף". (2) Emojis. (3) Taglines or context lines. (4) Any other event content. Do not summarize or shorten. Output must be HTML only; do not output raw * _ backtick or ~ (input is already HTML).
 - fullDescription examples: KEEP "כרטיסים והרשמה - בקישור המצורף" even when a link follows. REMOVE only the raw URL and, if present, a purely redundant phrase like "היכנסו לכאן" when it only points at the link.
 - location.City: NORMALIZED city/town name (e.g. "תל אביב" even if message says "ת"א"). Use standard Hebrew spelling. If not found, use "".
 - location.CityEvidence: The VERBATIM snippet from the message/image that indicates the city (e.g. "ת"א" or "חיפה"). Required for verification. null only if no city is mentioned at all.
@@ -435,17 +456,23 @@ FIELD RULES:
 - location.locationDetails: ONLY practical navigation/arrival instructions (e.g. "ימינה בכיכר הגדולה, מול הבית הצהוב" or "לשים בוויז בית השאנטי כדי להגיע"). NOT descriptions of the place (e.g. "מקום יפהפה ומואר" is NOT locationDetails). null if none.
 - location.wazeNavLink: Waze URL found in message text. Otherwise null.
 - location.gmapsNavLink: Google Maps URL found in message text. Otherwise null.
-- price: Entrance/entry fee ONLY. 0 if free is explicitly stated. null if not mentioned or unclear. Ignore food/merch prices.
+- price: Event/entrance price (what attendees pay to participate). Usually when a price appears in the message it is the event price — it does not need to appear next to כניסה, מחיר כניסה, or דמי כניסה. Ignore a price only when it is clearly the price of items sold at the event (e.g. costumes — תחפושות ב-X, מכירת תחפושות ב-X; food — פופקורן, דוכני אוכל; merchandise). In that case do not use that number; if no other price is given, set price to null. 0 if free is explicitly stated. null if no price is mentioned or unclear.
 - occurrence.hasTime: true if a specific time is mentioned; false if only a date is given (all-day event).
 - occurrence.startTime: ISO UTC string. If hasTime true: convert stated time from Israel local. If hasTime false: use event date at Israel local 00:00 converted to UTC.
 - occurrence.endTime: ISO UTC string or null.
 - media: Always return an empty array []. Media (images from the message) are added by the system from the actual WhatsApp attachment only. Do NOT put links or URLs here; links go in urls.
 - urls: Array of {Title, Url} for links found in the message.
+- justifications: For each key state source (text or image) and the exact snippet. If from image, quote the relevant text as read from the image; if from message, quote the relevant part of the message. If from multiple places, list them. If the field was set to null because not stated, write e.g. "Not stated in message or image."
+  - justifications.location: Source and exact snippet(s). If null/empty location, "Not stated in message or image."
+  - justifications.startTime: Source and exact snippet(s); focus on the selected date (e.g. "Image: '17/2'", "Text: 'החל משעה 17:00'").
+  - justifications.endTime: Source and snippet(s), or "Not stated in message or image."
+  - justifications.price: Source and snippet(s), or "Not stated in message or image."
 
 IMAGE RULES:
 - Message text is PRIMARY source.
 - Image is SECONDARY — use only if text is clearly readable with high confidence.
 - If image is blurry or ambiguous, ignore it.
+- When text in the image contains date, time, location, or price, use it and cite it in justifications (e.g. "Image: 'יום שלישי 17/2, 17:00'").
 
 EXAMPLE:
 Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתחם שוק תלפיות, חיפה\nכניסה: 30 ₪\nhttps://ul.waze.com/ul?place=abc"
@@ -459,17 +486,23 @@ Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתח
   "price": 30,
   "occurrence": { "hasTime": true, "startTime": "2026-02-25T18:00:00.000Z", "endTime": null },
   "media": [],
-  "urls": [{ "Title": "ניווט Waze", "Url": "https://ul.waze.com/ul?place=abc" }]
+  "urls": [{ "Title": "ניווט Waze", "Url": "https://ul.waze.com/ul?place=abc" }],
+  "justifications": {
+    "location": "Text: 'מתחם שוק תלפיות, חיפה'",
+    "startTime": "Text: '25/02 בשעה 20:00'",
+    "endTime": "Not stated in message or image.",
+    "price": "Text: 'כניסה: 30 ₪'"
+  }
 }`
 
   let userContent
   if (hasImage) {
     userContent = [
-      { type: 'text', text: `Extract event from this WhatsApp message:\n\n${messageText || '(no text — check image)'}\n\nLinks found: ${allUrls.length > 0 ? allUrls.join(', ') : '(none)'}` },
+      { type: 'text', text: `Extract event from this WhatsApp message (message body below is already in HTML):\n\n${messageBodyHtml || '(no text — check image)'}\n\nLinks found: ${allUrls.length > 0 ? allUrls.join(', ') : '(none)'}` },
       { type: 'image_url', image_url: { url: cloudinaryUrl } },
     ]
   } else {
-    userContent = `Extract event from this WhatsApp message:\n\n${messageText || '(empty)'}\n\nLinks found: ${allUrls.length > 0 ? allUrls.join(', ') : '(none)'}`
+    userContent = `Extract event from this WhatsApp message (message body below is already in HTML):\n\n${messageBodyHtml || '(empty)'}\n\nLinks found: ${allUrls.length > 0 ? allUrls.join(', ') : '(none)'}`
   }
 
   for (let attempt = 1; attempt <= MAX_OPENAI_ATTEMPTS; attempt++) {
@@ -616,53 +649,6 @@ async function handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData
   }
 }
 
-async function handleUpdatedEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, matchedCandidateId, event, originalMessage, client, messagePreview) {
-  logger.info(LOG_PREFIXES.EVENT_SERVICE, 'Handling updated event')
-
-  let matchedId
-  try {
-    matchedId = typeof matchedCandidateId === 'string' ? new ObjectId(matchedCandidateId) : matchedCandidateId
-  } catch (_) {
-    logger.error(LOG_PREFIXES.EVENT_SERVICE, `Invalid matchedCandidateId: ${matchedCandidateId}`)
-    await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED)
-    return
-  }
-
-  const matchedDoc = await getEventDocument(matchedId)
-  if (!matchedDoc) {
-    logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Matched candidate ${matchedCandidateId} not found — treating as new`)
-    await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, event, originalMessage, client, messagePreview)
-    return
-  }
-
-  await appendToPreviousVersions(matchedId, {
-    event: matchedDoc.event || null,
-    rawMessage: matchedDoc.rawMessage || null,
-    cloudinaryUrl: matchedDoc.cloudinaryUrl || null,
-    cloudinaryData: matchedDoc.cloudinaryData || null,
-    timestamp: matchedDoc.updatedAt || matchedDoc.createdAt || new Date(),
-  })
-
-  try {
-    const authorId = rawMessage.author || null
-    const enrichedEvent = await enrichEvent(event, authorId, cloudinaryUrl, originalMessage, client)
-    const updated = await updateEventWithNewData(matchedId, enrichedEvent, rawMessage, cloudinaryUrl, cloudinaryData)
-
-    if (updated) {
-      logger.info(LOG_PREFIXES.EVENT_SERVICE, `Updated event ${matchedCandidateId}`)
-      await deleteEventDocument(eventId)
-      await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.UPDATED_EVENT)
-    } else {
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.DATABASE_ERROR)
-    }
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error)
-    logger.error(LOG_PREFIXES.EVENT_SERVICE, `Error updating event: ${errorMsg}`)
-    const reason = errorMsg.includes('enrich') || errorMsg.includes('Invalid event') ? CONFIRMATION_REASONS.ENRICHMENT_ERROR : CONFIRMATION_REASONS.DATABASE_ERROR
-    await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason)
-  }
-}
-
 // ─── Main Pipeline ──────────────────────────────────────────────────────────
 
 /**
@@ -760,13 +746,8 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
 
     logger.info(LOG_PREFIXES.EVENT_SERVICE, `Comparison: ${comparison.status} (${comparison.reason})`)
 
-    if (comparison.status === 'existing_event') {
+    if (comparison.status === 'existing_event' || comparison.status === 'updated_event') {
       await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.ALREADY_EXISTING)
-      return
-    }
-
-    if (comparison.status === 'updated_event' && comparison.matchedCandidateId) {
-      await handleUpdatedEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, comparison.matchedCandidateId, validatedEvent, originalMessage, client, messagePreview)
       return
     }
 

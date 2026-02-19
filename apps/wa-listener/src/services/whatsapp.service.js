@@ -20,6 +20,7 @@ import { insertEventDocument, findEventBySignature } from './mongo.service.js'
 import { queueMessage } from './queue.service.js'
 import { computeMessageSignature } from '../utils/messageHelpers.js'
 import { deleteMediaFromCloudinary } from './cloudinary.service.js'
+import { sendEventConfirmation, CONFIRMATION_REASONS } from '../utils/messageSender.js'
 
 let sock = null
 
@@ -225,6 +226,13 @@ async function handleIncomingMessage(msg) {
         msg,
         sock
       )
+      const messagePreview = (rawMessage.text || '').substring(0, 20) || '(no text)'
+      try {
+        await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.PROCESSING_STARTED)
+      } catch (sendError) {
+        const sendErrorMsg = sendError instanceof Error ? sendError.message : String(sendError)
+        logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send processing-started confirmation: ${sendErrorMsg}`)
+      }
     } else {
       if (cloudinaryResult?.cloudinaryData?.public_id) {
         await deleteMediaFromCloudinary(cloudinaryResult.cloudinaryData.public_id)

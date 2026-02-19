@@ -43,7 +43,7 @@ export { getDisplayEvents, getAdditionalEventsCount, isWeekendDay, getCategoryCo
 export { generateCalendarDays } from '../utils/calendar.helpers';
 export { downloadIcsFile, getGoogleCalendarUrl, handleCalendarSelection } from '../utils/calendar.service';
 export { formatDateToYYYYMMDD, parseDateString, getTodayDateString, getCurrentYearMonth, formatMonthYear, getPrevMonth, getNextMonth, isMonthBefore, isValidMonth, isValidYear, getNextDay, getPrevDay, isToday, isBeforeToday, formatKanbanDateHeader, formatMinutesToTime, isSameMonth } from '../utils/date.helpers';
-export { formatEventTime, formatEventPrice, formatEventLocation, formatEventLocationForChip, transformEventForCard } from '../utils/events.helpers';
+export { formatEventTime, formatEventPrice, formatEventLocation, formatEventLocationForChip, transformEventForCard, PRICE_UNKNOWN_TEXT } from '../utils/events.helpers';
 export { getActiveEvents, getDateFromISO, getEventOccurrencesOnDate, getEventsForDate, getEventsByDate, eventMatchesCategories, filterEventsByCategories, getOccurrenceMinutesOfDay, occurrenceOverlapsTimeRange, filterEventsByTimeRangeForMonth, filterEventOccurrencesByTimeRange } from '../utils/events.service';
 export { logger } from '../utils/logger';
 export { handleNavigationSelection } from '../utils/navigation.service';

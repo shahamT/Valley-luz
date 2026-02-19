@@ -493,6 +493,55 @@ watch(galleryRef, (el) => {
     h1 { font-size: var(--font-size-xl); }
     h2 { font-size: var(--font-size-lg); }
     h3, h4, h5, h6 { font-size: var(--font-size-base); }
+
+    blockquote {
+      margin: 0 0 1em 0;
+      padding-inline-start: var(--spacing-md);
+      border-inline-start: 4px solid var(--color-border);
+      color: var(--color-text-light);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      p {
+        margin: 0;
+      }
+    }
+
+    code {
+      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+      font-size: 0.9em;
+      background-color: var(--color-surface);
+      padding: 0.125rem 0.375rem;
+      border-radius: var(--radius-sm);
+    }
+
+    pre {
+      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+      font-size: 0.875rem;
+      background-color: var(--color-surface);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin: 0 0 1em 0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      code {
+        background: none;
+        padding: 0;
+      }
+    }
+
+    del {
+      text-decoration: line-through;
+      color: var(--color-text-light);
+    }
   }
 
   &-linksSection {

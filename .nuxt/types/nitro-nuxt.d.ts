@@ -2,7 +2,7 @@
 /// <reference path="nitro-layouts.d.ts" />
 /// <reference path="app.config.d.ts" />
 /// <reference path="runtime-config.d.ts" />
-/// <reference types="C:/Users/shaha/OneDrive/Desktop/Coding/Valley luz/node_modules/@nuxt/nitro-server/dist/index.mjs" />
+/// <reference path="../../node_modules/@nuxt/nitro-server/dist/index.d.mts" />
 /// <reference path="nitro-middleware.d.ts" />
 /// <reference path="./schema.d.ts" />
 

@@ -650,7 +650,7 @@ const _inlineRuntimeConfig = {
   },
   "public": {},
   "mongodbUri": "mongodb+srv://shahamt_db_user:38UvWxQkxUx2kVk6@valley-luz-app.z42llxh.mongodb.net/?appName=valley-luz-app",
-  "mongodbDbName": "valley_luz_app",
+  "mongodbDbName": "valley_luz_app_dev",
   "mongodbCollectionEvents": "events",
   "mongodbCollectionRawMessages": "raw_messages"
 };
@@ -1823,8 +1823,8 @@ const errorHandler$0 = (async function errorhandler(error, event, { defaultHandl
 	// remove proto/hostname/port from URL
 	const url = new URL(errorObject.url);
 	errorObject.url = withoutBase(url.pathname, useRuntimeConfig(event).app.baseURL) + url.search + url.hash;
-	// add default server message
-	errorObject.message ||= "Server Error";
+	// add default server message (keep sanitized for unhandled errors)
+	errorObject.message = error.unhandled ? errorObject.message || "Server Error" : error.message || errorObject.message || "Server Error";
 	// we will be rendering this error internally so we can pass along the error.data safely
 	errorObject.data ||= error.data;
 	errorObject.statusText ||= error.statusText || error.statusMessage;
@@ -2148,22 +2148,7 @@ _4f6f7tDDlMMeQCTcLapzu2PM85htMZXN7yhuv9K_9GY,
 _hf6xc4hhlrdVwSZ5WIyywhBJppA44doAPPzwRnkQegY
 ];
 
-const assets = {
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"7284a-ERd6FrC1IKr+JjGun2EjgQfbb1k\"",
-    "mtime": "2026-02-18T12:01:14.738Z",
-    "size": 469066,
-    "path": "index.mjs.map"
-  },
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"1ca79-xzkp3Q+Ew78XqMT1b/0VNtoX3Zs\"",
-    "mtime": "2026-02-18T12:01:14.738Z",
-    "size": 117369,
-    "path": "index.mjs"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2294,7 +2279,7 @@ const unheadOptions = {
 
 function createSSRContext(event) {
 	const ssrContext = {
-		url: decodePath(event.path),
+		url: event.path,
 		event,
 		runtimeConfig: useRuntimeConfig(event),
 		noSSR: event.context.nuxt?.noSSR || (false),

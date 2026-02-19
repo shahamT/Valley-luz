@@ -7,6 +7,7 @@ import { config } from '../config.js'
  * Reason codes for event processing status
  */
 export const CONFIRMATION_REASONS = {
+  PROCESSING_STARTED: 'processing_started',
   NEW_EVENT: 'new_event',
   UPDATED_EVENT: 'updated_event',
   NO_TEXT: 'no_text',
@@ -22,6 +23,7 @@ export const CONFIRMATION_REASONS = {
 }
 
 const REASON_MESSAGES = {
+  [CONFIRMATION_REASONS.PROCESSING_STARTED]: 'מתחיל עיבוד ההודעה',
   [CONFIRMATION_REASONS.NEW_EVENT]: '✅ אירוע חדש נוסף בהצלחה',
   [CONFIRMATION_REASONS.UPDATED_EVENT]: '🔄 אירוע קיים עודכן בהצלחה',
   [CONFIRMATION_REASONS.NO_TEXT]: '❌ נכשל - הודעה ללא טקסט',
