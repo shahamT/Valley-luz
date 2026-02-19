@@ -5,7 +5,10 @@
 
 const ALL_DAY_TEXT = 'כל היום'
 const FREE_TEXT = 'חינם'
+const PRICE_UNKNOWN_TEXT = 'אין מידע'
 const UNKNOWN_LOCATION_TEXT = 'לא ידוע'
+
+export { PRICE_UNKNOWN_TEXT }
 
 /**
  * Format event occurrence time for display
@@ -41,10 +44,13 @@ export function formatEventTime(occurrence) {
 /**
  * Format event price for display
  * @param {Object} event - Event object with price property
- * @returns {string} Formatted price string or "חינם" for free events
+ * @returns {string} Formatted price string, "חינם" for free (0), or "אין מידע" when price is unknown
  */
 export function formatEventPrice(event) {
-  if (event.price === null || event.price === undefined || event.price === 0) {
+  if (event.price === null || event.price === undefined) {
+    return PRICE_UNKNOWN_TEXT
+  }
+  if (event.price === 0) {
     return FREE_TEXT
   }
   return `${event.price} ₪`
