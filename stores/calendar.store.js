@@ -12,6 +12,8 @@ export const useCalendarStore = defineStore('calendar', () => {
   const timeFilterStart = ref(0)
   const timeFilterEnd = ref(MINUTES_PER_DAY)
   const timeFilterPreset = ref(null)
+  /** Last date (YYYY-MM-DD) the user viewed in daily view; used when switching back to daily from monthly */
+  const lastDailyViewDate = ref(null)
 
   function toggleCategory(categoryId) {
     const index = selectedCategories.value.indexOf(categoryId)
@@ -53,6 +55,10 @@ export const useCalendarStore = defineStore('calendar', () => {
     currentDate.value = date
   }
 
+  function setLastDailyViewDate(dateString) {
+    lastDailyViewDate.value = dateString || null
+  }
+
   function setFiltersFromUrl(categories, timeStart, timeEnd, timePreset) {
     selectedCategories.value = categories || []
     timeFilterStart.value = timeStart ?? 0
@@ -66,12 +72,14 @@ export const useCalendarStore = defineStore('calendar', () => {
     timeFilterStart,
     timeFilterEnd,
     timeFilterPreset,
+    lastDailyViewDate,
     toggleCategory,
     resetFilter,
     setTimeRange,
     setTimePreset,
     clearTimePreset,
     setCurrentDate,
+    setLastDailyViewDate,
     setFiltersFromUrl,
   }
 })

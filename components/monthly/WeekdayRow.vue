@@ -46,7 +46,7 @@ const isWeekendDay = (index) => {
     padding-block: 0;
 
     &--weekend {
-      color: var(--brand-dark-green);
+      color: var(--brand-dark-blue);
     }
   }
 

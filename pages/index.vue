@@ -194,7 +194,7 @@ const filteredEvents = computed(() => {
     min-width: 0;
 
     @media (max-width: 768px) {
-      padding-inline: 1rem;
+      padding-inline: 4px;
     }
   }
 

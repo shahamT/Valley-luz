@@ -75,7 +75,7 @@ const calendarDays = computed(() => {
     direction: rtl; // Keep grid in RTL for correct column order
 
     @media (max-width: 767px) {
-      gap: 4px;
+      gap: 2px;
     }
   }
 }

@@ -93,8 +93,9 @@
   --day-cell-hover-bg: #fafbfc;
   --event-badge-bg: #81d4fa;
   --event-badge-text: #01579b;
-  --weekend-day-bg: #EDF7E4;
-  --weekend-day-hover-bg: #E6F3DC;
+  /* Weekend: blue shade matching kanban column headers (brand-light-blue tint) */
+  --weekend-day-bg: color-mix(in srgb, var(--brand-light-blue) 35%, white);
+  --weekend-day-hover-bg: color-mix(in srgb, var(--brand-light-blue) 42%, white);
   --chip-more-bg: #dddddd;
   --chip-text-white: #ffffff;
 

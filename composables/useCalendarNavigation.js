@@ -91,11 +91,15 @@ export const useCalendarNavigation = () => {
   }
 
   /**
-   * Navigate to daily view from monthly view
-   * Goes to today if the selected month is current, otherwise to the first day of the month
+   * Navigate to daily view from monthly view.
+   * Uses last visited date in daily view if set; otherwise today or first day of selected month.
    */
   const switchToDailyView = (currentDate) => {
-    const targetDate = getDailyTargetDateForMonth(currentDate.year, currentDate.month)
+    const lastDate = calendarStore.lastDailyViewDate
+    const targetDate =
+      lastDate && /^\d{4}-\d{2}-\d{2}$/.test(String(lastDate).trim())
+        ? String(lastDate).trim().slice(0, 10)
+        : getDailyTargetDateForMonth(currentDate.year, currentDate.month)
     navigateToDay(targetDate)
   }
 

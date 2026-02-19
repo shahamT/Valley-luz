@@ -119,6 +119,12 @@ watch(headerDate, (newHeaderDate) => {
   calendarStore.setCurrentDate(newHeaderDate)
 }, { immediate: true })
 
+watch(dateParam, (date) => {
+  if (date && isValidRouteDate(date)) {
+    calendarStore.setLastDailyViewDate(date)
+  }
+}, { immediate: true })
+
 const monthYearDisplay = computed(() => {
   return formatMonthYear(headerDate.value.year, headerDate.value.month)
 })

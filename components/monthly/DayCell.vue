@@ -108,7 +108,7 @@ const getMoreChipText = () => {
   position: relative;
 
   @media (max-width: 768px) {
-    padding-inline: 0.25rem;
+    padding: 4px 2px;
   }
 
   &:hover {
@@ -187,8 +187,13 @@ const getMoreChipText = () => {
     line-height: 1;
 
     @media (max-width: 768px) {
-      right: 0.25rem;
+      top: 4px;
+      right: 6px;
     }
+  }
+
+  &--weekend:not(&--today) .DayCell-number {
+    color: var(--brand-dark-blue);
   }
 
   &-events {
@@ -203,8 +208,10 @@ const getMoreChipText = () => {
     overflow: hidden;
 
     @media (max-width: 768px) {
-      left: 0.25rem;
-      right: 0.25rem;
+      top: calc(4px + 1.25rem);
+      left: 2px;
+      right: 2px;
+      bottom: 4px;
     }
   }
 
