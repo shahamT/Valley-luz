@@ -1,4 +1,5 @@
 import { logger } from '~/utils/logger'
+import { flattenEventsByOccurrence } from '~/utils/events.service'
 
 const LOG_PREFIX = '[EventsAPI]'
 
@@ -45,7 +46,9 @@ export const useEvents = () => {
       if (error.value && !data.value) {
         return []
       }
-      return data.value || []
+      const raw = data.value || []
+      if (!Array.isArray(raw)) return []
+      return flattenEventsByOccurrence(raw)
     }),
     isLoading: pending,
     isError: computed(() => {

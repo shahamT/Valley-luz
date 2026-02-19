@@ -32,7 +32,7 @@ export interface Occurrence {
 }
 
 /**
- * Main event entity
+ * Main event entity (API response shape: one per document with occurrences array)
  */
 export interface Event {
   id: string
@@ -52,6 +52,12 @@ export interface Event {
   media?: any[] // Media attachments (images, videos)
   publisherPhone?: string // WhatsApp contact number
 }
+
+/**
+ * Flattened event: one per occurrence, with occurrence fields at top level.
+ * This is the shape used in the app after flattenEventsByOccurrence(); id is unique per occurrence (e.g. documentId-0).
+ */
+export type FlatEvent = Omit<Event, 'occurrences'> & Occurrence & { sourceEventId?: string }
 
 /**
  * Category entity for event categorization
@@ -101,5 +107,5 @@ export interface DayCell {
   dateString: string // YYYY-MM-DD format
   isOutsideMonth: boolean
   eventsCount: number
-  events: Event[]
+  events: FlatEvent[]
 }

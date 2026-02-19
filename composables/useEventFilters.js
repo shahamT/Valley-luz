@@ -76,9 +76,9 @@ export const useEventFilters = (events) => {
         return aStart.localeCompare(bStart)
       })
 
-      result[date] = sorted.map(({ event, occurrence }, index) => ({
+      result[date] = sorted.map(({ event, occurrence }) => ({
         ...transformEventForCard(event, occurrence),
-        id: `${event.id}-${index}`,
+        id: event.id,
         eventId: event.id,
         mainCategory: event.mainCategory,
         categories: event.categories ?? [],

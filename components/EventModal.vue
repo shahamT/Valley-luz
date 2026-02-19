@@ -170,9 +170,8 @@ const selectedEvent = computed(() => {
   return events.value.find((event) => event.id === selectedEventId.value) || null
 })
 
-const selectedOccurrence = computed(() => {
-  return selectedEvent.value?.occurrences?.[0] || null
-})
+// Flat events have date/startTime at top level; the event is the occurrence
+const selectedOccurrence = computed(() => selectedEvent.value || null)
 
 const {
   eventImage,

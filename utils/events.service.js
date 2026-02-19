@@ -22,34 +22,71 @@ export function getDateFromISO(isoString) {
 }
 
 /**
- * Gets event occurrences that match a specific date
- * @param {Object} event - Event object
- * @param {string} dateString - Date string in YYYY-MM-DD format
- * @returns {Array} Array of matching occurrences
+ * Gets the calendar date (YYYY-MM-DD) for an event.
+ * Works for both API-shaped events (with occurrences array) and flat events (date/startTime at top level).
+ * @param {Object} event - Event object with date and/or startTime (at top level or on occurrence)
+ * @returns {string|null} Date string in YYYY-MM-DD format or null
  */
-export function getEventOccurrencesOnDate(event, dateString) {
-  if (!event.occurrences || event.occurrences.length === 0) return []
-
-  return event.occurrences.filter((occurrence) => {
-    const occurrenceDate = occurrence.date && /^\d{4}-\d{2}-\d{2}$/.test(String(occurrence.date).trim().slice(0, 10))
-      ? String(occurrence.date).trim().slice(0, 10)
-      : occurrence.startTime
-        ? getDateInIsraelFromIso(occurrence.startTime)
-        : null
-    return occurrenceDate === dateString
-  })
+export function getEventDateString(event) {
+  if (!event) return null
+  if (event.date && /^\d{4}-\d{2}-\d{2}$/.test(String(event.date).trim().slice(0, 10))) {
+    return String(event.date).trim().slice(0, 10)
+  }
+  if (event.startTime) {
+    return getDateInIsraelFromIso(event.startTime) || null
+  }
+  return null
 }
 
 /**
- * Gets all events that occur on a specific date
- * @param {Array} events - Array of events
+ * Flattens events so each occurrence becomes a separate event object with occurrence keys at top level.
+ * Used after fetching from API so the rest of the app works with one event per occurrence.
+ * @param {Array} events - Array of events from API (each may have occurrences array)
+ * @returns {Array} Array of flat events (one per occurrence), each with id, sourceEventId, date, hasTime, startTime, endTime at top level
+ */
+export function flattenEventsByOccurrence(events) {
+  if (!Array.isArray(events)) return []
+  const result = []
+  for (const event of events) {
+    const occurrences = event.occurrences && Array.isArray(event.occurrences) ? event.occurrences : []
+    if (occurrences.length === 0) continue
+    const { occurrences: _occ, ...eventRest } = event
+    for (let i = 0; i < occurrences.length; i++) {
+      const occ = occurrences[i]
+      result.push({
+        ...eventRest,
+        ...occ,
+        id: `${event.id}-${i}`,
+        sourceEventId: event.id,
+      })
+    }
+  }
+  return result
+}
+
+/**
+ * Gets event occurrences that match a specific date.
+ * For flat events (one occurrence per event), returns [event] if its date matches, else [].
+ * @param {Object} event - Event object (flat: date/startTime at top level, or legacy: occurrences array)
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {Array} Array of matching occurrences (for flat events, 0 or 1 element)
+ */
+export function getEventOccurrencesOnDate(event, dateString) {
+  const eventDate = getEventDateString(event)
+  if (!eventDate) return []
+  return eventDate === dateString ? [event] : []
+}
+
+/**
+ * Gets all events that occur on a specific date.
+ * For flat events, each event is one occurrence; returns { event, occurrence: event } for each match.
+ * @param {Array} events - Array of events (flat: one event per occurrence)
  * @param {string} dateString - Date string in YYYY-MM-DD format
  * @returns {Array} Array of {event, occurrence} objects
  */
 export function getEventsForDate(events, dateString) {
   const activeEvents = getActiveEvents(events)
   const eventsOnDate = []
-
   activeEvents.forEach((event) => {
     const matchingOccurrences = getEventOccurrencesOnDate(event, dateString)
     if (matchingOccurrences.length > 0) {
@@ -58,13 +95,13 @@ export function getEventsForDate(events, dateString) {
       })
     }
   })
-
   return eventsOnDate
 }
 
 /**
- * Gets event data grouped by date for a specific month
- * @param {Array} events - Array of events
+ * Gets event data grouped by date for a specific month.
+ * For flat events, each event has one date at top level; group by that date.
+ * @param {Array} events - Array of events (flat: one event per occurrence)
  * @param {number} year - Year (e.g., 2026)
  * @param {number} month - Month (1-12, 1-indexed)
  * @returns {Object} Map of date strings to arrays of event objects
@@ -72,39 +109,20 @@ export function getEventsForDate(events, dateString) {
 export function getEventsByDate(events, year, month) {
   const activeEvents = getActiveEvents(events)
   const eventsMap = {}
-
   activeEvents.forEach((event) => {
-    if (!event.occurrences) return
-
-    event.occurrences.forEach((occurrence) => {
-      let dateString
-      let occurrenceYear
-      let occurrenceMonth
-      if (occurrence.date && String(occurrence.date).trim()) {
-        const match = String(occurrence.date).trim().slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/)
-        if (match) {
-          occurrenceYear = Number(match[1])
-          occurrenceMonth = Number(match[2])
-          dateString = match[0]
-        }
+    const dateString = getEventDateString(event)
+    if (!dateString) return
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (!match) return
+    const occurrenceYear = Number(match[1])
+    const occurrenceMonth = Number(match[2])
+    if (occurrenceYear === year && occurrenceMonth === month) {
+      if (!eventsMap[dateString]) {
+        eventsMap[dateString] = []
       }
-      if (dateString == null && occurrence.startTime) {
-        dateString = getDateInIsraelFromIso(occurrence.startTime) || null
-        if (dateString) {
-          const [y, m] = dateString.split('-').map(Number)
-          occurrenceYear = y
-          occurrenceMonth = m
-        }
-      }
-      if (dateString != null && occurrenceYear === year && occurrenceMonth === month) {
-        if (!eventsMap[dateString]) {
-          eventsMap[dateString] = []
-        }
-        eventsMap[dateString].push(event)
-      }
-    })
+      eventsMap[dateString].push(event)
+    }
   })
-
   return eventsMap
 }
 
@@ -168,8 +186,9 @@ export function occurrenceOverlapsTimeRange(occurrence, rangeStartMinutes, range
 
 /**
  * Filter events to those with at least one occurrence in the given month overlapping the time range.
+ * For flat events, each event is one occurrence; filter by event's date and time range.
  * No filter when startMinutes === 0 && endMinutes === 1440.
- * @param {Array} events - Array of events
+ * @param {Array} events - Array of events (flat: one event per occurrence)
  * @param {number} year
  * @param {number} month - 1-indexed
  * @param {number} startMinutes
@@ -182,30 +201,14 @@ export function filterEventsByTimeRangeForMonth(events, year, month, startMinute
   }
   const activeEvents = getActiveEvents(events)
   return activeEvents.filter((event) => {
-    if (!event.occurrences) return false
-    return event.occurrences.some((occurrence) => {
-      let occYear
-      let occMonth
-      if (occurrence.date && String(occurrence.date).trim()) {
-        const match = String(occurrence.date).trim().slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/)
-        if (match) {
-          occYear = Number(match[1])
-          occMonth = Number(match[2])
-        }
-      }
-      if (occYear == null && occurrence.startTime) {
-        const dateStr = getDateInIsraelFromIso(occurrence.startTime)
-        if (dateStr) {
-          const [y, m] = dateStr.split('-').map(Number)
-          occYear = y
-          occMonth = m
-        }
-      }
-      if (occYear != null && occMonth != null && occYear === year && occMonth === month) {
-        return occurrenceOverlapsTimeRange(occurrence, startMinutes, endMinutes)
-      }
-      return false
-    })
+    const dateString = getEventDateString(event)
+    if (!dateString) return false
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (!match) return false
+    const occYear = Number(match[1])
+    const occMonth = Number(match[2])
+    if (occYear !== year || occMonth !== month) return false
+    return occurrenceOverlapsTimeRange(event, startMinutes, endMinutes)
   })
 }
 

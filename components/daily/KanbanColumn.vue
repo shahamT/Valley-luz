@@ -1,6 +1,6 @@
 <template>
   <div class="KanbanColumn" :class="{ 'KanbanColumn--disabled': isDisabled }">
-    <div class="KanbanColumn-header">
+    <div class="KanbanColumn-header" :class="{ 'KanbanColumn-header--weekend': isWeekend }">
       <h2 class="KanbanColumn-title">{{ formattedDate }}</h2>
     </div>
     <div class="KanbanColumn-events">
@@ -20,6 +20,7 @@
 
 <script setup>
 import { formatKanbanDateHeader } from '~/utils/date.helpers'
+import { isWeekendDay } from '~/utils/calendar-display.helpers'
 import { UI_TEXT } from '~/consts/calendar.const'
 
 defineOptions({ name: 'KanbanColumn' })
@@ -42,6 +43,8 @@ const props = defineProps({
 const formattedDate = computed(() => {
   return formatKanbanDateHeader(props.date)
 })
+
+const isWeekend = computed(() => isWeekendDay(props.date))
 </script>
 
 <style lang="scss">
@@ -77,6 +80,14 @@ const formattedDate = computed(() => {
     justify-content: center;
     background-color: color-mix(in srgb, var(--brand-light-green) 35%, white);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+
+    &--weekend {
+      background-color: color-mix(in srgb, var(--brand-light-blue) 35%, white);
+
+      .KanbanColumn-title {
+        color: var(--brand-dark-blue);
+      }
+    }
   }
 
   &-title {

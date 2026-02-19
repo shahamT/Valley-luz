@@ -54,6 +54,7 @@ declare global {
   const filterEventOccurrencesByTimeRange: typeof import('../../utils/events.service').filterEventOccurrencesByTimeRange
   const filterEventsByCategories: typeof import('../../utils/events.service').filterEventsByCategories
   const filterEventsByTimeRangeForMonth: typeof import('../../utils/events.service').filterEventsByTimeRangeForMonth
+  const flattenEventsByOccurrence: typeof import('../../utils/events.service').flattenEventsByOccurrence
   const formatDateToYYYYMMDD: typeof import('../../utils/date.helpers').formatDateToYYYYMMDD
   const formatEventLocation: typeof import('../../utils/events.helpers').formatEventLocation
   const formatEventLocationForChip: typeof import('../../utils/events.helpers').formatEventLocationForChip
@@ -73,6 +74,7 @@ declare global {
   const getDateFromISO: typeof import('../../utils/events.service').getDateFromISO
   const getDateInIsraelFromIso: typeof import('../../utils/date.helpers').getDateInIsraelFromIso
   const getDisplayEvents: typeof import('../../utils/calendar-display.helpers').getDisplayEvents
+  const getEventDateString: typeof import('../../utils/events.service').getEventDateString
   const getEventOccurrencesOnDate: typeof import('../../utils/events.service').getEventOccurrencesOnDate
   const getEventsByDate: typeof import('../../utils/events.service').getEventsByDate
   const getEventsForDate: typeof import('../../utils/events.service').getEventsForDate
@@ -318,6 +320,7 @@ declare global {
   const useNow: typeof import('../../node_modules/@vueuse/core').useNow
   const useNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').useNuxtApp
   const useNuxtData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useNuxtData
+  const useNuxtDevTools: typeof import('../../node_modules/nuxt/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools').useNuxtDevTools
   const useObjectUrl: typeof import('../../node_modules/@vueuse/core').useObjectUrl
   const useOffsetPagination: typeof import('../../node_modules/@vueuse/core').useOffsetPagination
   const useOnline: typeof import('../../node_modules/@vueuse/core').useOnline
@@ -528,6 +531,7 @@ declare module 'vue' {
     readonly filterEventOccurrencesByTimeRange: UnwrapRef<typeof import('../../utils/events.service')['filterEventOccurrencesByTimeRange']>
     readonly filterEventsByCategories: UnwrapRef<typeof import('../../utils/events.service')['filterEventsByCategories']>
     readonly filterEventsByTimeRangeForMonth: UnwrapRef<typeof import('../../utils/events.service')['filterEventsByTimeRangeForMonth']>
+    readonly flattenEventsByOccurrence: UnwrapRef<typeof import('../../utils/events.service')['flattenEventsByOccurrence']>
     readonly formatDateToYYYYMMDD: UnwrapRef<typeof import('../../utils/date.helpers')['formatDateToYYYYMMDD']>
     readonly formatEventLocation: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocation']>
     readonly formatEventLocationForChip: UnwrapRef<typeof import('../../utils/events.helpers')['formatEventLocationForChip']>
@@ -547,6 +551,7 @@ declare module 'vue' {
     readonly getDateFromISO: UnwrapRef<typeof import('../../utils/events.service')['getDateFromISO']>
     readonly getDateInIsraelFromIso: UnwrapRef<typeof import('../../utils/date.helpers')['getDateInIsraelFromIso']>
     readonly getDisplayEvents: UnwrapRef<typeof import('../../utils/calendar-display.helpers')['getDisplayEvents']>
+    readonly getEventDateString: UnwrapRef<typeof import('../../utils/events.service')['getEventDateString']>
     readonly getEventOccurrencesOnDate: UnwrapRef<typeof import('../../utils/events.service')['getEventOccurrencesOnDate']>
     readonly getEventsByDate: UnwrapRef<typeof import('../../utils/events.service')['getEventsByDate']>
     readonly getEventsForDate: UnwrapRef<typeof import('../../utils/events.service')['getEventsForDate']>
@@ -792,6 +797,7 @@ declare module 'vue' {
     readonly useNow: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useNow']>
     readonly useNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['useNuxtApp']>
     readonly useNuxtData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useNuxtData']>
+    readonly useNuxtDevTools: UnwrapRef<typeof import('../../node_modules/nuxt/node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools')['useNuxtDevTools']>
     readonly useObjectUrl: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useObjectUrl']>
     readonly useOffsetPagination: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useOffsetPagination']>
     readonly useOnline: UnwrapRef<typeof import('../../node_modules/@vueuse/core')['useOnline']>
