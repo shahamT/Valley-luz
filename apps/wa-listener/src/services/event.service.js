@@ -170,6 +170,27 @@ function israelMidnightToUtcIso(dateOrIso) {
   return utcIsraelMidnight.toISOString()
 }
 
+/**
+ * Returns ISO UTC string for a given date and time in Israel (Asia/Jerusalem).
+ * Used to correct startTime when the model stored Israel local time as UTC.
+ * @param {string} dateStr - YYYY-MM-DD
+ * @param {string} timeHHMM - HH:MM or H:MM (Israel local)
+ * @returns {string} ISO UTC string
+ */
+function localTimeIsraelToUtcIso(dateStr, timeHHMM) {
+  const dateMatch = (dateStr || '').slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  const timeMatch = (timeHHMM || '').match(/^(\d{1,2}):(\d{2})$/)
+  if (!dateMatch || !timeMatch) return ''
+  const [, y, mo, d] = dateMatch.map(Number)
+  const [, h, min] = timeMatch.map(Number)
+  if (h < 0 || h > 23 || min < 0 || min > 59) return ''
+  const noonUtc = new Date(Date.UTC(y, mo - 1, d, 12, 0, 0))
+  const israelHour = parseInt(noonUtc.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
+  const offsetHours = israelHour - 12
+  const utcMoment = new Date(Date.UTC(y, mo - 1, d, h, min, 0) - offsetHours * 3600 * 1000)
+  return utcMoment.toISOString()
+}
+
 // ─── Cleanup helper ─────────────────────────────────────────────────────────
 
 async function cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason) {
@@ -391,8 +412,9 @@ ${dateCtx}
 
 TIMEZONE RULE (CRITICAL):
 All times in messages are in Israel local time (${dateCtx.includes('UTC+3') ? 'UTC+3' : 'UTC+2'}).
-You MUST convert them to UTC before putting them in startTime / endTime.
-Example: if the message says "20:00" and offset is UTC+2 → startTime must be "…T18:00:00.000Z".
+You MUST convert them to UTC before putting them in startTime / endTime. Never put the local hour unchanged into the UTC string — subtract the offset.
+Examples: message "20:00" Israel, offset UTC+2 → startTime "…T18:00:00.000Z". Message "17:30" Israel, offset UTC+2 → startTime "…T15:30:00.000Z".
+If the message mentions multiple times (e.g. activity at 17:30, lecture at 18:30), use the time when the main event actually starts. Interpret Hebrew like "8 בערב" as 20:00 Israel local, then convert that to UTC for startTime.
 
 ALL-DAY RULE (date but no time):
 If the message has a calendar DATE but NO explicit time (e.g. "יום שישי 7.3 פיקניק"), set occurrence.hasTime to false.
@@ -404,7 +426,7 @@ ${categoriesText}
 FIELD RULES:
 - Title: Event name ONLY. No price, no date, no location.
 - shortDescription: What the event is about. No price, no date, no location.
-- fullDescription: May include all details. HTML ok, emojis ok. Hebrew.
+- fullDescription: Keep the message body as close as possible to the original. Preserve all formatting (line breaks, *bold*, spacing, bullets, etc.). You may fix obvious typos, clarify unclear phrases, or add minimal context if needed. Remove only: raw URLs (they are in urls), and any redundant text that merely repeats link/registration info already in urls. Do not summarize or shorten; the result should read like the original with at most light edits.
 - location.City: NORMALIZED city/town name (e.g. "תל אביב" even if message says "ת"א"). Use standard Hebrew spelling. If not found, use "".
 - location.CityEvidence: The VERBATIM snippet from the message/image that indicates the city (e.g. "ת"א" or "חיפה"). Required for verification. null only if no city is mentioned at all.
 - location.addressLine1: Venue/place name only — if explicitly stated. Otherwise null.
