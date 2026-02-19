@@ -22,7 +22,7 @@
     <div class="EventModal-infoDivider" />
     <div class="EventModal-infoItem">
       <UiIcon name="confirmation_number" size="md" color="var(--brand-dark-green)" class="EventModal-infoIcon" />
-      <span>{{ eventPrice }}</span>
+      <span :class="{ 'EventModal-priceUnknown': isPriceUnknown }">{{ eventPrice }}</span>
     </div>
   </div>
 
@@ -38,10 +38,11 @@
 
 <script setup>
 import { MODAL_TEXT } from '~/consts/ui.const'
+import { PRICE_UNKNOWN_TEXT } from '~/utils/events.helpers'
 
 defineOptions({ name: 'EventModalInfoBar' })
 
-defineProps({
+const props = defineProps({
   basicLocation: {
     type: String,
     required: true,
@@ -64,6 +65,7 @@ defineProps({
   },
 })
 
+const isPriceUnknown = computed(() => props.eventPrice === PRICE_UNKNOWN_TEXT)
 const isLocationPopupOpen = ref(false)
 
 const toggleLocationPopup = () => {
@@ -155,6 +157,10 @@ const toggleLocationPopup = () => {
       width: 100%;
       height: 1px;
     }
+  }
+
+  &-priceUnknown {
+    color: var(--color-text-muted);
   }
 }
 </style>

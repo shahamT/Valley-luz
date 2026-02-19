@@ -426,7 +426,7 @@ ${categoriesText}
 FIELD RULES:
 - Title: Event name ONLY. No price, no date, no location.
 - shortDescription: What the event is about. No price, no date, no location.
-- fullDescription: Keep the message body as close as possible to the original. Preserve all formatting (line breaks, *bold*, spacing, bullets, etc.). You may fix obvious typos, clarify unclear phrases, or add minimal context if needed. Remove only: raw URLs (they are in urls), and any redundant text that merely repeats link/registration info already in urls. Do not summarize or shorten; the result should read like the original with at most light edits.
+- fullDescription: Output as HTML so it displays correctly. Use only these tags: <p> for paragraphs (one <p>...</p> per logical paragraph), <br> for line breaks inside a paragraph when needed, <strong> for bold (e.g. WhatsApp *text*), <em> for emphasis, <ul>/<ol>/<li> for lists. Do not use other tags (no div, span, a, script, etc.). Keep the message body as close as possible to the original; preserve structure and meaning. You may fix obvious typos and clarify unclear phrases. Remove only: raw URLs (they are in urls), and redundant text that merely repeats link/registration info already in urls. Do not summarize or shorten. The HTML should be readable and well-structured (clear paragraphs and lists) so the text looks good on the page.
 - location.City: NORMALIZED city/town name (e.g. "תל אביב" even if message says "ת"א"). Use standard Hebrew spelling. If not found, use "".
 - location.CityEvidence: The VERBATIM snippet from the message/image that indicates the city (e.g. "ת"א" or "חיפה"). Required for verification. null only if no city is mentioned at all.
 - location.addressLine1: Venue/place name only — if explicitly stated. Otherwise null.
@@ -451,7 +451,7 @@ Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתח
 → {
   "Title": "ערב מוזיקה אתיופית",
   "shortDescription": "ערב של מוזיקה אתיופית",
-  "fullDescription": "🎶 ערב מוזיקה אתיופית...",
+  "fullDescription": "<p>🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00</p><p>מתחם שוק תלפיות, חיפה</p><p>כניסה: 30 ₪</p>",
   "categories": ["music"],
   "mainCategory": "music",
   "location": { "City": "חיפה", "CityEvidence": "חיפה", "addressLine1": "מתחם שוק תלפיות", "addressLine2": null, "locationDetails": null, "wazeNavLink": "https://ul.waze.com/ul?place=abc", "gmapsNavLink": null },
