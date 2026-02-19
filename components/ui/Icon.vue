@@ -1,15 +1,17 @@
 <template>
   <span
     class="Icon"
-    :class="`Icon--${size}`"
+    :class="[`Icon--${size}`, { 'Icon--waiting': !iconFontReady }]"
     :style="{ color: color }"
   >
-    {{ name }}
+    <template v-if="iconFontReady">{{ name }}</template>
   </span>
 </template>
 
 <script setup>
 defineOptions({ name: 'Icon' })
+
+const { iconFontReady } = useIconFontReady()
 
 const props = defineProps({
   name: {
@@ -63,6 +65,11 @@ const props = defineProps({
 
   &--xl {
     font-size: 2.5rem;
+  }
+
+  &.Icon--waiting {
+    min-width: 1em;
+    min-height: 1em;
   }
 }
 </style>

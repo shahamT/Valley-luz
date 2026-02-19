@@ -2,9 +2,14 @@
   <header class="AppHeader">
     <div class="AppHeader-container">
       <div class="AppHeader-side AppHeader-side--menu">
-        <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
-          <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
-        </button>
+        <ClientOnly>
+          <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
+            <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
+          </button>
+          <template #fallback>
+            <span class="AppHeader-menuButtonPlaceholder" aria-hidden="true" />
+          </template>
+        </ClientOnly>
       </div>
       <div class="AppHeader-side AppHeader-side--center">
         <button class="AppHeader-whatsappButton" aria-label="לבוט הוואטסאפ שלנו">
@@ -27,11 +32,7 @@
             class="AppHeader-logo AppHeader-logo--icon"
           />
           <template #fallback>
-            <img
-              src="/logos/valleyluz-logo.png"
-              alt="Valley Luz"
-              class="AppHeader-logo"
-            />
+            <span class="AppHeader-logoPlaceholder" aria-hidden="true" />
           </template>
         </ClientOnly>
       </div>
@@ -106,6 +107,20 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     object-fit: contain;
     flex-shrink: 0;
     direction: ltr;
+  }
+
+  &-menuButtonPlaceholder {
+    display: inline-block;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+
+  &-logoPlaceholder {
+    display: inline-block;
+    height: 2rem;
+    width: 2rem;
+    flex-shrink: 0;
   }
 
   &-menuButton {

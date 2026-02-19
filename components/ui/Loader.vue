@@ -53,14 +53,14 @@ const sizeClass = computed(() => `Loader--${props.size}`)
       var(--c) 50% 100%,
       var(--c) 100% 50%,
       var(--c) 0 50%;
-    background-size: calc(12px * var(--loader-scale)) calc(12px * var(--loader-scale));
+    background-size: calc(18px * var(--loader-scale)) calc(18px * var(--loader-scale));
     animation: Loader-spin 1s infinite;
   }
 
   &::before {
-    margin: calc(4px * var(--loader-scale));
+    margin: calc(2px * var(--loader-scale));
     --c: no-repeat radial-gradient(farthest-side, var(--brand-dark-blue) 92%, #0000);
-    background-size: calc(8px * var(--loader-scale)) calc(8px * var(--loader-scale));
+    background-size: calc(14px * var(--loader-scale)) calc(14px * var(--loader-scale));
     animation-timing-function: linear;
   }
 }
