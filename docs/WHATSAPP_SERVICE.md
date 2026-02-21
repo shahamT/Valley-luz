@@ -22,12 +22,7 @@ npm install
 
 ### 2. Configure Environment
 
-```bash
-cd apps/wa-listener
-cp .env.example .env
-```
-
-Edit `.env` and configure:
+Create a `.env` file in `apps/wa-listener` and configure:
 - `NODE_ENV=development`
 - `WA_DISCOVERY_MODE=true` (initially)
 - Leave `WHATSAPP_GROUP_IDS` empty initially

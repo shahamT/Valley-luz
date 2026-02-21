@@ -43,7 +43,35 @@ function extractUrlsFromText(text) {
   return [...new Set(text.match(urlRegex) || [])]
 }
 
+/** Max length for message text passed to OpenAI to limit prompt size and abuse. */
+const MESSAGE_TEXT_MAX_LENGTH = 8000
+
+/** Leading-line patterns that may indicate prompt-injection (English override attempts). Stripped only at start of message. */
+const LEADING_OVERRIDE_PATTERN = /^\s*(system\s*:|\s*ignore\s+(all\s+)?(previous|above|prior)\s+instructions?|\s*disregard\s+(all\s+)?(previous|above)\s*|\s*you\s+are\s+now\s+)/im
+
+/**
+ * Sanitize message text before using in OpenAI prompts: truncate length and strip leading instruction-override attempts.
+ * Does not alter normal Hebrew or event content.
+ * @param {string} text - Raw message text
+ * @returns {string}
+ */
+function sanitizeMessageForPrompt(text) {
+  if (!text || typeof text !== 'string') return ''
+  let s = text.trim()
+  const firstLineMatch = s.match(LEADING_OVERRIDE_PATTERN)
+  if (firstLineMatch) {
+    const firstLineEnd = s.indexOf('\n', firstLineMatch.index)
+    const stripEnd = firstLineEnd === -1 ? s.length : firstLineEnd
+    s = s.slice(stripEnd).trim()
+  }
+  if (s.length > MESSAGE_TEXT_MAX_LENGTH) {
+    s = s.slice(0, MESSAGE_TEXT_MAX_LENGTH)
+  }
+  return s
+}
+
 export async function callOpenAIForClassification(messageText, cloudinaryUrl) {
+  messageText = sanitizeMessageForPrompt(messageText || '')
   const dateCtx = getDateTimeContext()
   const hasImage = isImageUrl(cloudinaryUrl)
 
@@ -124,11 +152,12 @@ Message with only "ימי ראשון ... ימי שני" (Sundays ... Mondays) an
 }
 
 export async function callOpenAIForExtraction(messageText, cloudinaryUrl, categoriesList) {
+  messageText = sanitizeMessageForPrompt(messageText || '')
   const dateCtx = getDateTimeContext()
   const hasImage = isImageUrl(cloudinaryUrl)
   const categoriesText = categoriesList.map(c => `- ${c.id}: ${c.label}`).join('\n')
   const allUrls = extractUrlsFromText(messageText)
-  const messageBodyHtml = convertMessageToHtml(messageText || '')
+  const messageBodyHtml = convertMessageToHtml(messageText)
 
   const systemPrompt = `You are an event extraction assistant for a Hebrew community calendar.
 Extract structured event data from a WhatsApp message. Return ONLY data that is EXPLICITLY stated in the message or image — never guess or infer.
@@ -261,6 +290,7 @@ Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתח
 }
 
 export async function callOpenAIForComparison(extractedEvent, messageText, candidates) {
+  messageText = sanitizeMessageForPrompt(messageText || '')
   const candidatesText = candidates.map((c, i) => {
     const id = c._id.toString()
     const text = c.rawMessage?.text || '(no text)'

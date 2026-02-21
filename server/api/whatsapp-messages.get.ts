@@ -1,7 +1,11 @@
 import { getMongoConnection } from '~/server/utils/mongodb'
+import { requireApiSecret } from '~/server/utils/requireApiSecret'
+import { checkRateLimit } from '~/server/utils/rateLimit'
 import { MESSAGES_DEFAULT, MESSAGES_MAX } from '~/server/consts/index'
 
 export default defineEventHandler(async (event) => {
+  checkRateLimit(event)
+  requireApiSecret(event)
   const query = getQuery(event)
   const limit = Math.min(parseInt(query.limit as string) || MESSAGES_DEFAULT, MESSAGES_MAX)
 
@@ -25,10 +29,10 @@ export default defineEventHandler(async (event) => {
       total,
     }
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    console.error('[whatsapp-messages] Failed to read messages:', error instanceof Error ? error.message : String(error))
     throw createError({
       statusCode: 500,
-      statusMessage: `Failed to read messages: ${errorMessage}`,
+      statusMessage: 'Failed to read messages',
     })
   }
 })

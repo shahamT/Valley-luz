@@ -35,6 +35,7 @@ export default defineNuxtConfig({
   
   runtimeConfig: {
     // Private keys (only available on server-side)
+    apiSecret: process.env.API_SECRET || '',
     mongodbUri: process.env.MONGODB_URI,
     mongodbDbName: process.env.MONGODB_DB_NAME,
     mongodbCollectionEvents: process.env.MONGODB_COLLECTION_EVENTS || 'events',
@@ -47,7 +48,20 @@ export default defineNuxtConfig({
       posthogInDev: process.env.NUXT_PUBLIC_POSTHOG_IN_DEV === 'true',
     },
   },
-  
+
+  nitro: {
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Frame-Options': 'DENY',
+          'X-Content-Type-Options': 'nosniff',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+        },
+      },
+    },
+  },
+
   // Auto-import configuration
   imports: {
     dirs: ['stores', 'composables', 'utils'],
