@@ -109,7 +109,7 @@ export const COMPARISON_SCHEMA = {
 
 const EVIDENCE_CANDIDATE_ITEM = {
   type: 'object',
-  required: ['quote', 'source'],
+  required: ['quote', 'source', 'messageTextStartIdx', 'messageTextEndIdx', 'ocrBlockId', 'ocrLineId', 'fieldSubtype'],
   additionalProperties: false,
   properties: {
     quote: { type: 'string' },
