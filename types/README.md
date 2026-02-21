@@ -1,6 +1,6 @@
 # Type Definitions
 
-This directory contains TypeScript type definitions for the Valley Luz project.
+This directory contains TypeScript type definitions for the Galiluz project.
 
 ## Purpose
 

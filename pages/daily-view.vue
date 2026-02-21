@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { UI_TEXT, DAILY_CAROUSEL_DAYS_RANGE } from '~/consts/calendar.const'
+import { UI_TEXT, DAILY_CAROUSEL_DAYS_RANGE, ROUTE_DAILY_VIEW } from '~/consts/calendar.const'
 
 import { getTodayDateString, formatMonthYear, parseDateString, formatDateToYYYYMMDD } from '~/utils/date.helpers'
 import { isValidRouteDate } from '~/utils/validation.helpers'
@@ -74,7 +74,7 @@ const slideToDateRequest = ref(null)
 onMounted(async () => {
   const dateFromQuery = route.query.date
   if (!dateFromQuery || !isValidRouteDate(String(dateFromQuery).trim())) {
-    await router.replace({ path: '/daily-view', query: { ...route.query, date: getTodayDateString() } })
+    await router.replace({ path: ROUTE_DAILY_VIEW, query: { ...route.query, date: getTodayDateString() } })
   }
   await nextTick()
   runPageInit()
@@ -92,7 +92,7 @@ const pageTitle = computed(() => {
   const date = parseDateString(dateParam.value)
   const day = date.getDate()
   const monthName = formatMonthYear(date.getFullYear(), date.getMonth() + 1)
-  return `יומן Valley Luz - ${day} ${monthName}`
+  return `יומן Galiluz - ${day} ${monthName}`
 })
 const headerDate = computed(() => {
   const date = parseDateString(dateParam.value)
@@ -121,9 +121,9 @@ const eventsByDate = computed(() => getFilteredEventsByDate(visibleDays.value))
 // SEO metadata (reactive: useHead tracks pageTitle)
 useHead({ title: pageTitle })
 useSeoMeta({
-  description: 'תצוגה יומית של אירועים ופעילויות ב-Valley Luz',
+  description: 'תצוגה יומית של אירועים ופעילויות ב-Galiluz',
   ogTitle: pageTitle,
-  ogDescription: 'תצוגה יומית של אירועים ב-Valley Luz',
+  ogDescription: 'תצוגה יומית של אירועים ב-Galiluz',
 })
 
 // methods

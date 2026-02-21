@@ -59,13 +59,13 @@ defineOptions({ name: 'MonthlyView' })
 
 // SEO metadata
 useHead({
-  title: 'יומן Valley Luz - תצוגה חודשית',
+  title: 'יומן Galiluz - תצוגה חודשית',
 })
 
 useSeoMeta({
-  description: 'יומן אירועים חודשי של Valley Luz - צפייה בכל האירועים והפעילויות החודשיות',
-  ogTitle: 'יומן Valley Luz - תצוגה חודשית',
-  ogDescription: 'יומן אירועים חודשי של Valley Luz',
+  description: 'יומן אירועים חודשי של Galiluz - צפייה בכל האירועים והפעילויות החודשיות',
+  ogTitle: 'יומן Galiluz - תצוגה חודשית',
+  ogDescription: 'יומן אירועים חודשי של Galiluz',
 })
 
 // data

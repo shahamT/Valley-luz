@@ -11,13 +11,13 @@
 </template>
 
 <script setup>
-import { UI_TEXT } from '~/consts/calendar.const'
+import { UI_TEXT, ROUTE_MONTHLY_VIEW } from '~/consts/calendar.const'
 
 defineOptions({ name: 'NotFoundPage' })
 
 // methods
 const goToMonthly = () => {
-  navigateTo('/monthly-view')
+  navigateTo(ROUTE_MONTHLY_VIEW)
 }
 </script>
 

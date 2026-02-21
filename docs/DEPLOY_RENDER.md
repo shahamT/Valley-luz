@@ -1,9 +1,9 @@
 # Deploying to Render
 
-This guide covers deploying both parts of the Valley Luz monorepo to Render:
+This guide covers deploying both parts of the Galiluz monorepo to Render:
 
-1. **valleyluz-web** – Nuxt 3 SSR app (Web Service)
-2. **valleyluz-wa** – WhatsApp listener (Background Worker)
+1. **galiluz-web** – Nuxt 3 SSR app (Web Service)
+2. **galiluz-wa** – WhatsApp listener (Background Worker)
 
 Both services deploy from the `main` branch only.
 Development happens on the `develop` branch and is merged into `main` via PR when ready.
@@ -48,7 +48,7 @@ Workflow: `feature/xyz` → PR → `develop` → PR → `main` → Render auto-d
 
 ### Environment Variables
 
-Set these in the **valleyluz-shared** environment group (shared with the WA worker):
+Set these in the **galiluz-shared** environment group (shared with the WA worker):
 
 | Variable | Description | Required |
 |----------|-------------|----------|
@@ -87,14 +87,14 @@ Optional overrides (service-level):
 
 ### Environment Variables
 
-**From valleyluz-shared group** (shared with the web app):
+**From galiluz-shared group** (shared with the web app):
 
 | Variable | Required |
 |----------|----------|
 | `MONGODB_URI` | Yes |
 | `MONGODB_DB_NAME` | Yes |
 
-**From valleyluz-wa-secrets group** (worker only):
+**From galiluz-wa-secrets group** (worker only):
 
 | Variable | Description | Required |
 |----------|-------------|----------|
@@ -168,8 +168,8 @@ If WhatsApp invalidates the session (rare, but possible):
 
 | Group | Used By | Variables |
 |-------|---------|-----------|
-| `valleyluz-shared` | Web + Worker | `MONGODB_URI`, `MONGODB_DB_NAME` |
-| `valleyluz-wa-secrets` | Worker only | `NODE_ENV`, `WA_DISCOVERY_MODE`, `WHATSAPP_GROUP_IDS`, `OPENAI_API_KEY`, Cloudinary keys |
+| `galiluz-shared` | Web + Worker | `MONGODB_URI`, `MONGODB_DB_NAME` |
+| `galiluz-wa-secrets` | Worker only | `NODE_ENV`, `WA_DISCOVERY_MODE`, `WHATSAPP_GROUP_IDS`, `OPENAI_API_KEY`, Cloudinary keys, `CLOUDINARY_FOLDER` |
 
 ---
 
@@ -183,3 +183,25 @@ If WhatsApp invalidates the session (rare, but possible):
 - [ ] Switch WA worker to production mode
 - [ ] Verify Nuxt web app loads and APIs respond
 - [ ] Enable notifications for service health
+
+---
+
+## Renaming from Valley Luz (Render, MongoDB, Cloudinary)
+
+If you previously had services and env groups named `valleyluz-*`, do the following.
+
+### Render dashboard
+
+- **Option A – New Blueprint**: Create a **new Blueprint Instance** from this repo. Render will create `galiluz-web`, `galiluz-wa`, `galiluz-shared`, and `galiluz-wa-secrets`. Copy env var values from your old groups into the new ones, then delete the old Blueprint instance (or leave it stopped).
+- **Option B – Rename existing**: If your Render plan allows it, rename the existing services to `galiluz-web` and `galiluz-wa`, and rename env groups to `galiluz-shared` and `galiluz-wa-secrets`. Then re-sync the Blueprint or re-connect the repo so the YAML matches. If Render does not allow renaming, use Option A.
+
+### MongoDB
+
+- **MONGODB_URI** and **MONGODB_DB_NAME** are set only in env (Render groups and local `.env`). There is no hardcoded value in the repo.
+- If you create a new MongoDB cluster or database for Galiluz (e.g. `galiluz_app` / `galiluz_app_dev`): set `MONGODB_URI` and `MONGODB_DB_NAME` in **galiluz-shared** (and in `galiluz-wa-secrets` if you use a separate worker env) and in your local `apps/wa-listener/.env`.
+- If you keep using the same cluster and database, no change is required; only the Render service/group names change.
+
+### Cloudinary
+
+- **CLOUDINARY_FOLDER** is set only in env (e.g. in `galiluz-wa-secrets` and in `apps/wa-listener/.env`). There is no hardcoded value in the repo.
+- To use a new folder for Galiluz uploads: set `CLOUDINARY_FOLDER=galiluz` (or your chosen name) in the worker’s env. New uploads will go there; existing assets stay in the previous folder unless you move them in Cloudinary.

@@ -1,3 +1,4 @@
+import { ROUTE_MONTHLY_VIEW, ROUTE_DAILY_VIEW } from '~/consts/calendar.const'
 import {
   getPrevDay,
   getNextDay,
@@ -33,7 +34,7 @@ export const useCalendarNavigation = () => {
 
     calendarStore.setCurrentDate({ year, month })
     navigateTo({
-      path: '/monthly-view',
+      path: ROUTE_MONTHLY_VIEW,
       query: { ...currentQuery, year, month },
     })
   }
@@ -47,7 +48,7 @@ export const useCalendarNavigation = () => {
     const currentQuery = router.currentRoute.value.query
 
     navigateTo({
-      path: '/daily-view',
+      path: ROUTE_DAILY_VIEW,
       query: { ...currentQuery, date: dateString },
     })
   }

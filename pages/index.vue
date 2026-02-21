@@ -7,11 +7,13 @@
 </template>
 
 <script setup>
+import { ROUTE_MONTHLY_VIEW } from '~/consts/calendar.const'
+
 defineOptions({ name: 'IndexRedirect' })
 
 // lifecycle
 onMounted(() => {
-  navigateTo('/monthly-view', { replace: true })
+  navigateTo(ROUTE_MONTHLY_VIEW, { replace: true })
 })
 </script>
 

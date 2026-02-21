@@ -1,13 +1,15 @@
 import { parseCategories, serializeCategories, parseTimeFilter, isValidMonthYear } from '~/utils/validation.helpers'
-import { MINUTES_PER_DAY, FILTER_PREFERENCE_STORAGE_KEY } from '~/consts/calendar.const'
+import {
+  MINUTES_PER_DAY,
+  FILTER_PREFERENCE_STORAGE_KEY,
+  ROUTE_MONTHLY_VIEW,
+  ROUTE_DAILY_VIEW,
+} from '~/consts/calendar.const'
 import { getTodayDateString } from '~/utils/date.helpers'
-
-const MONTHLY_PATH = '/monthly-view'
-const DAILY_PATH = '/daily-view'
 
 /**
  * Composable for syncing calendar state with URL query parameters
- * Monthly: /monthly-view?year=...&month=... ; Daily: /daily-view?date=...
+ * Monthly: ROUTE_MONTHLY_VIEW?year=...&month=... ; Daily: ROUTE_DAILY_VIEW?date=...
  *
  * @param {Object} options - Configuration options
  * @param {boolean} options.syncMonth - Whether to sync currentDate (year/month) to URL (monthly view only)
@@ -121,7 +123,7 @@ export const useUrlState = (options = {}) => {
       params.month = currentDate.value.month
     }
 
-    if (!syncMonth && route.path === DAILY_PATH) {
+    if (!syncMonth && route.path === ROUTE_DAILY_VIEW) {
       params.date = route.query.date || getTodayDateString()
     }
 
@@ -146,15 +148,15 @@ export const useUrlState = (options = {}) => {
    */
   const updateUrl = () => {
     if (!isInitialized.value) return
-    if (syncMonth && route.path !== MONTHLY_PATH) return
-    if (!syncMonth && route.path !== DAILY_PATH) return
+    if (syncMonth && route.path !== ROUTE_MONTHLY_VIEW) return
+    if (!syncMonth && route.path !== ROUTE_DAILY_VIEW) return
 
     const newQuery = buildQueryParams()
     const currentQuery = route.query
     const queryChanged = JSON.stringify(currentQuery) !== JSON.stringify(newQuery)
 
     if (queryChanged) {
-      const path = syncMonth ? MONTHLY_PATH : DAILY_PATH
+      const path = syncMonth ? ROUTE_MONTHLY_VIEW : ROUTE_DAILY_VIEW
       router.replace({ path, query: newQuery })
     }
   }

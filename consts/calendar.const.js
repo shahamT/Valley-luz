@@ -1,3 +1,7 @@
+// Route paths (single source of truth for calendar views)
+export const ROUTE_MONTHLY_VIEW = '/monthly-view'
+export const ROUTE_DAILY_VIEW = '/daily-view'
+
 // Calendar grid constants
 export const DAYS_PER_WEEK = 7
 
@@ -13,7 +17,7 @@ export const MORE_EVENTS_TEXT = (count) => `עוד ${count} אירועים...`
 export const MINUTES_PER_DAY = 24 * 60
 
 // localStorage key for persisting user filter preference (categories + time range)
-export const FILTER_PREFERENCE_STORAGE_KEY = 'valley-luz-calendar-filters'
+export const FILTER_PREFERENCE_STORAGE_KEY = 'galiluz-calendar-filters'
 
 // Daily carousel configuration
 export const DAILY_CAROUSEL_DAYS_RANGE = 4 // Number of days on each side of the center date (total: 2*range + 1 = 9 days)

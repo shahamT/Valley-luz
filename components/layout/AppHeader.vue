@@ -1,13 +1,22 @@
 <template>
   <header class="AppHeader">
     <div class="AppHeader-container">
-      <div class="AppHeader-side AppHeader-side--menu">
+      <div class="AppHeader-side AppHeader-side--logo">
         <ClientOnly>
-          <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
-            <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
-          </button>
+          <img
+            v-if="!isMobile"
+            src="/logos/galiluz-logo.svg"
+            alt="Galiluz"
+            class="AppHeader-logo"
+          />
+          <img
+            v-else
+            src="/logos/galiluz-icon-round.svg"
+            alt="Galiluz"
+            class="AppHeader-logo AppHeader-logo--icon"
+          />
           <template #fallback>
-            <span class="AppHeader-menuButtonPlaceholder" aria-hidden="true" />
+            <span class="AppHeader-logoPlaceholder" aria-hidden="true" />
           </template>
         </ClientOnly>
       </div>
@@ -17,22 +26,13 @@
           <span class="AppHeader-whatsappText">לבוט הוואטסאפ שלנו</span>
         </button>
       </div>
-      <div class="AppHeader-side AppHeader-side--logo">
+      <div class="AppHeader-side AppHeader-side--menu">
         <ClientOnly>
-          <img
-            v-if="!isMobile"
-            src="/logos/valleyluz-logo.png"
-            alt="Valley Luz"
-            class="AppHeader-logo"
-          />
-          <img
-            v-else
-            src="/logos/valleyluz-icon.svg"
-            alt="Valley Luz"
-            class="AppHeader-logo AppHeader-logo--icon"
-          />
+          <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
+            <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
+          </button>
           <template #fallback>
-            <span class="AppHeader-logoPlaceholder" aria-hidden="true" />
+            <span class="AppHeader-menuButtonPlaceholder" aria-hidden="true" />
           </template>
         </ClientOnly>
       </div>
@@ -84,7 +84,7 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 
     &--menu {
       justify-content: flex-end;
-      grid-column: 1;
+      grid-column: 3;
     }
 
     &--center {
@@ -93,14 +93,10 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     }
 
     &--logo {
-      justify-content: flex-start;
-      grid-column: 3;
+      justify-content: flex-end;
+      grid-column: 1;
       direction: ltr;
     }
-  }
-
-  [dir='rtl'] &-side--menu {
-    justify-content: flex-start;
   }
 
   &-logo {

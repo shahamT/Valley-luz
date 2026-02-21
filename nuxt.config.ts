@@ -14,7 +14,7 @@ export default defineNuxtConfig({
   
   app: {
     head: {
-      title: 'Valley Luz',
+      title: 'Galiluz',
       htmlAttrs: {
         lang: 'he',
         dir: 'rtl',

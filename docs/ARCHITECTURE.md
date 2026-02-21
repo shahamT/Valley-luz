@@ -1,4 +1,4 @@
-# Valley Luz – Frontend architecture
+# Galiluz – Frontend architecture
 
 High-level map of the Nuxt frontend: main flows, where they start, and which files they touch.
 
@@ -6,7 +6,7 @@ High-level map of the Nuxt frontend: main flows, where they start, and which fil
 
 - **pages/** – `index` (redirect), `monthly-view`, `daily-view`, `[...slug]` (404).
 - **components/** – `layout/` (AppShell, AppHeader), `controls/` (CalendarViewNav, CalendarViewHeader), `monthly/` (MonthCarousel, MonthCalendar, DayCell, WeekdayRow), `daily/` (KanbanCarousel, KanbanColumn, KanbanEventCard), `ui/` (filters, pickers, popups, EventModal sub-parts, Icon, Loader). Root: EventModal, CalendarViewContent.
-- **composables/** – Data: useCalendarViewData, useEvents, useCategories. URL/state: useUrlState, useCalendarNavigation. Filtering: useEventFilters. Modal: useEventModalData. Utils: useScreenWidth, useIconFontReady, usePosthog.
+- **composables/** – Data: useCalendarViewData, useEvents, useCategories. URL/state: useUrlState, useCalendarNavigation, useCalendarPageInit. Filtering: useEventFilters. Modal: useEventModalData. Utils: useScreenWidth, useIconFontReady, usePosthog.
 - **stores/** – calendar.store (filters, currentDate, lastDailyViewDate), ui.store (event modal + URL sync).
 - **utils/** – events.service, events.helpers, calendar.helpers, calendar-display.helpers, date.helpers, validation.helpers, navigation.service, calendar.service, media.helpers, logger.
 - **consts/** – events.const (EVENT_CATEGORIES), calendar.const, ui.const.
@@ -18,7 +18,7 @@ High-level map of the Nuxt frontend: main flows, where they start, and which fil
 
 1. **View toggle** – User clicks month/day in CalendarViewNav → emit to CalendarViewHeader → monthly-view/daily-view handle: monthly calls `switchToDailyView(currentDate)`, daily calls `navigateToMonth(headerDate)` (useCalendarNavigation).
 2. **useCalendarNavigation** – `switchToDailyView` / `navigateToDay` / `navigateToMonth` use router + calendarStore (setCurrentDate, lastDailyViewDate).
-3. **URL sync** – useUrlState({ syncMonth: true|false }) used in monthly-view and daily-view. On mount: `initializeFromUrl()` (read query → store), then `startUrlSync()` (watch store → updateUrl + localStorage). Monthly syncs year/month + filters; daily syncs filters (date from route.query.date).
+3. **URL sync** – useCalendarPageInit({ syncMonth }) returns runPageInit(), which runs initializeFromUrl(), startUrlSync(), and uiStore.initializeModalFromUrl(). Both calendar pages call runPageInit() in onMounted (daily-view after validating/fixing date query and nextTick). Route paths: consts/calendar.const (ROUTE_MONTHLY_VIEW, ROUTE_DAILY_VIEW).
 4. **Carousels** – monthly-view passes visibleMonths, currentDate, filteredEvents, categories → MonthCarousel → MonthCalendar → DayCell. daily-view passes visibleDays, eventsByDate, dateParam, categories → KanbanCarousel → KanbanColumn → KanbanEventCard. Swipe/change → emit → page updates store and/or navigates.
 
 **Files:** CalendarViewNav, CalendarViewHeader, monthly-view, daily-view, useCalendarNavigation, useUrlState, calendar.store, MonthCarousel, MonthCalendar, DayCell, KanbanCarousel, KanbanColumn, date.helpers, validation.helpers.
@@ -72,6 +72,6 @@ High-level map of the Nuxt frontend: main flows, where they start, and which fil
 ## Conventions
 
 - **Composables:** Prefer composables for reusable, scoped logic; Pinia for global shared state (calendar filters, modal state).
-- **URL state:** useUrlState centralizes reading query → store and watching store → URL + localStorage. Both calendar pages must call initializeFromUrl() then startUrlSync() on mount (and daily-view must ensure valid date in URL before init).
+- **URL state:** useUrlState centralizes reading query → store and watching store → URL + localStorage. useCalendarPageInit wraps that plus modal-from-URL; both calendar pages call runPageInit() in onMounted. Route paths are in consts/calendar.const (ROUTE_MONTHLY_VIEW, ROUTE_DAILY_VIEW).
 - **Data:** Events and categories are fetched once in the plugin and consumed via useCalendarViewData so components don’t re-fetch. EventModal also uses useCalendarViewData for the same source.
 - **Script order (components):** defineOptions → defineProps → defineEmits → data (composables, refs) → lifecycle → computed → methods → watchers. Import order: NPM → project (consts, utils) → components, with blank lines between groups.

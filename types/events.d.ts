@@ -1,5 +1,5 @@
 /**
- * Type definitions for Valley Luz events and categories
+ * Type definitions for Galiluz events and categories
  * These types document the structure of data used throughout the application
  * and prepare for future TypeScript migration
  */

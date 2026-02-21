@@ -1,15 +1,15 @@
-# Render Blueprint – Valley Luz monorepo
+# Render Blueprint – Galiluz monorepo
 # Two services from one repo, both deploy from main branch only.
 #
-# 1. valleyluz-web    – Nuxt 3 SSR app (Web Service)
-# 2. valleyluz-wa     – WhatsApp listener (Background Worker + persistent disk)
+# 1. galiluz-web    – Nuxt 3 SSR app (Web Service)
+# 2. galiluz-wa     – WhatsApp listener (Background Worker + persistent disk)
 #
-# Shared env vars live in the "valleyluz-shared" environment group (create once in Render dashboard).
+# Shared env vars live in the "galiluz-shared" environment group (create once in Render dashboard).
 
 services:
   # ── Nuxt 3 Web App ────────────────────────────────────────────
   - type: web
-    name: valleyluz-web
+    name: galiluz-web
     runtime: node
     branch: main
     plan: starter
@@ -22,11 +22,11 @@ services:
         value: "22"
       - key: NODE_ENV
         value: production
-      - fromGroup: valleyluz-shared
+      - fromGroup: galiluz-shared
 
   # ── WhatsApp Listener Worker ──────────────────────────────────
   - type: worker
-    name: valleyluz-wa
+    name: galiluz-wa
     runtime: node
     branch: main
     plan: starter
@@ -43,8 +43,8 @@ services:
         value: "22"
       - key: WA_AUTH_PATH
         value: /var/data/auth
-      - fromGroup: valleyluz-shared
-      - fromGroup: valleyluz-wa-secrets
+      - fromGroup: galiluz-shared
+      - fromGroup: galiluz-wa-secrets
 
 # ── Environment Groups ──────────────────────────────────────────
 # Create these in the Render dashboard and fill in the actual values.
@@ -52,7 +52,7 @@ services:
 
 envVarGroups:
   # Shared between both services (Nuxt web + WA worker)
-  - name: valleyluz-shared
+  - name: galiluz-shared
     envVars:
       - key: MONGODB_URI
         sync: false
@@ -60,7 +60,7 @@ envVarGroups:
         sync: false
 
   # WA worker only – secrets that the Nuxt app does not need
-  - name: valleyluz-wa-secrets
+  - name: galiluz-wa-secrets
     envVars:
       - key: NODE_ENV
         sync: false
@@ -77,4 +77,6 @@ envVarGroups:
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CLOUDINARY_FOLDER
         sync: false
