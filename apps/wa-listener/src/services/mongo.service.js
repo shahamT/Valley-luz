@@ -11,6 +11,7 @@ export {
   deleteEventDocument,
   findCandidateEvents,
   updateEventDocument,
+  updateSourceAndOcr,
   updateEventWithNewData,
   appendToPreviousVersions,
   getEventDocument,

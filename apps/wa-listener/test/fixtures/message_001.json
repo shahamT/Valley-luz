@@ -1,0 +1,22 @@
+{
+  "rawMessage": {
+    "id": "msg_001",
+    "text": "ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתחם שוק תלפיות, חיפה\nכניסה: 30 ₪",
+    "t": 1730000000
+  },
+  "cloudinaryUrl": null,
+  "ocrText": null,
+  "expected": {
+    "occurrences": [
+      {
+        "date": "2026-02-25",
+        "hasTime": true,
+        "startTime": "2026-02-25T18:00:00.000Z"
+      }
+    ],
+    "location": {
+      "City": "חיפה"
+    },
+    "price": 30
+  }
+}

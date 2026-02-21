@@ -106,3 +106,98 @@ export const COMPARISON_SCHEMA = {
     },
   },
 }
+
+const EVIDENCE_CANDIDATE_ITEM = {
+  type: 'object',
+  required: ['quote', 'source'],
+  additionalProperties: false,
+  properties: {
+    quote: { type: 'string' },
+    source: { type: 'string', enum: ['message_text', 'ocr_text', 'url'] },
+    messageTextStartIdx: { type: ['integer', 'null'] },
+    messageTextEndIdx: { type: ['integer', 'null'] },
+    ocrBlockId: { type: ['string', 'null'] },
+    ocrLineId: { type: ['string', 'null'] },
+    fieldSubtype: { type: ['string', 'null'] },
+  },
+}
+
+export const EVIDENCE_LOCATOR_SCHEMA = {
+  name: 'evidence_locator',
+  strict: true,
+  schema: {
+    type: 'object',
+    required: ['evidenceCandidates'],
+    additionalProperties: false,
+    properties: {
+      evidenceCandidates: {
+        type: 'object',
+        required: ['date', 'timeOfDay', 'location', 'price'],
+        additionalProperties: false,
+        properties: {
+          date: { type: 'array', items: EVIDENCE_CANDIDATE_ITEM },
+          timeOfDay: { type: 'array', items: EVIDENCE_CANDIDATE_ITEM },
+          location: { type: 'array', items: EVIDENCE_CANDIDATE_ITEM },
+          price: { type: 'array', items: EVIDENCE_CANDIDATE_ITEM },
+        },
+      },
+    },
+  },
+}
+
+export const DESCRIPTION_BUILDER_SCHEMA = {
+  name: 'description_builder',
+  strict: true,
+  schema: {
+    type: 'object',
+    required: ['Title', 'shortDescription', 'fullDescription', 'categories', 'mainCategory', 'urls'],
+    additionalProperties: false,
+    properties: {
+      Title: { type: 'string' },
+      shortDescription: { type: 'string' },
+      fullDescription: { type: 'string' },
+      categories: { type: 'array', items: { type: 'string' } },
+      mainCategory: { type: 'string' },
+      urls: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['Title', 'Url'],
+          additionalProperties: false,
+          properties: {
+            Title: { type: 'string' },
+            Url: { type: 'string' },
+          },
+        },
+      },
+    },
+  },
+}
+
+const FIELD_VERIFICATION_ITEM = {
+  type: 'object',
+  required: ['fieldName', 'ok', 'reason'],
+  additionalProperties: false,
+  properties: {
+    fieldName: { type: 'string' },
+    ok: { type: 'boolean' },
+    suggestedValue: { type: ['string', 'null'] },
+    reason: { type: 'string' },
+  },
+}
+
+export const FIELD_VERIFICATION_SCHEMA = {
+  name: 'field_verification',
+  strict: true,
+  schema: {
+    type: 'object',
+    required: ['fields'],
+    additionalProperties: false,
+    properties: {
+      fields: {
+        type: 'array',
+        items: FIELD_VERIFICATION_ITEM,
+      },
+    },
+  },
+}

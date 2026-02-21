@@ -1,60 +1,8 @@
 import { NOT_STATED_JUSTIFICATION } from '../consts/events.const.js'
+import { israelMidnightToUtcIso, getDateInIsraelFromIso, localTimeIsraelToUtcIso } from '../utils/israelTime.js'
 
 function isNotStatedJustification(str) {
   return typeof str === 'string' && str.trim().toLowerCase() === NOT_STATED_JUSTIFICATION.toLowerCase()
-}
-
-/**
- * Returns ISO UTC string for Israel (Asia/Jerusalem) midnight on the given date.
- * Used when occurrence.hasTime is false (all-day events).
- * @param {string} dateOrIso - Date part (YYYY-MM-DD) or full ISO string
- * @returns {string} ISO UTC string
- */
-function israelMidnightToUtcIso(dateOrIso) {
-  const dateOnly = typeof dateOrIso === 'string' ? dateOrIso.slice(0, 10) : ''
-  const match = dateOnly.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  if (!match) return dateOrIso
-  const [, y, m, d] = match.map(Number)
-  const noonUtc = new Date(Date.UTC(y, m - 1, d, 12, 0, 0))
-  const israelHour = parseInt(noonUtc.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
-  const offsetHours = israelHour - 12
-  const utcIsraelMidnight = new Date(Date.UTC(y, m - 1, d) - offsetHours * 3600 * 1000)
-  return utcIsraelMidnight.toISOString()
-}
-
-/**
- * Returns YYYY-MM-DD in Israel (Asia/Jerusalem) for an ISO UTC string.
- * @param {string} isoString - ISO UTC date-time string
- * @returns {string|null} YYYY-MM-DD or null
- */
-function getDateInIsraelFromIso(isoString) {
-  if (!isoString || typeof isoString !== 'string') return null
-  const d = new Date(isoString)
-  if (isNaN(d.getTime())) return null
-  const parts = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).split('-')
-  if (parts.length !== 3) return null
-  return `${parts[0]}-${parts[1]}-${parts[2]}`
-}
-
-/**
- * Returns ISO UTC string for a given date and time in Israel (Asia/Jerusalem).
- * Used to correct startTime when the model stored Israel local time as UTC.
- * @param {string} dateStr - YYYY-MM-DD
- * @param {string} timeHHMM - HH:MM or H:MM (Israel local)
- * @returns {string} ISO UTC string
- */
-function localTimeIsraelToUtcIso(dateStr, timeHHMM) {
-  const dateMatch = (dateStr || '').slice(0, 10).match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  const timeMatch = (timeHHMM || '').match(/^(\d{1,2}):(\d{2})$/)
-  if (!dateMatch || !timeMatch) return ''
-  const [, y, mo, d] = dateMatch.map(Number)
-  const [, h, min] = timeMatch.map(Number)
-  if (h < 0 || h > 23 || min < 0 || min > 59) return ''
-  const noonUtc = new Date(Date.UTC(y, mo - 1, d, 12, 0, 0))
-  const israelHour = parseInt(noonUtc.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hour12: false }), 10)
-  const offsetHours = israelHour - 12
-  const utcMoment = new Date(Date.UTC(y, mo - 1, d, h, min, 0) - offsetHours * 3600 * 1000)
-  return utcMoment.toISOString()
 }
 
 export function validateEventStructure(event) {
@@ -88,12 +36,20 @@ export function validateSearchKeys(searchKeys) {
 /**
  * Validates an extracted event programmatically.
  * Checks dates, required fields, location word-match, and category validity.
+ * When combinedTextForVerbatim is provided (e.g. messageText + "\n[OCR]\n" + ocrText), verbatim checks use it so evidence from both message and OCR is accepted.
  * Returns the event with corrections applied, or null if unfixable.
  * Exported for use by test scripts.
+ * @param {Object} event
+ * @param {string} rawMessageText
+ * @param {Array<{id: string}>} categoriesList
+ * @param {string} [combinedTextForVerbatim] - Optional: message + OCR text for verbatim evidence checks
  */
-export function validateEventProgrammatic(event, rawMessageText, categoriesList) {
+export function validateEventProgrammatic(event, rawMessageText, categoriesList, combinedTextForVerbatim = '') {
   const corrections = []
   const validCatIds = categoriesList.map(c => c.id)
+  const textForVerbatim = (typeof combinedTextForVerbatim === 'string' && combinedTextForVerbatim.trim())
+    ? combinedTextForVerbatim
+    : rawMessageText
 
   if (!Array.isArray(event.occurrences) || event.occurrences.length === 0) {
     return { event: null, corrections: ['Missing or empty occurrences'] }
@@ -158,9 +114,9 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
   if (event.location) {
     const evidence = event.location.CityEvidence != null && String(event.location.CityEvidence).trim()
     if (evidence) {
-      const evidenceInText = rawMessageText.includes(event.location.CityEvidence.trim())
+      const evidenceInText = textForVerbatim.includes(event.location.CityEvidence.trim())
       if (!evidenceInText) {
-        corrections.push(`CityEvidence "${event.location.CityEvidence}" not found in message text - cleared City and CityEvidence`)
+        corrections.push(`CityEvidence "${event.location.CityEvidence}" not found in message/OCR text - cleared City and CityEvidence`)
         event.location.City = ''
         event.location.CityEvidence = null
       }
@@ -173,8 +129,8 @@ export function validateEventProgrammatic(event, rawMessageText, categoriesList)
     for (const field of verbatimLocationFields) {
       const val = event.location[field]
       if (val != null && typeof val === 'string' && val.trim()) {
-        if (!rawMessageText.includes(val.trim())) {
-          corrections.push(`location.${field} not found verbatim in message - cleared`)
+        if (!textForVerbatim.includes(val.trim())) {
+          corrections.push(`location.${field} not found verbatim in message/OCR - cleared`)
           event.location[field] = null
         }
       }

@@ -4,7 +4,14 @@ import { logger } from '../utils/logger.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 import { OPENAI } from '../consts/index.js'
 import { getDateTimeContext, isImageUrl } from '../consts/events.const.js'
-import { CLASSIFICATION_SCHEMA, EXTRACTION_SCHEMA, COMPARISON_SCHEMA } from '../consts/openaiSchemas.const.js'
+import {
+  CLASSIFICATION_SCHEMA,
+  EXTRACTION_SCHEMA,
+  COMPARISON_SCHEMA,
+  EVIDENCE_LOCATOR_SCHEMA,
+  DESCRIPTION_BUILDER_SCHEMA,
+  FIELD_VERIFICATION_SCHEMA,
+} from '../consts/openaiSchemas.const.js'
 import { convertMessageToHtml } from '../utils/whatsappFormatToHtml.js'
 
 function sleep(ms) {
@@ -37,7 +44,7 @@ function getRetryDelayMs(error, attemptIndex) {
   return Math.min(30000, backoff)
 }
 
-function extractUrlsFromText(text) {
+export function extractUrlsFromText(text) {
   if (!text) return []
   const urlRegex = /https?:\/\/[^\s]+/g
   return [...new Set(text.match(urlRegex) || [])]
@@ -55,7 +62,7 @@ const LEADING_OVERRIDE_PATTERN = /^\s*(system\s*:|\s*ignore\s+(all\s+)?(previous
  * @param {string} text - Raw message text
  * @returns {string}
  */
-function sanitizeMessageForPrompt(text) {
+export function sanitizeMessageForPrompt(text) {
   if (!text || typeof text !== 'string') return ''
   let s = text.trim()
   const firstLineMatch = s.match(LEADING_OVERRIDE_PATTERN)
@@ -359,6 +366,118 @@ Decide: new_event, existing_event, or updated_event?`
       } else {
         return null
       }
+    }
+  }
+  return null
+}
+
+/**
+ * Pass A — Evidence Locator: output only evidence candidates for date, timeOfDay, location, price.
+ * @param {import('../../../../types/events').EventSourceDocument} sourceDocument
+ * @returns {Promise<{ evidenceCandidates: { date: Array<{quote,source}>, timeOfDay: [], location: [], price: [] } } | null>}
+ */
+export async function callOpenAIForEvidenceLocator(sourceDocument) {
+  const dateCtx = getDateTimeContext()
+  const messageText = sourceDocument?.messageTextSanitized ?? ''
+  const ocrText = sourceDocument?.ocrText ?? ''
+  const urls = sourceDocument?.extractedUrls ?? []
+  const urlsLine = urls.length > 0 ? `Links: ${urls.join(', ')}` : 'Links: (none)'
+  const systemPrompt = `You are an evidence locator for a Hebrew community events calendar.
+Given message text and optional OCR text, list ALL candidate quotes for: calendar DATE, time of day, LOCATION, PRICE.
+Do NOT output normalized dates or UTC. Only exact quotes and source (message_text, ocr_text, or url).
+${dateCtx}
+Return evidenceCandidates with arrays: date, timeOfDay, location, price. Each item: quote, source.`
+  const userParts = [`Message text:\n${messageText || '(empty)'}`, urlsLine, dateCtx]
+  if (ocrText) userParts.push(`OCR text:\n${ocrText.slice(0, 4000)}`)
+  const userContent = userParts.join('\n\n')
+  for (let attempt = 1; attempt <= OPENAI.MAX_ATTEMPTS; attempt++) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: config.openai.model,
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }],
+        response_format: { type: 'json_schema', json_schema: EVIDENCE_LOCATOR_SCHEMA },
+        max_tokens: 2000,
+        temperature: 0.1,
+      })
+      const content = response.choices[0]?.message?.content
+      if (!content) return null
+      const parsed = JSON.parse(content)
+      if (parsed?.evidenceCandidates) return parsed
+      return null
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Evidence locator API error (attempt ${attempt}): ${errorMsg}`)
+      if (attempt < OPENAI.MAX_ATTEMPTS && isRetryableOpenAIError(error)) {
+        await sleep(getRetryDelayMs(error, attempt - 1))
+      } else return null
+    }
+  }
+  return null
+}
+
+/**
+ * Pass B — Description Builder: Title, shortDescription, fullDescription, categories, mainCategory, urls.
+ * @param {import('../../../../types/events').EventSourceDocument} sourceDocument
+ * @param {{ location?: object, price?: number|null }} verifiedCriticalSummary
+ * @param {Array<{id: string, label: string}>} categoriesList
+ * @returns {Promise<{ Title: string, shortDescription: string, fullDescription: string, categories: string[], mainCategory: string, urls: Array<{Title: string, Url: string}> } | null>}
+ */
+export async function callOpenAIForDescriptionBuilder(sourceDocument, verifiedCriticalSummary, categoriesList) {
+  const messageHtml = sourceDocument?.messageHtml ?? ''
+  const messageText = sourceDocument?.messageTextSanitized ?? ''
+  const extractedUrls = sourceDocument?.extractedUrls ?? []
+  const categoriesText = categoriesList.map((c) => `- ${c.id}: ${c.label}`).join('\n')
+  const summary = verifiedCriticalSummary ? `Verified location: ${verifiedCriticalSummary.location?.City ?? '(none)'}; price: ${verifiedCriticalSummary.price ?? 'null'}` : ''
+  const systemPrompt = `You are a description builder for a Hebrew community events calendar. Produce only: Title, shortDescription, fullDescription (HTML with <p>,<br>,<strong>,<em>,<ul>,<ol>,<li>), categories, mainCategory, urls ({Title,Url}). Use ONLY category ids from:\n${categoriesText}`
+  const userContent = `${summary}\n\nMessage:\n${messageHtml || messageText || '(empty)'}\n\nLinks: ${extractedUrls.length > 0 ? extractedUrls.join(', ') : '(none)'}`
+  for (let attempt = 1; attempt <= OPENAI.MAX_ATTEMPTS; attempt++) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: config.openai.model,
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }],
+        response_format: { type: 'json_schema', json_schema: DESCRIPTION_BUILDER_SCHEMA },
+        max_tokens: config.openai.maxTokens,
+        temperature: 0.1,
+      })
+      const content = response.choices[0]?.message?.content
+      if (!content) return null
+      return JSON.parse(content)
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Description builder API error (attempt ${attempt}): ${errorMsg}`)
+      if (attempt < OPENAI.MAX_ATTEMPTS && isRetryableOpenAIError(error)) await sleep(getRetryDelayMs(error, attempt - 1))
+      else return null
+    }
+  }
+  return null
+}
+
+/**
+ * Optional Chain-of-Verification: yes/no per field.
+ * @param {object} verifiedEvent
+ * @param {object} evidenceQuotes
+ * @returns {Promise<{ fields: Array<{ fieldName: string, ok: boolean, suggestedValue: string|null, reason: string }> } | null>}
+ */
+export async function callOpenAIForFieldVerification(verifiedEvent, evidenceQuotes) {
+  const systemPrompt = `You are a field verification assistant. Given chosen values and evidence quotes, answer yes/no per field (date, timeOfDay, location, price). If no, suggest corrected value or null; suggestedValue must be supported by evidence.`
+  const userContent = `Chosen:\n${JSON.stringify(verifiedEvent, null, 2)}\n\nEvidence:\n${JSON.stringify(evidenceQuotes, null, 2)}`
+  for (let attempt = 1; attempt <= OPENAI.MAX_ATTEMPTS; attempt++) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: config.openai.model,
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }],
+        response_format: { type: 'json_schema', json_schema: FIELD_VERIFICATION_SCHEMA },
+        max_tokens: 600,
+        temperature: 0.1,
+      })
+      const content = response.choices[0]?.message?.content
+      if (!content) return null
+      return JSON.parse(content)
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Field verification API error (attempt ${attempt}): ${errorMsg}`)
+      if (attempt < OPENAI.MAX_ATTEMPTS && isRetryableOpenAIError(error)) await sleep(getRetryDelayMs(error, attempt - 1))
+      else return null
     }
   }
   return null

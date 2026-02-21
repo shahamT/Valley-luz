@@ -92,6 +92,18 @@ function loadConfig() {
       model: process.env.OPENAI_MODEL || 'gpt-4o',
       maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 2000,
     },
+    // Verification-first pipeline (evidence locator + deterministic parsers)
+    verificationFirstPipeline: process.env.VERIFICATION_FIRST_PIPELINE === 'true',
+    verificationFirstShadowMode: process.env.VERIFICATION_FIRST_SHADOW_MODE === 'true',
+    // OCR (e.g. Google Cloud Vision); disabled when not configured
+    ocr: {
+      enabled: process.env.OCR_ENABLED === 'true',
+      provider: process.env.OCR_PROVIDER || 'google_vision',
+      googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
+      googleVisionApiKey: process.env.GOOGLE_VISION_API_KEY || '',
+      fallbackOpenAiVision: process.env.OCR_FALLBACK_OPENAI_VISION === 'true',
+      openAiVisionModel: process.env.OCR_OPENAI_VISION_MODEL || process.env.OPENAI_MODEL || 'gpt-4o',
+    },
   }
 
   // Resolve relative paths against wa-listener directory; absolute paths (e.g. Render disk) stay as-is

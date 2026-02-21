@@ -1,0 +1,10 @@
+{
+  "rawMessage": {
+    "id": "msg_002",
+    "text": "שעות פתיחה: א-ה 9:00-17:00",
+    "t": 1730000000
+  },
+  "expected": {
+    "isEvent": false
+  }
+}

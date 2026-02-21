@@ -109,3 +109,88 @@ export interface DayCell {
   eventsCount: number
   events: FlatEvent[]
 }
+
+/** Verification-first pipeline: source of an evidence quote */
+export type EvidenceSource = 'message_text' | 'ocr_text' | 'url'
+
+/** Single evidence candidate for a critical field (date, time, location, price) */
+export interface EvidenceCandidate {
+  quote: string
+  source: EvidenceSource
+  messageTextStartIdx?: number
+  messageTextEndIdx?: number
+  ocrBlockId?: string
+  ocrLineId?: string
+  fieldSubtype?: string
+}
+
+/** Evidence candidates per critical field from Evidence Locator (Pass A) */
+export interface EvidenceCandidates {
+  date: EvidenceCandidate[]
+  timeOfDay: EvidenceCandidate[]
+  location: EvidenceCandidate[]
+  price: EvidenceCandidate[]
+}
+
+/** OCR block/line from provider (e.g. Google Vision); bbox optional */
+export interface OcrBlock {
+  id: string
+  text: string
+  confidence: number
+  bbox?: [number, number, number, number]
+}
+
+export interface OcrLine {
+  id: string
+  text: string
+  confidence: number
+  blockId?: string
+}
+
+/** Full OCR result for an image */
+export interface OcrData {
+  fullText: string
+  blocks?: OcrBlock[]
+  lines?: OcrLine[]
+}
+
+/** Canonical source for pipeline: message text, URLs, timestamp, optional OCR */
+export interface EventSourceDocument {
+  messageTextRaw: string
+  messageTextSanitized: string
+  messageHtml: string
+  extractedUrls: string[]
+  messageTimestamp: number | null
+  cloudinaryUrl?: string | null
+  ocrText?: string | null
+  ocrData?: OcrData | null
+}
+
+/** Per-field verification audit for debugging and review */
+export interface VerificationReport {
+  date?: {
+    candidates: EvidenceCandidate[]
+    chosen: string | null
+    reasonChosen: string
+    rejected?: string[]
+  }
+  timeOfDay?: {
+    candidates: EvidenceCandidate[]
+    chosen: string | null
+    reasonChosen: string
+    rejected?: string[]
+  }
+  location?: {
+    candidates: EvidenceCandidate[]
+    chosen: Record<string, unknown> | null
+    reasonChosen: string
+    rejected?: string[]
+  }
+  price?: {
+    candidates: EvidenceCandidate[]
+    chosen: number | null
+    reasonChosen: string
+    rejected?: string[]
+  }
+  needsReview?: boolean
+}

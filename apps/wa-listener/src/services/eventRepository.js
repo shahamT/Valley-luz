@@ -31,9 +31,12 @@ export async function findEventBySignature(signature) {
  * @param {string|null} cloudinaryUrl - Cloudinary URL or null
  * @param {Object|null} cloudinaryData - Cloudinary metadata or null
  * @param {string|null} messageSignature - Message signature (SHA-256 hash) or null
+ * @param {Object|null} [sourceDocument] - Optional EventSourceDocument for verification-first pipeline
+ * @param {string|null} [ocrText] - Optional OCR full text
+ * @param {Object|null} [ocrData] - Optional OCR blocks/lines
  * @returns {Promise<Object|null>} Inserted document with _id or null on failure
  */
-export async function insertEventDocument(rawMessage, cloudinaryUrl, cloudinaryData, messageSignature = null) {
+export async function insertEventDocument(rawMessage, cloudinaryUrl, cloudinaryData, messageSignature = null, sourceDocument = null, ocrText = null, ocrData = null) {
   const db = getDb()
   if (!db) {
     logger.warn(LOG_PREFIXES.MONGODB, 'Cannot insert event: MongoDB connection not established')
@@ -51,6 +54,9 @@ export async function insertEventDocument(rawMessage, cloudinaryUrl, cloudinaryD
       previousVersions: [],
       isActive: true,
       messageSignature: messageSignature || null,
+      sourceDocument: sourceDocument || null,
+      ocrText: ocrText ?? null,
+      ocrData: ocrData ?? null,
     }
 
     const result = await collection.insertOne(document)
@@ -130,7 +136,17 @@ export async function findCandidateEvents(searchKeys, excludeEventId = null) {
 
     const candidates = await collection
       .find(query)
-      .project({ _id: 1, 'rawMessage.text': 1 })
+      .project({
+        _id: 1,
+        'rawMessage.text': 1,
+        'event.Title': 1,
+        'event.location.City': 1,
+        'event.price': 1,
+        'event.categories': 1,
+        'event.occurrences.0.date': 1,
+        'event.occurrences.0.startTime': 1,
+        'event.occurrences.0.endTime': 1,
+      })
       .limit(5)
       .toArray()
 
@@ -143,6 +159,39 @@ export async function findCandidateEvents(searchKeys, excludeEventId = null) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     logger.error(LOG_PREFIXES.MONGODB, `Error finding candidate events: ${errorMsg}`)
     return []
+  }
+}
+
+/**
+ * Updates an event document with sourceDocument and OCR data (e.g. after OCR step).
+ * @param {Object} eventId - MongoDB ObjectId or document with _id
+ * @param {Object|null} sourceDocument - EventSourceDocument or null
+ * @param {string|null} ocrText - Full OCR text
+ * @param {Object|null} ocrData - OCR blocks/lines
+ * @returns {Promise<boolean>} True if update succeeded
+ */
+export async function updateSourceAndOcr(eventId, sourceDocument, ocrText, ocrData) {
+  const db = getDb()
+  if (!db) {
+    logger.warn(LOG_PREFIXES.MONGODB, 'Cannot update source/OCR: MongoDB connection not established')
+    return false
+  }
+  try {
+    const collection = db.collection(config.mongodb.collectionEvents)
+    const id = eventId._id || eventId
+    const result = await collection.updateOne(
+      { _id: id },
+      { $set: { sourceDocument: sourceDocument ?? null, ocrText: ocrText ?? null, ocrData: ocrData ?? null } }
+    )
+    if (result.matchedCount === 0) {
+      logger.warn(LOG_PREFIXES.MONGODB, `Event document ${id} not found for source/OCR update`)
+      return false
+    }
+    return true
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    logger.error(LOG_PREFIXES.MONGODB, `Error updating source/OCR: ${errorMsg}`)
+    return false
   }
 }
 
