@@ -112,6 +112,9 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
   const evidence = locatorResult.evidenceCandidates
   const occurrences = buildOccurrences(evidence.date || [], evidence.timeOfDay || [], messageTimestamp)
   if (!occurrences.length) {
+    const dateCandidates = evidence.date || []
+    const timeCandidates = evidence.timeOfDay || []
+    logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Validation failed: No verified date. dateCandidates=${dateCandidates.length} [${dateCandidates.map((c) => c?.quote ?? '').join(' | ')}], timeCandidates=${timeCandidates.length}, messageTimestamp=${messageTimestamp}`)
     await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, 'No verified date', sourceGroupId, sourceGroupName)
     return
   }
@@ -176,6 +179,7 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
 
   const structureCheck = validateEventStructure(event)
   if (!structureCheck.valid) {
+    logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Validation failed: structure. reason=${structureCheck.reason}. Title=${event.Title ?? ''}, occurrences.length=${event.occurrences?.length ?? 0}, firstOcc=${event.occurrences?.[0] ? JSON.stringify(event.occurrences[0]) : 'none'}`)
     await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, structureCheck.reason, sourceGroupId, sourceGroupName)
     return
   }
