@@ -108,8 +108,28 @@ export function parseRelativeDateFromQuote(quote, refUnixSeconds) {
   return null
 }
 
+/** Extract HH:MM or HH:MM-HH:MM from anywhere in string (e.g. "בשעה 19:00" or "19:00-20:00"). */
+function parseHhMmFromString(s) {
+  const hhmm = s.match(/(\d{1,2}):(\d{2})(?:\s*-\s*(\d{1,2}):(\d{2}))?/)
+  if (!hhmm) return null
+  const [, h, min, eh, em] = hhmm
+  const hour = parseInt(h, 10)
+  const minute = parseInt(min, 10)
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null
+  const out = { hour, minute }
+  if (eh != null && em != null) {
+    const endHour = parseInt(eh, 10)
+    const endMinute = parseInt(em, 10)
+    if (endHour >= 0 && endHour <= 23 && endMinute >= 0 && endMinute <= 59) {
+      out.endHour = endHour
+      out.endMinute = endMinute
+    }
+  }
+  return out
+}
+
 /**
- * Parse time of day: HH:MM, H:MM, "8 בערב" (20:00), range 17:30-19:00.
+ * Parse time of day: HH:MM, H:MM, "8 בערב" (20:00), range 17:30-19:00. Accepts time anywhere in quote.
  * @param {string} quote
  * @returns {{ hour: number, minute: number, endHour?: number, endMinute?: number } | null}
  */
@@ -117,23 +137,8 @@ export function parseTimeFromQuote(quote) {
   if (!quote || typeof quote !== 'string') return null
   const s = quote.trim()
 
-  const hhmm = s.match(/^(\d{1,2}):(\d{2})(?:\s*-\s*(\d{1,2}):(\d{2}))?$/)
-  if (hhmm) {
-    const [, h, min, eh, em] = hhmm
-    const hour = parseInt(h, 10)
-    const minute = parseInt(min, 10)
-    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null
-    const out = { hour, minute }
-    if (eh != null && em != null) {
-      const endHour = parseInt(eh, 10)
-      const endMinute = parseInt(em, 10)
-      if (endHour >= 0 && endHour <= 23 && endMinute >= 0 && endMinute <= 59) {
-        out.endHour = endHour
-        out.endMinute = endMinute
-      }
-    }
-    return out
-  }
+  const timeResult = parseHhMmFromString(s)
+  if (timeResult) return timeResult
 
   const hebrewEvening = s.match(/(\d{1,2})\s*(?:בערב| evening)/i)
   if (hebrewEvening) {

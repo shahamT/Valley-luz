@@ -127,7 +127,7 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
     timeOfDay: { candidates: evidence.timeOfDay || [], chosen: occurrences[0]?.startTime ?? null, reasonChosen: occurrences[0]?.evidenceQuote || 'parsed' },
     location: { candidates: evidence.location || [], chosen: locationResult, reasonChosen: locationResult.evidenceQuote || 'verified' },
     price: { candidates: evidence.price || [], chosen: priceResult.price, reasonChosen: priceResult.evidenceQuote || 'parsed' },
-    needsReview: !locationResult.verified || priceResult.price === null,
+    needsReview: !locationResult.verified || (priceResult.price !== null && !priceResult.verified),
   }
 
   logger.info(LOG_PREFIXES.EVENT_SERVICE, `[Description Builder] ${messageId}`)
