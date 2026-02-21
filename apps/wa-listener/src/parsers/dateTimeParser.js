@@ -11,28 +11,33 @@ const ENGLISH_MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 
  * @param {number|null} refUnixSeconds - Message timestamp (Unix seconds) for current year
  * @returns {{ date: string } | null} YYYY-MM-DD or null
  */
+/** Extract and parse DD.MM, DD/MM, DD-MM from anywhere in string (e.g. "רביעי 18.2" or "יום ד' 18.2"). */
+function parseDdMmFromString(s, year) {
+  const ddmmyy = s.match(/(\d{1,2})[./\-](\d{1,2})(?:[./\-](\d{2,4}))?/)
+  if (!ddmmyy) return null
+  const [, d, m, yPart] = ddmmyy
+  let y = year
+  if (yPart) {
+    const yn = parseInt(yPart, 10)
+    y = yn < 100 ? 2000 + yn : yn
+  }
+  const day = parseInt(d, 10)
+  const month = parseInt(m, 10)
+  if (day < 1 || day > 31 || month < 1 || month > 12) return null
+  const dateStr = `${y}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  const dTest = new Date(dateStr)
+  if (isNaN(dTest.getTime())) return null
+  return dateStr
+}
+
 export function parseDateFromQuote(quote, refUnixSeconds) {
   if (!quote || typeof quote !== 'string') return null
   const s = quote.trim()
   const ref = refUnixSeconds != null && Number.isFinite(refUnixSeconds) ? new Date(refUnixSeconds * 1000) : new Date()
   const year = ref.getFullYear()
 
-  const ddmmyy = s.match(/^(\d{1,2})[./\-](\d{1,2})(?:[./\-](\d{2,4}))?$/)
-  if (ddmmyy) {
-    const [, d, m, yPart] = ddmmyy
-    let y = year
-    if (yPart) {
-      const yn = parseInt(yPart, 10)
-      y = yn < 100 ? 2000 + yn : yn
-    }
-    const day = parseInt(d, 10)
-    const month = parseInt(m, 10)
-    if (day < 1 || day > 31 || month < 1 || month > 12) return null
-    const dateStr = `${y}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    const dTest = new Date(dateStr)
-    if (isNaN(dTest.getTime())) return null
-    return { date: dateStr }
-  }
+  const ddMmDate = parseDdMmFromString(s, year)
+  if (ddMmDate) return { date: ddMmDate }
 
   const monthNameMatch = s.match(new RegExp(`(\\d{1,2})\\s*(?:ב)?(${HEBREW_MONTHS.join('|')})`, 'i'))
   if (monthNameMatch) {
