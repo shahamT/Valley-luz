@@ -99,7 +99,16 @@ function loadConfig() {
     ocr: {
       enabled: process.env.OCR_ENABLED === 'true',
       provider: process.env.OCR_PROVIDER || 'google_vision',
-      googleApplicationCredentials: process.env.GOOGLE_APPLICATION_CREDENTIALS || '',
+      /** Service account credentials from GOOGLE_CREDENTIALS_JSON (full JSON string). Same in dev and production. */
+      googleCredentials: (() => {
+        const raw = process.env.GOOGLE_CREDENTIALS_JSON
+        if (!raw || typeof raw !== 'string') return null
+        try {
+          return JSON.parse(raw)
+        } catch {
+          return null
+        }
+      })(),
       googleVisionApiKey: process.env.GOOGLE_VISION_API_KEY || '',
       fallbackOpenAiVision: process.env.OCR_FALLBACK_OPENAI_VISION === 'true',
       openAiVisionModel: process.env.OCR_OPENAI_VISION_MODEL || process.env.OPENAI_MODEL || 'gpt-4o',

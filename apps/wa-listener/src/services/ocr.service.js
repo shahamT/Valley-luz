@@ -88,14 +88,10 @@ export async function runOcr(imageUrl, imageBuffer = null) {
   }
 
   let googleResult = null
-  try {
-    const { ImageAnnotatorClient } = await import('@google-cloud/vision')
-    const credentials = config.ocr?.googleApplicationCredentials
-      ? config.ocr.googleApplicationCredentials
-      : undefined
-    const client = new ImageAnnotatorClient(
-      credentials ? { keyFilename: credentials } : {}
-    )
+  if (config.ocr?.googleCredentials) {
+    try {
+      const { ImageAnnotatorClient } = await import('@google-cloud/vision')
+      const client = new ImageAnnotatorClient({ credentials: config.ocr.googleCredentials })
 
     const [result] = await client.documentTextDetection({
       image: { content: buffer.toString('base64') },
@@ -144,9 +140,10 @@ export async function runOcr(imageUrl, imageBuffer = null) {
       }
       googleResult = { fullText, blocks, lines }
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    logger.error(LOG_PREFIXES.EVENT_SERVICE, `${OCR_PREFIX} Google Vision failed: ${msg}`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      logger.error(LOG_PREFIXES.EVENT_SERVICE, `${OCR_PREFIX} Google Vision failed: ${msg}`)
+    }
   }
 
   if (googleResult) {

@@ -277,6 +277,15 @@ Messages are stored in MongoDB with the following structure:
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret | (empty) | Yes (for media upload) |
 | `CLOUDINARY_FOLDER` | Cloudinary folder for uploads | `whatsapp-listener` | No |
 
+### Google Vision OCR (dev and production)
+
+One approach everywhere: put the **entire Google service account key file JSON** in the env var `GOOGLE_CREDENTIALS_JSON`.
+
+- **Local:** In `apps/wa-listener/.env`, set `GOOGLE_CREDENTIALS_JSON=` and paste the full key file content as **one line** (minify: remove newlines). Do not commit `.env`.
+- **Render:** In **galiluz-wa** → **Environment**, add a **Secret** with key `GOOGLE_CREDENTIALS_JSON` and value = entire key file JSON (paste as-is or one line).
+
+Also set: `OCR_ENABLED=true`, `OCR_PROVIDER=google_vision`, `OCR_FALLBACK_OPENAI_VISION=true`. No key file path is used.
+
 ## Cloudinary Media Storage
 
 Media files from WhatsApp messages are automatically uploaded to Cloudinary:
