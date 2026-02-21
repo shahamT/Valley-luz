@@ -60,3 +60,10 @@ export const DEFAULT_MIME_TYPE = 'application/octet-stream'
  * Allowed message types for processing
  */
 export const ALLOWED_MESSAGE_TYPES = ['text', 'image', 'video', 'chat']
+
+/**
+ * OpenAI API retry and schema-related constants
+ */
+export const OPENAI = {
+  MAX_ATTEMPTS: 3,
+}

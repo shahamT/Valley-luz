@@ -50,6 +50,9 @@ export function getDateTimeContext() {
   ].join('\n')
 }
 
+/** Normalized phrase for justifications when a field has no source in message or image. */
+export const NOT_STATED_JUSTIFICATION = 'Not stated in message or image.'
+
 /**
  * Returns whether a Cloudinary URL points to an image (not video/audio/document).
  * Does NOT rely on file extensions; checks Cloudinary resource type path segment.

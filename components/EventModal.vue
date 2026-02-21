@@ -141,45 +141,18 @@
 <script setup>
 import { MODAL_TEXT, MOBILE_BREAKPOINT } from '~/consts/ui.const'
 import { useEventModalData } from '~/composables/useEventModalData'
+import { useEventModalGallery } from '~/composables/useEventModalGallery'
+import { useEventModalShare } from '~/composables/useEventModalShare'
+import { useEventModalImagePopup } from '~/composables/useEventModalImagePopup'
 
 defineOptions({ name: 'EventModal' })
 
-// --- Store & data ---
 const uiStore = useUiStore()
 const { isEventModalShowing, selectedEventId } = storeToRefs(uiStore)
 const { events, categories } = useCalendarViewData()
 
 const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
-const isImagePopupOpen = ref(false)
-const currentImageIndex = ref(0)
-const canShare = ref(false)
-const galleryRef = ref(null)
-const galleryWidth = ref(0)
-const isGalleryMediaLoaded = ref(true)
 
-const THUMB_WIDTH = 93
-const THUMB_GAP = 16
-
-// --- Lifecycle ---
-let resizeObserver = null
-
-onMounted(() => {
-  if (import.meta.client && navigator.share) {
-    canShare.value = true
-  }
-})
-
-onUnmounted(() => {
-  if (import.meta.client) {
-    document.body.style.overflow = ''
-  }
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-    resizeObserver = null
-  }
-})
-
-// --- Computed ---
 const selectedEvent = computed(() => {
   if (!selectedEventId.value || !events.value) return null
   return events.value.find((event) => event.id === selectedEventId.value) || null
@@ -190,7 +163,6 @@ const modalPageTitle = computed(() =>
 )
 useHead({ title: modalPageTitle })
 
-// Flat events have date/startTime at top level; the event is the occurrence
 const selectedOccurrence = computed(() => selectedEvent.value || null)
 
 const {
@@ -210,109 +182,33 @@ const {
   calendarEndTime,
 } = useEventModalData(selectedEvent, selectedOccurrence)
 
-const maxVisibleThumbs = computed(() => {
-  if (galleryWidth.value <= 0) return 1
-  return Math.max(1, Math.floor((galleryWidth.value + THUMB_GAP) / (THUMB_WIDTH + THUMB_GAP)))
-})
+const {
+  galleryRef,
+  isGalleryMediaLoaded,
+  showOverflow,
+  overflowCount,
+  visibleMedia,
+} = useEventModalGallery(eventMedia)
 
-const showOverflow = computed(() => eventMedia.value.length > maxVisibleThumbs.value)
+const { canShare, handleShare } = useEventModalShare(selectedEvent)
 
-const overflowCount = computed(() => eventMedia.value.length - maxVisibleThumbs.value + 1)
+const { isImagePopupOpen, currentImageIndex, openImagePopup, closeImagePopup } = useEventModalImagePopup()
 
-const visibleMedia = computed(() => {
-  if (!showOverflow.value) return eventMedia.value
-  return eventMedia.value.slice(0, maxVisibleThumbs.value)
-})
-
-// --- Methods ---
 const closeModal = () => {
+  closeImagePopup()
   uiStore.closeEventModal()
-  isImagePopupOpen.value = false
 }
 
-const openImagePopup = (index = 0) => {
-  currentImageIndex.value = index
-  isImagePopupOpen.value = true
-}
-
-const closeImagePopup = () => {
-  isImagePopupOpen.value = false
-}
-
-const measureGallery = () => {
-  if (galleryRef.value) {
-    const style = getComputedStyle(galleryRef.value)
-    const paddingLeft = parseFloat(style.paddingLeft) || 0
-    const paddingRight = parseFloat(style.paddingRight) || 0
-    galleryWidth.value = galleryRef.value.clientWidth - paddingLeft - paddingRight
+onUnmounted(() => {
+  if (import.meta.client) {
+    document.body.style.overflow = ''
   }
-}
+})
 
-const handleShare = async () => {
-  if (!navigator.share || !selectedEvent.value) return
-  try {
-    await navigator.share({
-      title: selectedEvent.value.title,
-      url: import.meta.client ? window.location.href : '',
-      text: selectedEvent.value.shortDescription || selectedEvent.value.title,
-    })
-  } catch (e) {
-    if (e.name !== 'AbortError') {
-      // User cancelled or share failed; no feedback required
-    }
-  }
-}
-
-// --- Watchers ---
 watch(isEventModalShowing, (isShowing) => {
   if (import.meta.server) return
   document.body.style.overflow = isShowing ? 'hidden' : ''
 }, { immediate: true })
-
-watch(galleryRef, (el) => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-    resizeObserver = null
-  }
-  if (el) {
-    measureGallery()
-    resizeObserver = new ResizeObserver(measureGallery)
-    resizeObserver.observe(el)
-  }
-})
-
-// Preload all gallery media (displayUrl = image or video thumbnail); show full modal only when ready
-let galleryLoadId = 0
-watch(
-  () => eventMedia.value,
-  (media) => {
-    if (!import.meta.client || !media?.length) {
-      isGalleryMediaLoaded.value = true
-      return
-    }
-    isGalleryMediaLoaded.value = false
-    const currentId = ++galleryLoadId
-    const urls = media.map((item) => item.displayUrl).filter(Boolean)
-    if (urls.length === 0) {
-      isGalleryMediaLoaded.value = true
-      return
-    }
-    let done = 0
-    const checkComplete = () => {
-      done += 1
-      if (currentId === galleryLoadId && done >= urls.length) {
-        isGalleryMediaLoaded.value = true
-      }
-    }
-    urls.forEach((url) => {
-      const img = new Image()
-      img.onload = checkComplete
-      img.onerror = checkComplete
-      img.src = url
-    })
-  },
-  { immediate: true }
-)
 </script>
 
 <style lang="scss">

@@ -114,6 +114,7 @@
 <script setup>
 import { UI_TEXT } from '~/consts/calendar.const'
 import { MOBILE_BREAKPOINT, SMALL_MOBILE_BREAKPOINT } from '~/consts/ui.const'
+import { useCalendarViewNav } from '~/composables/useCalendarViewNav'
 
 defineOptions({ name: 'CalendarViewNav' })
 
@@ -176,65 +177,28 @@ const emit = defineEmits([
   'next',
 ])
 
-// data
-const isMonthYearPickerOpen = ref(false)
-const monthTriggerButtonRef = ref(null)
-const isFilterPopupOpen = ref(false)
-const filterTriggerRef = ref(null)
 const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 const isSmallMobile = useScreenWidth(SMALL_MOBILE_BREAKPOINT)
 
-const viewMonthlyLabel = UI_TEXT.viewMonthly
-const viewDailyLabel = UI_TEXT.viewDaily
-
-// computed
-const monthSegmentAriaLabel = computed(() =>
-  props.viewMode === 'month' ? 'Monthly view (current)' : 'Switch to monthly view'
-)
-const daySegmentAriaLabel = computed(() =>
-  props.viewMode === 'day' ? 'Daily view (current)' : 'Switch to daily view'
-)
-
-// methods
-const toggleMonthYearPicker = () => {
-  if (isFilterPopupOpen.value) closeFilterPopup()
-  isMonthYearPickerOpen.value = !isMonthYearPickerOpen.value
-}
-
-const closeMonthYearPicker = () => {
-  isMonthYearPickerOpen.value = false
-}
-
-const toggleFilterPopup = () => {
-  if (isMonthYearPickerOpen.value) closeMonthYearPicker()
-  isFilterPopupOpen.value = !isFilterPopupOpen.value
-}
-
-const closeFilterPopup = () => {
-  isFilterPopupOpen.value = false
-}
-
-const handleMonthYearSelect = ({ year, month }) => {
-  emit('select-month-year', { year, month })
-  closeMonthYearPicker()
-}
-
-const handleYearChange = ({ year }) => {
-  emit('year-change', { year })
-}
-
-const handleViewSegmentClick = (view) => {
-  if (view === props.viewMode) return
-  emit('view-change', { view })
-}
-
-const handlePrev = () => {
-  emit('prev')
-}
-
-const handleNext = () => {
-  emit('next')
-}
+const {
+  isMonthYearPickerOpen,
+  monthTriggerButtonRef,
+  isFilterPopupOpen,
+  filterTriggerRef,
+  viewMonthlyLabel,
+  viewDailyLabel,
+  monthSegmentAriaLabel,
+  daySegmentAriaLabel,
+  toggleMonthYearPicker,
+  closeMonthYearPicker,
+  toggleFilterPopup,
+  closeFilterPopup,
+  handleMonthYearSelect,
+  handleYearChange,
+  handleViewSegmentClick,
+  handlePrev,
+  handleNext,
+} = useCalendarViewNav(props, emit)
 </script>
 
 <style lang="scss">
