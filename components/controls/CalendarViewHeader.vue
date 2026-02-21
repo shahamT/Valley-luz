@@ -4,6 +4,7 @@
       :view-mode="viewMode"
       :month-year="monthYear"
       :current-date="currentDate"
+      :categories="categories"
       :selected-categories-count="selectedCategories?.length ?? 0"
       :hours-filter-label="hoursFilterLabel"
       :filter-button-label="filterButtonLabel"
@@ -22,17 +23,10 @@
 
 <script setup>
 import { UI_TEXT, MINUTES_PER_DAY } from '~/consts/calendar.const'
+
 import { formatMinutesToTime } from '~/utils/date.helpers'
 
 defineOptions({ name: 'CalendarViewHeader' })
-
-defineEmits([
-  'select-month-year',
-  'year-change',
-  'view-change',
-  'prev',
-  'next',
-])
 
 const props = defineProps({
   viewMode: {
@@ -63,10 +57,21 @@ const props = defineProps({
     type: String,
     default: 'Next',
   },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
+defineEmits([
+  'select-month-year',
+  'year-change',
+  'view-change',
+  'prev',
+  'next',
+])
+
 // data
-const { categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
 const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calendarStore)
 
@@ -93,7 +98,7 @@ const filterButtonLabel = computed(() => {
     return UI_TEXT.filterButtonLabel
   }
   const parts = []
-  const cats = categories.value ?? {}
+  const cats = props.categories ?? {}
   const ids = selectedCategories.value
   if (ids.length > 0) {
     if (ids.length === 1 && cats[ids[0]]?.label) {

@@ -39,15 +39,18 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
 // data
-const { categories } = useCalendarViewData()
 const uiStore = useUiStore()
 
 // computed
 const categoryColor = computed(() => {
-  return getCategoryColor(props.event.mainCategory, categories.value)
+  return getCategoryColor(props.event.mainCategory, props.categories)
 })
 
 const orderedCategoryIds = computed(() =>
@@ -72,11 +75,11 @@ const categoryChips = computed(() => {
 
 // methods
 const getChipColor = (categoryId) => {
-  return getCategoryColor(categoryId, categories.value)
+  return getCategoryColor(categoryId, props.categories)
 }
 
 const getCategoryLabel = (categoryId) => {
-  return categories.value?.[categoryId]?.label ?? categoryId
+  return props.categories?.[categoryId]?.label ?? categoryId
 }
 
 const handleCardClick = () => {
@@ -119,10 +122,10 @@ const handleCardClick = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
-    height: 20px;
+    gap: var(--spacing-xs);
+    height: var(--chip-min-height);
     padding: 0 6px 0 0.75rem;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     background-color: var(--chip-more-bg);
     color: var(--color-text-light);
     font-size: var(--font-size-xs);
@@ -180,20 +183,20 @@ const handleCardClick = () => {
   &-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: var(--spacing-xs);
     margin-top: var(--spacing-sm);
   }
 
   &-chip {
     padding: 0 6px;
-    font-size: 0.6875rem;
+    font-size: var(--font-size-2xs);
     font-weight: 500;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     color: var(--chip-text-white);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 20px;
+    min-height: var(--chip-min-height);
     display: inline-flex;
     align-items: center;
     justify-content: center;

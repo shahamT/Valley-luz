@@ -37,8 +37,8 @@ const iconName = computed(() =>
 
 <style lang="scss">
 .CalendarNavArrow {
-  width: 34px;
-  height: 34px;
+  width: var(--control-height);
+  height: var(--control-height);
   border-radius: 50%;
   border: none;
   background-color: var(--light-bg);

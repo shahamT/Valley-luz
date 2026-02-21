@@ -5,6 +5,7 @@
     @click.stop
   >
     <UiFilterPanel
+      :categories="categories"
       :selected-categories-count="selectedCategoriesCount"
       :hours-filter-label="hoursFilterLabel"
       @close="emit('close')"
@@ -19,6 +20,10 @@ const props = defineProps({
   triggerElement: {
     type: Object,
     required: true,
+  },
+  categories: {
+    type: Object,
+    default: () => ({}),
   },
   selectedCategoriesCount: {
     type: Number,
@@ -50,12 +55,12 @@ onClickOutside(
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 8px;
-  background-color: var(--light-bg, #f2fbf8);
+  margin-top: var(--spacing-sm);
+  background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   padding: 0;
   box-shadow: var(--shadow-lg);
-  min-width: 420px;
+  min-width: var(--popup-min-width);
   z-index: var(--z-index-modal);
 }
 </style>

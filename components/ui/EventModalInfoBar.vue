@@ -74,6 +74,8 @@ const toggleLocationPopup = () => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .EventModal {
   &-infoBar {
     display: flex;
@@ -84,7 +86,7 @@ const toggleLocationPopup = () => {
     padding: var(--spacing-md) var(--spacing-lg);
     gap: var(--spacing-md);
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-md);
       flex-direction: column;
       align-items: stretch;
@@ -104,7 +106,7 @@ const toggleLocationPopup = () => {
     color: var(--color-secondary);
     text-align: center;
 
-    @media (max-width: 768px) {
+    @include mobile {
       flex-direction: row;
       align-items: flex-start;
       text-align: right;
@@ -115,9 +117,9 @@ const toggleLocationPopup = () => {
   }
 
   &-infoIcon {
-    @media (max-width: 768px) {
-      font-size: 1.375rem !important;
-      margin-top: 4px;
+    @include mobile {
+      font-size: var(--icon-size-md) !important;
+      margin-top: var(--spacing-xs);
     }
   }
 
@@ -127,7 +129,7 @@ const toggleLocationPopup = () => {
     align-items: center;
     gap: var(--spacing-xs);
 
-    @media (max-width: 768px) {
+    @include mobile {
       align-items: flex-start;
     }
   }
@@ -136,7 +138,7 @@ const toggleLocationPopup = () => {
     background: none;
     border: none;
     color: var(--brand-dark-green);
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     font-weight: 500;
     cursor: pointer;
     padding: 0;
@@ -153,7 +155,7 @@ const toggleLocationPopup = () => {
     background-color: var(--color-border);
     align-self: stretch;
 
-    @media (max-width: 768px) {
+    @include mobile {
       width: 100%;
       height: 1px;
     }

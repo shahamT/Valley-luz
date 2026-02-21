@@ -88,13 +88,15 @@ function handlePresetClick(presetId) {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .HoursFilterPanel {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
   padding: var(--spacing-sm) 0;
 
-  @media (max-width: 768px) {
+  @include mobile {
     gap: var(--spacing-xl);
   }
 
@@ -110,12 +112,12 @@ function handlePresetClick(presetId) {
   }
 
   &-slider {
-    --slider-connect-bg: var(--brand-dark-green, #0d7377);
-    --slider-tooltip-bg: var(--brand-dark-green, #0d7377);
-    --slider-handle-ring-color: var(--brand-light-green, #14ffec);
+    --slider-connect-bg: var(--brand-dark-green);
+    --slider-tooltip-bg: var(--brand-dark-green);
+    --slider-handle-ring-color: var(--brand-light-green);
   }
 
-  @media (max-width: 768px) {
+  @include mobile {
     .slider-tooltip {
       font-size: var(--font-size-md) !important;
     }
@@ -161,7 +163,7 @@ function handlePresetClick(presetId) {
       }
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-md);
       font-size: var(--font-size-md);
     }
@@ -176,7 +178,7 @@ function handlePresetClick(presetId) {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.125rem;
+    gap: var(--spacing-2xs);
     text-align: center;
   }
 
@@ -185,17 +187,17 @@ function handlePresetClick(presetId) {
     font-weight: 600;
     line-height: 1.2;
 
-    @media (max-width: 768px) {
+    @include mobile {
       font-size: var(--font-size-md) !important;
     }
   }
 
   &-presetHours {
-    font-size: var(--font-size-xs, 0.75rem);
+    font-size: var(--font-size-xs);
     font-variant-numeric: tabular-nums;
     opacity: 0.9;
 
-    @media (max-width: 768px) {
+    @include mobile {
       font-size: var(--font-size-sm);
     }
   }

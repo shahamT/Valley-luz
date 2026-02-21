@@ -123,9 +123,11 @@ const handleNavigationSelect = (navType) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .EventModal {
   &-actions {
-    @media (max-width: 768px) {
+    @include mobile {
       flex-shrink: 0;
     }
   }
@@ -138,10 +140,10 @@ const handleNavigationSelect = (navType) => {
     gap: var(--spacing-md);
     position: sticky;
     bottom: 0;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-top);
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 
-    @media (max-width: 768px) {
+    @include mobile {
       position: fixed;
       bottom: 0;
       left: 0;
@@ -149,7 +151,7 @@ const handleNavigationSelect = (navType) => {
       padding: var(--spacing-md);
       padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom, 0));
       border-top: 1px solid var(--color-border);
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--shadow-top);
       gap: var(--spacing-sm);
       border-radius: 0;
       z-index: 10;
@@ -181,12 +183,12 @@ const handleNavigationSelect = (navType) => {
       transform: scale(0.98);
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-block: 0.75rem;
       font-size: var(--font-size-base);
 
       .Icon {
-        font-size: 1.375rem;
+        font-size: var(--icon-size-md);
       }
     }
   }
@@ -216,12 +218,12 @@ const handleNavigationSelect = (navType) => {
       transform: scale(0.98);
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-block: 0.75rem;
       font-size: var(--font-size-base);
 
       .Icon {
-        font-size: 1.375rem;
+        font-size: var(--icon-size-md);
       }
     }
   }

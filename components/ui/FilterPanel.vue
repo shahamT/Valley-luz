@@ -77,9 +77,11 @@ import { UI_TEXT, MINUTES_PER_DAY } from '~/consts/calendar.const'
 
 defineOptions({ name: 'FilterPanel' })
 
-defineEmits(['close'])
-
 const props = defineProps({
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
   selectedCategoriesCount: {
     type: Number,
     default: 0,
@@ -90,9 +92,10 @@ const props = defineProps({
   },
 })
 
+defineEmits(['close'])
+
 // data
 const activeTab = ref('categories')
-const { categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
 const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calendarStore)
 
@@ -105,7 +108,7 @@ const categoriesTabLabel = computed(
 )
 
 const selectedCategoriesList = computed(() => selectedCategories?.value ?? [])
-const categoriesList = computed(() => categories?.value ?? {})
+const categoriesList = computed(() => props.categories ?? {})
 
 const isTimeFilterActive = computed(() => {
   return timeFilterStart.value !== 0 || timeFilterEnd.value !== MINUTES_PER_DAY
@@ -126,12 +129,14 @@ const handleClearAllFilters = () => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .FilterPanel {
   display: flex;
   flex-direction: column;
   height: 100%;
 
-  @media (max-width: 768px) {
+  @include mobile {
     height: 100dvh;
   }
 
@@ -142,14 +147,14 @@ const handleClearAllFilters = () => {
     overflow: hidden;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 
-    @media (max-width: 768px) {
+    @include mobile {
       border-radius: 0;
     }
   }
 
   &-tab {
     flex: 1;
-    padding: var(--spacing-sm) 0.5rem;
+    padding: var(--spacing-sm) var(--spacing-sm);
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-light);
@@ -170,8 +175,8 @@ const handleClearAllFilters = () => {
       border-bottom-color: var(--brand-dark-green);
     }
 
-    @media (max-width: 768px) {
-      padding: var(--spacing-md) 0.5rem;
+    @include mobile {
+      padding: var(--spacing-md) var(--spacing-sm);
       font-size: var(--font-size-md);
     }
   }
@@ -181,7 +186,7 @@ const handleClearAllFilters = () => {
     min-height: 320px;
     overflow-y: auto;
 
-    @media (max-width: 768px) {
+    @include mobile {
       flex: 1;
       overflow-y: auto;
     }
@@ -207,7 +212,7 @@ const handleClearAllFilters = () => {
     padding-top: var(--spacing-md);
     border-top: 1px solid var(--color-border);
 
-    @media (max-width: 768px) {
+    @include mobile {
       display: flex;
       gap: var(--spacing-sm);
       align-items: center;
@@ -217,7 +222,7 @@ const handleClearAllFilters = () => {
   &-clearAllButton {
     width: 100%;
     padding: 0 var(--spacing-md);
-    height: 34px;
+    height: var(--control-height);
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--brand-dark-green);
@@ -242,9 +247,9 @@ const handleClearAllFilters = () => {
       pointer-events: none;
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       flex: 1;
-      height: 44px;
+      height: var(--section-header-height);
       font-size: var(--font-size-md);
     }
   }
@@ -256,14 +261,14 @@ const handleClearAllFilters = () => {
   &-doneButton {
     display: none;
 
-    @media (max-width: 768px) {
+    @include mobile {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: var(--spacing-xs);
       flex: 1;
       padding: 0 var(--spacing-md);
-      height: 44px;
+      height: var(--section-header-height);
       font-size: var(--font-size-md);
       font-weight: 600;
       color: var(--chip-text-white);
@@ -280,7 +285,7 @@ const handleClearAllFilters = () => {
   }
 
   &-doneButtonIcon {
-    @media (max-width: 768px) {
+    @include mobile {
       flex-shrink: 0;
     }
   }

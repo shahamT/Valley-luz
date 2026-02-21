@@ -26,6 +26,7 @@
         <MonthlyMonthCalendar
           :date="month"
           :events="filteredEvents"
+          :categories="categories"
         />
       </swiper-slide>
     </swiper>
@@ -58,6 +59,10 @@ const props = defineProps({
   slideToMonthRequest: {
     type: Object,
     default: null,
+  },
+  categories: {
+    type: Object,
+    default: () => ({}),
   },
 })
 

@@ -12,6 +12,8 @@ defineOptions({ name: 'AppShell' })
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .AppShell {
   min-height: 100vh;
   display: flex;
@@ -35,7 +37,7 @@ defineOptions({ name: 'AppShell' })
     display: flex;
     flex-direction: column;
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-inline: 0;
       padding-block: var(--spacing-md);
       padding-bottom: calc(var(--spacing-md) - var(--spacing-sm));

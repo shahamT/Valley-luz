@@ -49,13 +49,15 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .AppHeader {
   position: sticky;
   top: 0;
   height: var(--header-height);
   background-color: var(--color-background);
   z-index: 1000;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-header);
 
   &-container {
     max-width: var(--content-max-width);
@@ -69,7 +71,7 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     align-items: center;
     gap: var(--spacing-md);
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-inline: 1rem;
     }
   }
@@ -111,8 +113,8 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 
   &-menuButtonPlaceholder {
     display: inline-block;
-    width: 34px;
-    height: 34px;
+    width: var(--control-height);
+    height: var(--control-height);
     flex-shrink: 0;
   }
 
@@ -127,8 +129,8 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: var(--control-height);
+    height: var(--control-height);
     padding: 0;
     border: none;
     border-radius: var(--radius-md);
@@ -153,18 +155,18 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     gap: var(--spacing-sm);
     background-color: var(--whatsapp-green);
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     cursor: pointer;
     padding: var(--spacing-xs) var(--spacing-md);
     transition: opacity 0.2s ease;
     flex-shrink: 0;
-    height: 34px;
+    height: var(--control-height);
 
     &:hover {
       opacity: 0.9;
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-xs) var(--spacing-md);
       gap: var(--spacing-sm);
     }
@@ -175,7 +177,7 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     height: 18px;
     filter: brightness(0) saturate(100%);
 
-    @media (max-width: 768px) {
+    @include mobile {
       width: 16px;
       height: 16px;
     }

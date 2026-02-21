@@ -152,9 +152,9 @@ const handleOptionClick = (optionId) => {
 
 .CalendarOptionsPopup-content {
   width: 100%;
-  max-width: 400px;
+  max-width: var(--popup-max-width);
   max-height: 80vh;
-  background-color: var(--light-bg, #f2fbf8);
+  background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   display: flex;
@@ -176,7 +176,7 @@ const handleOptionClick = (optionId) => {
 .CalendarOptionsPopup-titleWrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--spacing-xs);
 }
 
 .CalendarOptionsPopup-titleLabel {
@@ -224,7 +224,7 @@ const handleOptionClick = (optionId) => {
 
 // Desktop: Popup above button
 .CalendarOptionsPopup {
-  background-color: var(--light-bg, #f2fbf8);
+  background-color: var(--light-bg);
   border-radius: var(--radius-md);
   padding: var(--spacing-xs);
   box-shadow: var(--shadow-lg);
@@ -249,17 +249,17 @@ const handleOptionClick = (optionId) => {
   direction: ltr;
   
   &:hover {
-    background-color: var(--color-hover, rgba(0, 0, 0, 0.05));
+    background-color: var(--color-hover);
   }
   
   &:active {
-    background-color: var(--color-active, rgba(0, 0, 0, 0.1));
+    background-color: var(--color-active);
   }
 }
 
 .CalendarOptionsPopup-icon {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
   flex-shrink: 0;
   object-fit: contain;
 }
@@ -278,8 +278,8 @@ const handleOptionClick = (optionId) => {
   }
   
   .CalendarOptionsPopup-icon {
-    width: 28px;
-    height: 28px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
   }
   
   .CalendarOptionsPopup-label {

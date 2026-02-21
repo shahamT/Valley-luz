@@ -3,6 +3,10 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-01-15',
   
   devtools: { enabled: true },
+
+  devServer: {
+    port: 3000,
+  },
   
   css: ['~/assets/css/main.scss'],
   
@@ -31,7 +35,11 @@ export default defineNuxtConfig({
     mongodbCollectionEvents: process.env.MONGODB_COLLECTION_EVENTS || 'events',
     mongodbCollectionRawMessages: process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages',
     // Public keys (exposed to client-side)
-    public: {},
+    public: {
+      posthogPublicKey: process.env.NUXT_PUBLIC_POSTHOG_PUBLIC_KEY || '',
+      posthogHost: process.env.NUXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com',
+      posthogDefaults: process.env.NUXT_PUBLIC_POSTHOG_DEFAULTS || '2026-01-30',
+    },
   },
   
   // Auto-import configuration

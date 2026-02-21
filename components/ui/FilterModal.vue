@@ -16,6 +16,7 @@
           </button>
         </div>
         <UiFilterPanel
+          :categories="categories"
           :selected-categories-count="selectedCategoriesCount"
           :hours-filter-label="hoursFilterLabel"
           @close="handleClose"
@@ -31,6 +32,10 @@ import { UI_TEXT } from '~/consts/calendar.const'
 defineOptions({ name: 'FilterModal' })
 
 defineProps({
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
   selectedCategoriesCount: {
     type: Number,
     default: 0,
@@ -51,6 +56,8 @@ const handleClose = () => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .FilterModal {
   position: fixed;
   top: 0;
@@ -67,17 +74,17 @@ const handleClose = () => {
   &-content {
     position: relative;
     width: 100%;
-    min-width: 420px;
+    min-width: var(--popup-min-width);
     max-width: var(--modal-max-width);
     max-height: 100%;
     border-radius: var(--radius-lg);
     padding: 0;
     display: flex;
     flex-direction: column;
-    background-color: var(--light-bg, #f2fbf8);
+    background-color: var(--light-bg);
     margin: var(--spacing-lg);
 
-    @media (max-width: 768px) {
+    @include mobile {
       min-width: 0;
       width: 100%;
       height: 100%;
@@ -98,7 +105,7 @@ const handleClose = () => {
     padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--color-border);
 
-    @media (max-width: 768px) {
+    @include mobile {
       display: none;
     }
   }

@@ -28,7 +28,7 @@ export const useEvents = () => {
         }
         if (import.meta.DEV) {
           const flat = flattenEventsByOccurrence(events)
-          console.log('[EventsAPI] Refactored events (flat):', flat)
+          logger.debug(LOG_PREFIX, 'Refactored events (flat):', flat)
         }
       }
     }, { immediate: true })

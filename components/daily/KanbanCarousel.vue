@@ -28,6 +28,7 @@
           :date="date"
           :events="eventsByDate[date] || []"
           :is-disabled="isDatePast(date)"
+          :categories="categories"
         />
       </swiper-slide>
     </swiper>
@@ -36,6 +37,8 @@
 
 <script setup>
 import { Swiper, SwiperSlide } from 'swiper/vue'
+
+defineOptions({ name: 'KanbanCarousel' })
 
 const slidesPerView = 3
 const spaceBetween = 24
@@ -73,6 +76,10 @@ const props = defineProps({
   slideToDateRequest: {
     type: String,
     default: null,
+  },
+  categories: {
+    type: Object,
+    default: () => ({}),
   },
 })
 
@@ -177,6 +184,8 @@ watch(
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .KanbanCarousel {
   width: 100%;
   max-width: 100%;
@@ -201,7 +210,7 @@ watch(
     min-width: 0;
   }
 
-  @media (max-width: 768px) {
+  @include mobile {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -237,7 +246,7 @@ watch(
   }
 
   // Desktop: 3 slides per view
-  @media (min-width: 769px) {
+  @include desktop {
     .swiper-wrapper {
       width: calc(11 * (100% - 2 * var(--spacing-lg)) / 3) !important;
     }
@@ -248,7 +257,7 @@ watch(
   }
 
   // Mobile: slides managed by slidesPerView prop (1.15)
-  @media (max-width: 768px) {
+  @include mobile {
     .swiper-slide {
       width: auto !important;
     }

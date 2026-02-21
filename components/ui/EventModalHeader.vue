@@ -74,6 +74,8 @@ const getCategoryLabel = (categoryId) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .EventModal {
   &-imageHeader {
     position: relative;
@@ -82,7 +84,7 @@ const getCategoryLabel = (categoryId) => {
     flex-direction: column;
     overflow: hidden;
 
-    @media (max-width: 768px) {
+    @include mobile {
       min-height: 160px;
     }
   }
@@ -123,7 +125,7 @@ const getCategoryLabel = (categoryId) => {
   }
 
   &-shareButton {
-    padding: 4px;
+    padding: var(--spacing-xs);
   }
 
   &-shareButton,
@@ -140,7 +142,7 @@ const getCategoryLabel = (categoryId) => {
     font-weight: 700;
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--overlay-dark-subtle);
     }
   }
 
@@ -151,7 +153,7 @@ const getCategoryLabel = (categoryId) => {
     padding-top: 80px;
     z-index: 5;
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-md);
       padding-top: var(--spacing-lg);
     }
@@ -163,26 +165,26 @@ const getCategoryLabel = (categoryId) => {
     color: var(--chip-text-white);
     margin: 0 0 var(--spacing-md) 0;
     line-height: 1.3;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: var(--text-shadow-overlay);
   }
 
   &-categories {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem;
+    gap: var(--spacing-xs);
   }
 
   &-categoryChip {
-    padding: 0.2rem 0.5rem;
+    padding: 0.2rem var(--spacing-sm);
     font-size: 0.625rem;
     font-weight: 500;
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
     color: var(--chip-text-white);
     white-space: nowrap;
 
-    @media (max-width: 768px) {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.625rem;
+    @include mobile {
+      font-size: var(--font-size-xs);
+      padding: var(--spacing-xs) 0.625rem;
     }
   }
 }

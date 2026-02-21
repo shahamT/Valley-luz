@@ -53,8 +53,8 @@ const emit = defineEmits(['close'])
 
 .LocationInfoPopup-content {
   width: 100%;
-  max-width: 400px;
-  background-color: var(--light-bg, #f2fbf8);
+  max-width: var(--popup-max-width);
+  background-color: var(--light-bg);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   display: flex;

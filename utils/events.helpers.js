@@ -1,5 +1,5 @@
 /**
- * Event helper functions for formatting and transformation
+ * Event display formatting and transformation (time, price, location, card shape).
  * Note: formatDateToYYYYMMDD and parseDateString live in date.helpers.js - import from there
  */
 

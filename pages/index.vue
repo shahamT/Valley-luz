@@ -7,7 +7,9 @@
 </template>
 
 <script setup>
-// Redirect root to monthly view (default)
+defineOptions({ name: 'IndexRedirect' })
+
+// lifecycle
 onMounted(() => {
   navigateTo('/monthly-view', { replace: true })
 })

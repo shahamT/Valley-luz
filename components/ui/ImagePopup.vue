@@ -90,20 +90,22 @@ watch(() => props.currentIndex, (val) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .ImagePopup {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: var(--overlay-dark-strong);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: calc(var(--z-index-modal) + 20);
   padding: var(--spacing-xl);
   
-  @media (max-width: 768px) {
+  @include mobile {
     padding: var(--spacing-lg);
   }
 
@@ -111,13 +113,13 @@ watch(() => props.currentIndex, (val) => {
     position: absolute;
     top: var(--spacing-md);
     right: var(--spacing-md);
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--overlay-light-mid);
     border: none;
     cursor: pointer;
     color: white;
     padding: var(--spacing-sm);
-    width: 40px;
-    height: 40px;
+    width: var(--control-height-mobile);
+    height: var(--control-height-mobile);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -126,7 +128,7 @@ watch(() => props.currentIndex, (val) => {
     z-index: 10;
     
     &:hover {
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: var(--overlay-light-strong);
     }
   }
 
@@ -134,7 +136,7 @@ watch(() => props.currentIndex, (val) => {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--overlay-light-mid);
     border: none;
     cursor: pointer;
     color: white;
@@ -148,7 +150,7 @@ watch(() => props.currentIndex, (val) => {
     z-index: 10;
 
     &:hover:not(:disabled) {
-      background-color: rgba(255, 255, 255, 0.3);
+      background-color: var(--overlay-light-strong);
     }
 
     &--prev {

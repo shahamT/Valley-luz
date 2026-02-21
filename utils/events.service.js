@@ -1,3 +1,6 @@
+/**
+ * Event domain logic: filtering, flattening by occurrence, date/active and category/time-range filtering.
+ */
 import { MINUTES_PER_DAY } from '~/consts/calendar.const'
 import { formatDateToYYYYMMDD, getDateInIsraelFromIso } from './date.helpers'
 

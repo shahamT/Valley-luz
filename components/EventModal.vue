@@ -311,6 +311,8 @@ watch(
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .EventModal {
   position: fixed;
   top: 0;
@@ -327,7 +329,7 @@ watch(
   overflow-y: auto;
   direction: ltr;
 
-  @media (max-width: 768px) {
+  @include mobile {
     padding: 0;
     overflow-y: auto;
   }
@@ -341,7 +343,7 @@ watch(
     box-shadow: var(--shadow-lg);
     position: relative;
 
-    @media (max-width: 768px) {
+    @include mobile {
       width: 100%;
       max-width: none;
       min-height: 100vh;
@@ -351,14 +353,14 @@ watch(
     }
 
     &--mobile {
-      @media (max-width: 768px) {
+      @include mobile {
         height: 100vh;
       }
     }
   }
 
   &-body {
-    @media (max-width: 768px) {
+    @include mobile {
       flex: 1;
       padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
     }
@@ -366,8 +368,8 @@ watch(
 
   &-devId {
     margin-top: var(--spacing-md);
-    font-size: 0.75rem;
-    color: var(--color-text-muted, #888);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
   }
 
   &-notFoundWrapper {
@@ -383,12 +385,12 @@ watch(
   &-loadingOverlay {
     position: absolute;
     inset: 0;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--overlay-light);
     pointer-events: none;
   }
 
   &-disclaimer {
-    background-color: rgba(173, 216, 230, 0.15);
+    background-color: var(--disclaimer-bg);
     padding: var(--spacing-sm) var(--spacing-lg);
     display: flex;
     align-items: center;
@@ -396,14 +398,14 @@ watch(
     border-bottom: 1px solid var(--color-border);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-sm) var(--spacing-md);
       border-radius: 0;
     }
   }
 
   &-disclaimerText {
-    font-size: 0.6875rem;
+    font-size: var(--font-size-2xs);
     color: var(--disclaimer-text);
     line-height: 1.4;
     text-align: center;
@@ -417,7 +419,7 @@ watch(
     justify-content: flex-start;
     gap: var(--spacing-md);
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-md);
       padding-bottom: 0;
     }
@@ -451,13 +453,13 @@ watch(
   &-galleryOverlay {
     position: absolute;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--overlay-dark);
     display: flex;
     align-items: center;
     justify-content: center;
 
     &--play {
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: var(--overlay-dark-light);
     }
   }
 
@@ -475,7 +477,7 @@ watch(
     background-color: var(--color-background);
     padding: var(--spacing-lg);
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-md);
     }
   }
@@ -603,7 +605,7 @@ watch(
     flex-wrap: wrap;
     gap: var(--spacing-sm);
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md);
     }
   }
@@ -651,14 +653,14 @@ watch(
       cursor: not-allowed;
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       width: 100%;
     }
   }
 
   &-whatsappIcon {
-    width: 20px;
-    height: 20px;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     flex-shrink: 0;
     filter: invert(59%) sepia(89%) saturate(464%) hue-rotate(94deg) brightness(95%) contrast(87%);
   }

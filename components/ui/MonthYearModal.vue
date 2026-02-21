@@ -53,6 +53,8 @@ const handlePickerYearChange = (year) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .MonthYearModal {
   position: fixed;
   top: 0;
@@ -76,7 +78,7 @@ const handlePickerYearChange = (year) => {
     padding: var(--spacing-lg);
     display: flex;
     flex-direction: column;
-    background-color: var(--light-bg, #f2fbf8);
+    background-color: var(--light-bg);
   }
 
   &-header {
@@ -87,7 +89,7 @@ const handlePickerYearChange = (year) => {
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--color-border);
 
-    @media (max-width: 768px) {
+    @include mobile {
       margin-bottom: var(--spacing-sm);
       padding-bottom: var(--spacing-sm);
     }
