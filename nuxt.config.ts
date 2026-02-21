@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-15',
   
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== 'production' },
 
   devServer: {
     port: 3000,
@@ -14,12 +14,17 @@ export default defineNuxtConfig({
   
   app: {
     head: {
-      title: 'Galiluz',
+      title: 'גלילו"ז',
       htmlAttrs: {
         lang: 'he',
         dir: 'rtl',
       },
       link: [
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: '/logos/galiluz-icon.svg',
+        },
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200',

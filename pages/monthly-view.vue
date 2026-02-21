@@ -52,26 +52,16 @@
 
 <script setup>
 import { UI_TEXT } from '~/consts/calendar.const'
+import { HEBREW_MONTHS } from '~/consts/dates.const'
 
 import { formatMonthYear, getCurrentYearMonth, getPrevMonth, getNextMonth } from '~/utils/date.helpers'
 
 defineOptions({ name: 'MonthlyView' })
 
-// SEO metadata
-useHead({
-  title: 'יומן Galiluz - תצוגה חודשית',
-})
-
-useSeoMeta({
-  description: 'יומן אירועים חודשי של Galiluz - צפייה בכל האירועים והפעילויות החודשיות',
-  ogTitle: 'יומן Galiluz - תצוגה חודשית',
-  ogDescription: 'יומן אירועים חודשי של Galiluz',
-})
-
 // data
 const { events, isLoading, isError, categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
-const { currentDate } = storeToRefs(calendarStore)
+const currentDate = computed(() => calendarStore.currentDate)
 const { getFilteredEventsForMonth } = useEventFilters(events)
 const { switchToDailyView } = useCalendarNavigation()
 const { runPageInit } = useCalendarPageInit({ syncMonth: true })
@@ -85,6 +75,14 @@ onMounted(() => {
 // computed
 const currentYear = computed(() => currentDate.value?.year ?? getCurrentYearMonth().year)
 const currentMonth = computed(() => currentDate.value?.month ?? getCurrentYearMonth().month)
+const pageTitle = computed(() => `גלילו"ז - ${HEBREW_MONTHS[currentMonth.value - 1]}`)
+// SEO metadata (reactive: useHead tracks pageTitle)
+useHead({ title: pageTitle })
+useSeoMeta({
+  description: 'יומן אירועים חודשי של Galiluz - צפייה בכל האירועים והפעילויות החודשיות',
+  ogTitle: pageTitle,
+  ogDescription: 'יומן אירועים חודשי של Galiluz',
+})
 const monthYearDisplay = computed(() => {
   return formatMonthYear(currentYear.value, currentMonth.value)
 })

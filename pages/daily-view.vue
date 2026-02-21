@@ -54,6 +54,7 @@
 
 <script setup>
 import { UI_TEXT, DAILY_CAROUSEL_DAYS_RANGE, ROUTE_DAILY_VIEW } from '~/consts/calendar.const'
+import { HEBREW_MONTHS } from '~/consts/dates.const'
 
 import { getTodayDateString, formatMonthYear, parseDateString, formatDateToYYYYMMDD } from '~/utils/date.helpers'
 import { isValidRouteDate } from '~/utils/validation.helpers'
@@ -91,8 +92,8 @@ const dateParam = computed(() => {
 const pageTitle = computed(() => {
   const date = parseDateString(dateParam.value)
   const day = date.getDate()
-  const monthName = formatMonthYear(date.getFullYear(), date.getMonth() + 1)
-  return `יומן Galiluz - ${day} ${monthName}`
+  const monthName = HEBREW_MONTHS[date.getMonth()]
+  return `גלילו"ז - ${day} ב${monthName}`
 })
 const headerDate = computed(() => {
   const date = parseDateString(dateParam.value)

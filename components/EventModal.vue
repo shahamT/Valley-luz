@@ -185,6 +185,11 @@ const selectedEvent = computed(() => {
   return events.value.find((event) => event.id === selectedEventId.value) || null
 })
 
+const modalPageTitle = computed(() =>
+  selectedEvent.value?.title ? `גלילו"ז - ${selectedEvent.value.title}` : 'גלילו"ז'
+)
+useHead({ title: modalPageTitle })
+
 // Flat events have date/startTime at top level; the event is the occurrence
 const selectedOccurrence = computed(() => selectedEvent.value || null)
 
