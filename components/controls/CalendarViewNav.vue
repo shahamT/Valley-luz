@@ -92,12 +92,14 @@
           <UiFilterPopup
             v-if="isFilterPopupOpen && !isMobile"
             :trigger-element="filterTriggerRef"
+            :categories="categories"
             :selected-categories-count="selectedCategoriesCount"
             :hours-filter-label="hoursFilterLabel"
             @close="closeFilterPopup"
           />
           <UiFilterModal
             v-if="isFilterPopupOpen && isMobile"
+            :categories="categories"
             :selected-categories-count="selectedCategoriesCount"
             :hours-filter-label="hoursFilterLabel"
             @close="closeFilterPopup"
@@ -115,14 +117,6 @@ import { MOBILE_BREAKPOINT, SMALL_MOBILE_BREAKPOINT } from '~/consts/ui.const'
 
 defineOptions({ name: 'CalendarViewNav' })
 
-const emit = defineEmits([
-  'select-month-year',
-  'year-change',
-  'view-change',
-  'prev',
-  'next',
-])
-
 const props = defineProps({
   viewMode: {
     type: String,
@@ -139,6 +133,10 @@ const props = defineProps({
       year: new Date().getFullYear(),
       month: new Date().getMonth() + 1,
     }),
+  },
+  categories: {
+    type: Object,
+    default: () => ({}),
   },
   selectedCategoriesCount: {
     type: Number,
@@ -169,6 +167,14 @@ const props = defineProps({
     default: 'Next',
   },
 })
+
+const emit = defineEmits([
+  'select-month-year',
+  'year-change',
+  'view-change',
+  'prev',
+  'next',
+])
 
 // data
 const isMonthYearPickerOpen = ref(false)
@@ -232,6 +238,8 @@ const handleNext = () => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .CalendarViewNav {
   display: flex;
   flex-direction: column;
@@ -254,7 +262,7 @@ const handleNext = () => {
     margin-bottom: var(--spacing-sm);
     min-width: 0;
 
-    @media (max-width: 768px) {
+    @include mobile {
       margin-bottom: 0;
     }
   }
@@ -273,9 +281,9 @@ const handleNext = () => {
     min-width: 0;
   }
 
-  @media (max-width: 768px) {
+  @include mobile {
     &-gridWrapper {
-      max-width: 400px;
+      max-width: var(--popup-max-width);
       margin: 0 auto;
     }
 
@@ -326,7 +334,7 @@ const handleNext = () => {
     }
   }
 
-  @media (max-width: 560px) {
+  @include mobile-narrow {
     &-viewToggleText {
       display: none;
     }
@@ -336,8 +344,8 @@ const handleNext = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: var(--control-height);
+    height: var(--control-height);
     border-radius: var(--radius-md);
     background-color: var(--light-bg);
     border: none;
@@ -356,12 +364,12 @@ const handleNext = () => {
       pointer-events: none;
     }
 
-    @media (max-width: 768px) {
-      width: 40px;
-      height: 40px;
+    @include mobile {
+      width: var(--control-height-mobile);
+      height: var(--control-height-mobile);
 
       .Icon {
-        font-size: 1.375rem;
+        font-size: var(--icon-size-md);
       }
     }
   }
@@ -382,7 +390,7 @@ const handleNext = () => {
     justify-content: center;
     gap: var(--spacing-xs);
     width: 12rem;
-    height: 34px;
+    height: var(--control-height);
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -397,12 +405,12 @@ const handleNext = () => {
       background-color: var(--day-cell-hover-bg);
     }
 
-    @media (max-width: 768px) {
-      height: 40px;
+    @include mobile {
+      height: var(--control-height-mobile);
       font-size: var(--font-size-base);
 
       .Icon {
-        font-size: 1.375rem;
+        font-size: var(--icon-size-md);
       }
     }
   }
@@ -423,7 +431,7 @@ const handleNext = () => {
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
-    height: 34px;
+    height: var(--control-height);
     min-width: 0;
     max-width: 100%;
     padding: 0 var(--spacing-md);
@@ -437,8 +445,8 @@ const handleNext = () => {
     transition: background-color 0.2s ease, color 0.2s ease;
     white-space: nowrap;
 
-    @media (min-width: 769px) {
-      min-width: 168px;
+    @include desktop {
+      min-width: 10.5rem;
     }
 
     &:hover:not(.CalendarViewNav-filterButton--active) {
@@ -454,12 +462,12 @@ const handleNext = () => {
       }
     }
 
-    @media (max-width: 768px) {
-      height: 40px;
+    @include mobile {
+      height: var(--control-height-mobile);
       font-size: var(--font-size-base);
 
       .Icon {
-        font-size: 1.375rem;
+        font-size: var(--icon-size-md);
       }
     }
   }
@@ -478,13 +486,13 @@ const handleNext = () => {
   &-viewToggle {
     display: flex;
     align-items: stretch;
-    height: 34px;
+    height: var(--control-height);
     border-radius: var(--radius-md);
     overflow: hidden;
     background-color: var(--light-bg);
 
-    @media (max-width: 768px) {
-      height: 40px;
+    @include mobile {
+      height: var(--control-height-mobile);
     }
   }
 
@@ -514,11 +522,11 @@ const handleNext = () => {
       }
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       font-size: var(--font-size-base);
 
       .Icon {
-        font-size: 1.375rem;
+        font-size: var(--icon-size-md);
       }
     }
   }

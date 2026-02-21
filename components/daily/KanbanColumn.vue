@@ -9,6 +9,7 @@
           v-for="event in events"
           :key="event.id"
           :event="event"
+          :categories="categories"
         />
         <div v-if="events.length === 0" class="KanbanColumn-empty">
           {{ UI_TEXT.noEvents }}
@@ -19,9 +20,9 @@
 </template>
 
 <script setup>
+import { UI_TEXT } from '~/consts/calendar.const'
 import { formatKanbanDateHeader } from '~/utils/date.helpers'
 import { isWeekendDay } from '~/utils/calendar-display.helpers'
-import { UI_TEXT } from '~/consts/calendar.const'
 
 defineOptions({ name: 'KanbanColumn' })
 
@@ -38,6 +39,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
 const formattedDate = computed(() => {
@@ -48,6 +53,8 @@ const isWeekend = computed(() => isWeekendDay(props.date))
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .KanbanColumn {
   display: flex;
   flex-direction: column;
@@ -59,7 +66,7 @@ const isWeekend = computed(() => isWeekendDay(props.date))
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 
-  @media (max-width: 768px) {
+  @include mobile {
     width: 85vw;
     max-width: 85vw;
     min-width: 85vw;
@@ -73,7 +80,7 @@ const isWeekend = computed(() => isWeekendDay(props.date))
   }
 
   &-header {
-    height: 44px;
+    height: var(--section-header-height);
     flex-shrink: 0;
     padding-block: 0;
     padding-inline: var(--spacing-md);
@@ -102,28 +109,28 @@ const isWeekend = computed(() => isWeekendDay(props.date))
 
   &-events {
     direction: ltr; // Inner wrapper restores RTL for cards
-    padding: 12px;
+    padding: var(--spacing-sm-lg);
     overflow-x: hidden;
 
-    @media (max-width: 768px) {
+    @include mobile {
       flex: 1;
       min-height: 0;
       overflow-y: auto;
       scrollbar-gutter: stable;
-      padding-inline-start: 12px;
-      padding-inline-end: 6px; /* 12px - 6px scrollbar so scrollbar side total matches other side */
-      padding-block: 12px;
+      padding-inline-start: var(--spacing-sm-lg);
+      padding-inline-end: var(--scrollbar-width); /* scrollbar side: total matches other side */
+      padding-block: var(--spacing-sm-lg);
 
       &::-webkit-scrollbar-track {
-        background: rgba(11, 151, 74, 0.11);
+        background: var(--brand-dark-green-tint-light);
       }
 
       &::-webkit-scrollbar-thumb {
-        background: rgba(11, 151, 74, 0.3);
+        background: var(--brand-dark-green-tint);
       }
 
       &::-webkit-scrollbar-thumb:hover {
-        background: rgba(11, 151, 74, 0.4);
+        background: var(--brand-dark-green-tint-strong);
       }
     }
   }
@@ -132,7 +139,7 @@ const isWeekend = computed(() => isWeekendDay(props.date))
     direction: rtl; // Restore RTL so cards keep correct order (accent, body, text)
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--spacing-sm-lg);
   }
 
   &-empty {

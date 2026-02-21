@@ -49,6 +49,8 @@ defineEmits(['prev', 'next'])
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .CalendarViewContent {
   position: relative;
   width: 100%;
@@ -75,7 +77,7 @@ defineEmits(['prev', 'next'])
     top: 6px;
     z-index: 1;
 
-    @media (max-width: 768px) {
+    @include mobile {
       display: none;
     }
   }

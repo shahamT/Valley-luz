@@ -46,10 +46,13 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
 // data
-const { categories } = useCalendarViewData()
 const { navigateToDay } = useCalendarNavigation()
 const isMobile = useScreenWidth(DAY_CELL_BREAKPOINT)
 
@@ -87,7 +90,7 @@ const handleClick = () => {
 }
 
 const getEventChipColor = (mainCategory) => {
-  return getCategoryColor(mainCategory, categories.value)
+  return getCategoryColor(mainCategory, props.categories)
 }
 
 const getMoreChipText = () => {
@@ -96,6 +99,8 @@ const getMoreChipText = () => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .DayCell {
   background-color: var(--light-bg);
   border-radius: var(--card-radius);
@@ -108,10 +113,10 @@ const getMoreChipText = () => {
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   position: relative;
 
-  @media (max-width: 768px) {
-    padding: 4px 2px;
-    border-radius: 8px;
-    min-height: 7rem;
+  @include mobile {
+    padding: var(--spacing-xs) 2px;
+    border-radius: var(--radius-lg);
+    min-height: var(--daily-view-header-height);
   }
 
   &:hover {
@@ -193,8 +198,8 @@ const getMoreChipText = () => {
     color: var(--color-text-light);
     line-height: 1;
 
-    @media (max-width: 768px) {
-      top: 4px;
+    @include mobile {
+      top: var(--spacing-xs);
       right: 6px;
     }
   }
@@ -207,27 +212,27 @@ const getMoreChipText = () => {
     bottom: var(--spacing-xs);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--spacing-xs);
     overflow: hidden;
 
-    @media (max-width: 768px) {
-      top: calc(4px + 1.25rem);
+    @include mobile {
+      top: calc(var(--spacing-xs) + 1.25rem);
       left: 2px;
       right: 2px;
-      bottom: 4px;
+      bottom: var(--spacing-xs);
     }
   }
 
   &-chip {
     padding: 0 6px;
-    font-size: 0.6875rem;
+    font-size: var(--font-size-2xs);
     font-weight: 500;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     color: var(--chip-text-white);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 20px;
+    min-height: var(--chip-min-height);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -241,10 +246,10 @@ const getMoreChipText = () => {
       white-space: normal;
     }
 
-    @media (max-width: 768px) {
-      font-size: 0.5625rem;
-      padding: 0 4px;
-      min-height: 18px;
+    @include mobile {
+      font-size: var(--font-size-3xs);
+      padding: 0 var(--spacing-xs);
+      min-height: var(--chip-min-height-sm);
       text-overflow: clip;
     }
   }
@@ -257,7 +262,7 @@ const getMoreChipText = () => {
     white-space: nowrap;
     color: inherit;
     text-align: center;
-    line-height: 20px;
+    line-height: var(--chip-min-height);
 
     &--more {
       overflow: visible;
@@ -265,8 +270,8 @@ const getMoreChipText = () => {
       white-space: normal;
     }
 
-    @media (max-width: 768px) {
-      line-height: 18px;
+    @include mobile {
+      line-height: var(--chip-min-height-sm);
       text-overflow: clip;
     }
   }

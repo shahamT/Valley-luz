@@ -9,6 +9,7 @@
           v-for="day in calendarDays"
           :key="day.dateString"
           :day="day"
+          :categories="categories"
         />
       </div>
     </div>
@@ -31,6 +32,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  categories: {
+    type: Object,
+    default: () => ({}),
+  },
 })
 
 const eventsMap = computed(() => {
@@ -51,6 +56,8 @@ const calendarDays = computed(() => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .MonthCalendar {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -64,10 +71,10 @@ const calendarDays = computed(() => {
   &-gridWrapper {
     grid-row: 2;
     min-height: 0;
-    padding-top: 4px; // Allow hover transition and shadow to show
-    padding-left: 8px; // Allow shadow to show on left side
+    padding-top: var(--spacing-xs); // Allow hover transition and shadow to show
+    padding-left: var(--spacing-sm); // Allow shadow to show on left side
 
-    @media (max-width: 767px) {
+    @include mobile {
       padding-left: 0;
     }
   }
@@ -78,8 +85,8 @@ const calendarDays = computed(() => {
     gap: var(--spacing-md);
     direction: rtl; // Keep grid in RTL for correct column order
 
-    @media (max-width: 767px) {
-      gap: 2px;
+    @include mobile {
+      gap: 2px; // Tighter grid on mobile
     }
   }
 }

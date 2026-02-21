@@ -9,6 +9,7 @@
           view-mode="day"
           :month-year="monthYearDisplay"
           :current-date="headerDate"
+          :categories="categories"
           :prev-disabled="isTodayOrPast"
           prev-aria-label="Previous day"
           next-aria-label="Next day"
@@ -40,6 +41,7 @@
                 :current-date="dateParam"
                 :today="today"
                 :slide-to-date-request="slideToDateRequest"
+                :categories="categories"
                 @date-change="handleDateChange"
               />
             </div>
@@ -52,24 +54,24 @@
 
 <script setup>
 import { UI_TEXT, DAILY_CAROUSEL_DAYS_RANGE } from '~/consts/calendar.const'
+
 import { getTodayDateString, formatMonthYear, parseDateString, formatDateToYYYYMMDD } from '~/utils/date.helpers'
 import { isValidRouteDate } from '~/utils/validation.helpers'
 
+defineOptions({ name: 'DailyView' })
+
+// data
 const route = useRoute()
 const router = useRouter()
-
-// Get events and categories data with loading/error states
-const { events, isLoading, isError } = useCalendarViewData()
-
+const { events, isLoading, isError, categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
 const uiStore = useUiStore()
-
 const { getFilteredEventsByDate } = useEventFilters(events)
 const { navigateToMonth, navigateToMonthInDailyView, navigateToDay, goToPrevDay, goToNextDay } = useCalendarNavigation()
-
-// Initialize URL state sync (without month sync for daily view - date is in query)
 const { initializeFromUrl, startUrlSync } = useUrlState({ syncMonth: false })
+const slideToDateRequest = ref(null)
 
+// lifecycle
 onMounted(() => {
   const dateFromQuery = route.query.date
   if (!dateFromQuery || !isValidRouteDate(String(dateFromQuery).trim())) {
@@ -80,6 +82,7 @@ onMounted(() => {
   uiStore.initializeModalFromUrl()
 })
 
+// computed
 const dateParam = computed(() => {
   const param = route.query.date
   if (param && isValidRouteDate(String(param).trim())) {
@@ -87,25 +90,12 @@ const dateParam = computed(() => {
   }
   return getTodayDateString()
 })
-
-// SEO metadata with dynamic date
 const pageTitle = computed(() => {
   const date = parseDateString(dateParam.value)
   const day = date.getDate()
   const monthName = formatMonthYear(date.getFullYear(), date.getMonth() + 1)
   return `יומן Valley Luz - ${day} ${monthName}`
 })
-
-useHead({
-  title: pageTitle,
-})
-
-useSeoMeta({
-  description: 'תצוגה יומית של אירועים ופעילויות ב-Valley Luz',
-  ogTitle: pageTitle,
-  ogDescription: 'תצוגה יומית של אירועים ב-Valley Luz',
-})
-
 const headerDate = computed(() => {
   const date = parseDateString(dateParam.value)
   return {
@@ -113,21 +103,9 @@ const headerDate = computed(() => {
     month: date.getMonth() + 1,
   }
 })
-
-watch(headerDate, (newHeaderDate) => {
-  calendarStore.setCurrentDate(newHeaderDate)
-}, { immediate: true })
-
-watch(dateParam, (date) => {
-  if (date && isValidRouteDate(date)) {
-    calendarStore.setLastDailyViewDate(date)
-  }
-}, { immediate: true })
-
 const monthYearDisplay = computed(() => {
   return formatMonthYear(headerDate.value.year, headerDate.value.month)
 })
-
 const visibleDays = computed(() => {
   const centerDate = parseDateString(dateParam.value)
   const days = []
@@ -138,15 +116,29 @@ const visibleDays = computed(() => {
   }
   return days
 })
-
 const today = computed(() => getTodayDateString())
+const isTodayOrPast = computed(() => dateParam.value <= today.value)
+const eventsByDate = computed(() => getFilteredEventsByDate(visibleDays.value))
 
-const slideToDateRequest = ref(null)
-
-const isTodayOrPast = computed(() => {
-  return dateParam.value <= today.value
+// SEO metadata with dynamic date
+useHead({ title: pageTitle })
+useSeoMeta({
+  description: 'תצוגה יומית של אירועים ופעילויות ב-Valley Luz',
+  ogTitle: pageTitle,
+  ogDescription: 'תצוגה יומית של אירועים ב-Valley Luz',
 })
 
+// watchers
+watch(headerDate, (newHeaderDate) => {
+  calendarStore.setCurrentDate(newHeaderDate)
+}, { immediate: true })
+watch(dateParam, (date) => {
+  if (date && isValidRouteDate(date)) {
+    calendarStore.setLastDailyViewDate(date)
+  }
+}, { immediate: true })
+
+// methods
 const handlePrevDay = () => {
   if (isTodayOrPast.value) return
   const targetDate = goToPrevDay(dateParam.value)
@@ -165,8 +157,6 @@ const handleNextDay = () => {
     navigateToDay(targetDate)
   }
 }
-
-const eventsByDate = computed(() => getFilteredEventsByDate(visibleDays.value))
 
 const handleMonthYearSelect = ({ year, month }) => {
   navigateToMonthInDailyView(year, month)
@@ -192,6 +182,8 @@ const handleViewChange = ({ view }) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .ContentViewLoader {
   flex: 1;
   min-height: 0;
@@ -217,7 +209,7 @@ const handleViewChange = ({ view }) => {
     min-width: 0;
     max-width: 100%;
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-inline: 1rem;
     }
   }
@@ -227,14 +219,14 @@ const handleViewChange = ({ view }) => {
     min-height: 0;
     min-width: 0;
 
-    @media (max-width: 768px) {
+    @include mobile {
       display: flex;
       flex-direction: column;
     }
   }
 
   &-kanbanWrapper {
-    @media (max-width: 768px) {
+    @include mobile {
       height: calc(
         100dvh
         - var(--header-height)

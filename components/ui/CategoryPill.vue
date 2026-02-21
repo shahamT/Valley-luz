@@ -48,6 +48,8 @@ const pillStyle = computed(() => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .CategoryPill {
   border: 2px solid;
   border-radius: var(--pill-radius);
@@ -73,7 +75,7 @@ const pillStyle = computed(() => {
     white-space: nowrap;
   }
 
-  @media (max-width: 768px) {
+  @include mobile {
     font-size: var(--font-size-md);
     padding: 0.5rem var(--pill-padding-x);
   }

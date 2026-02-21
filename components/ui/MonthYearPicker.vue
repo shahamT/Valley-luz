@@ -106,11 +106,13 @@ const selectMonth = (month) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .MonthYearPicker {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  background-color: var(--light-bg, #f2fbf8);
+  background-color: var(--light-bg);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm);
 
@@ -120,7 +122,7 @@ const selectMonth = (month) => {
     flex-direction: column;
     gap: var(--spacing-sm);
 
-    @media (max-width: 768px) {
+    @include mobile {
       gap: var(--spacing-md);
     }
   }
@@ -131,7 +133,7 @@ const selectMonth = (month) => {
     color: var(--color-text-light);
     text-align: center;
 
-    @media (max-width: 768px) {
+    @include mobile {
       font-size: var(--font-size-md);
     }
   }
@@ -146,7 +148,7 @@ const selectMonth = (month) => {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
-    background-color: var(--light-bg, #f2fbf8);
+    background-color: var(--light-bg);
     color: var(--color-text-light);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -165,7 +167,7 @@ const selectMonth = (month) => {
       font-weight: 600;
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-sm) var(--spacing-md);
       font-size: var(--font-size-md);
     }
@@ -176,7 +178,7 @@ const selectMonth = (month) => {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-xs);
 
-    @media (max-width: 768px) {
+    @include mobile {
       grid-template-columns: repeat(2, 1fr);
     }
   }
@@ -185,7 +187,7 @@ const selectMonth = (month) => {
     padding: var(--spacing-xs) var(--spacing-sm);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
-    background-color: var(--light-bg, #f2fbf8);
+    background-color: var(--light-bg);
     color: var(--color-text-light);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -210,7 +212,7 @@ const selectMonth = (month) => {
       pointer-events: none;
     }
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding: var(--spacing-sm) var(--spacing-md);
       font-size: var(--font-size-md);
     }

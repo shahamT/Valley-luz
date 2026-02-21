@@ -9,6 +9,7 @@
           view-mode="month"
           :month-year="monthYearDisplay"
           :current-date="currentDate"
+          :categories="categories"
           :prev-disabled="isCurrentMonth"
           prev-aria-label="Previous month"
           next-aria-label="Next month"
@@ -39,6 +40,7 @@
               :filtered-events="filteredEvents"
               :today-month="todayMonth"
               :slide-to-month-request="slideToMonthRequest"
+              :categories="categories"
               @month-change="handleMonthChange"
             />
           </template>
@@ -50,7 +52,10 @@
 
 <script setup>
 import { UI_TEXT } from '~/consts/calendar.const'
+
 import { formatMonthYear, getCurrentYearMonth, getPrevMonth, getNextMonth } from '~/utils/date.helpers'
+
+defineOptions({ name: 'MonthlyView' })
 
 // SEO metadata
 useHead({
@@ -63,45 +68,36 @@ useSeoMeta({
   ogDescription: 'יומן אירועים חודשי של Valley Luz',
 })
 
-// Get events and categories data with loading/error states
-const { events, isLoading, isError } = useCalendarViewData()
-
+// data
+const { events, isLoading, isError, categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
 const { currentDate } = storeToRefs(calendarStore)
-
 const uiStore = useUiStore()
-
 const { getFilteredEventsForMonth } = useEventFilters(events)
 const { switchToDailyView } = useCalendarNavigation()
-
-// Initialize URL state sync (with month sync enabled for monthly view)
 const { initializeFromUrl, startUrlSync } = useUrlState({ syncMonth: true })
+const slideToMonthRequest = ref(null)
 
+// lifecycle
 onMounted(() => {
-  // Initialize store from URL params first
   initializeFromUrl()
-  // Start watching store and syncing to URL
   startUrlSync()
-  // Initialize modal from URL if event param exists
   uiStore.initializeModalFromUrl()
 })
 
+// computed
 const currentYear = computed(() => currentDate.value?.year ?? getCurrentYearMonth().year)
 const currentMonth = computed(() => currentDate.value?.month ?? getCurrentYearMonth().month)
-
 const monthYearDisplay = computed(() => {
   return formatMonthYear(currentYear.value, currentMonth.value)
 })
-
 const isCurrentMonth = computed(() => {
   if (import.meta.server) return false
   const now = new Date()
   const date = currentDate.value
   return date && date.year === now.getFullYear() && date.month === now.getMonth() + 1
 })
-
 const todayMonth = computed(() => getCurrentYearMonth())
-
 const visibleMonths = computed(() => {
   const c = currentDate.value ?? getCurrentYearMonth()
   if (!c?.year || !c?.month) return []
@@ -111,9 +107,11 @@ const visibleMonths = computed(() => {
     getNextMonth(c.year, c.month),
   ]
 })
+const filteredEvents = computed(() => {
+  return getFilteredEventsForMonth(currentYear.value, currentMonth.value)
+})
 
-const slideToMonthRequest = ref(null)
-
+// methods
 const navigateMonth = (targetMonth) => {
   const isInVisibleMonths = visibleMonths.value.some(
     (m) => m.year === targetMonth.year && m.month === targetMonth.month
@@ -150,13 +148,11 @@ const handleViewChange = ({ view }) => {
   if (view !== 'day') return
   switchToDailyView(currentDate.value)
 }
-
-const filteredEvents = computed(() => {
-  return getFilteredEventsForMonth(currentYear.value, currentMonth.value)
-})
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .ContentViewLoader {
   flex: 1;
   min-height: 0;
@@ -174,7 +170,7 @@ const filteredEvents = computed(() => {
   min-height: 0;
   min-width: 0;
 
-  @media (max-width: 768px) {
+  @include mobile {
     gap: 0;
   }
 
@@ -183,7 +179,7 @@ const filteredEvents = computed(() => {
     min-width: 0;
     max-width: 100%;
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-inline: 1rem;
     }
   }
@@ -193,7 +189,7 @@ const filteredEvents = computed(() => {
     min-height: 0;
     min-width: 0;
 
-    @media (max-width: 768px) {
+    @include mobile {
       padding-inline: 4px;
     }
   }

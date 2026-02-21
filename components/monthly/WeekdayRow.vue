@@ -30,11 +30,13 @@ const isWeekendDay = (index) => {
 </script>
 
 <style lang="scss">
+@use '~/assets/css/breakpoints' as *;
+
 .WeekdayRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   align-items: center;
-  height: 44px;
+  height: var(--section-header-height);
   padding-block: 0;
   gap: var(--spacing-md);
 
@@ -50,8 +52,8 @@ const isWeekendDay = (index) => {
     }
   }
 
-  @media (max-width: 767px) {
-    gap: 4px;
+  @include mobile {
+    gap: var(--spacing-xs);
   }
 }
 </style>

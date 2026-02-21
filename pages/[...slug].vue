@@ -13,6 +13,9 @@
 <script setup>
 import { UI_TEXT } from '~/consts/calendar.const'
 
+defineOptions({ name: 'NotFoundPage' })
+
+// methods
 const goToMonthly = () => {
   navigateTo('/monthly-view')
 }

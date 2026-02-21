@@ -14,8 +14,10 @@
   --color-success: #388e3c;
 
   /* Spacing */
+  --spacing-2xs: 0.125rem;
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
+  --spacing-sm-lg: 0.75rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
@@ -24,7 +26,12 @@
 
   /* Typography */
   --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-3xs: 0.5625rem;
+  --font-size-2xs: 0.6875rem;
   --font-size-xs: 0.75rem;
+  --icon-size-sm: 20px;
+  --icon-size-md: 1.375rem;
+  --icon-size-lg: 28px;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-md: 1rem;
@@ -34,23 +41,34 @@
   --font-size-3xl: 1.875rem;
   --font-size-4xl: 2.25rem;
 
+  /* Breakpoints (for @media and JS alignment) */
+  --breakpoint-mobile: 768px;
+  --breakpoint-mobile-narrow: 560px;
+
   /* Border radius */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
+  --radius-full: 9999px;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --shadow-card: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+  --shadow-top: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-header: 0 2px 12px rgba(0, 0, 0, 0.1);
+  --text-shadow-overlay: 0 2px 4px rgba(0, 0, 0, 0.3);
 
   /* Brand Colors */
   --brand-dark-blue: #3C92B5;
   --brand-light-blue: #80DCDA;
   --brand-dark-green: #0B974A;
   --brand-dark-green-overlay: rgba(11, 151, 74, 0.75);
+  --brand-dark-green-tint-light: rgba(11, 151, 74, 0.11);
+  --brand-dark-green-tint: rgba(11, 151, 74, 0.3);
+  --brand-dark-green-tint-strong: rgba(11, 151, 74, 0.4);
   --brand-light-green: #85C84B;
   --brand-light-green-hover: #D4E8C4;
 
@@ -59,6 +77,18 @@
 
   /* Semantic Colors */
   --disclaimer-text: #2c5aa0;
+  --color-hover: rgba(0, 0, 0, 0.05);
+  --color-active: rgba(0, 0, 0, 0.1);
+
+  /* Overlay / backdrop */
+  --overlay-dark: rgba(0, 0, 0, 0.6);
+  --overlay-dark-strong: rgba(0, 0, 0, 0.9);
+  --overlay-dark-light: rgba(0, 0, 0, 0.4);
+  --overlay-dark-subtle: rgba(0, 0, 0, 0.2);
+  --overlay-light: rgba(255, 255, 255, 0.1);
+  --overlay-light-mid: rgba(255, 255, 255, 0.2);
+  --overlay-light-strong: rgba(255, 255, 255, 0.3);
+  --disclaimer-bg: rgba(173, 216, 230, 0.15);
 
   /* Gradient */
   --gradient-start: #e8f5e9;
@@ -75,6 +105,15 @@
   --scrollbar-thumb-hover-bg: rgba(11, 151, 74, 0.8);
   --scrollbar-border-radius: 3px;
   --scrollbar-margin: 4px 0;
+
+  /* Control / UI sizes */
+  --control-height: 34px;
+  --control-height-mobile: 40px;
+  --section-header-height: 44px;
+
+  /* Chip / small UI */
+  --chip-min-height: 20px;
+  --chip-min-height-sm: 18px;
 
   /* Card */
   --card-radius: 0.75rem;
@@ -112,4 +151,8 @@
   --modal-width: 90%;
   --modal-close-size: 2rem;
   --z-index-modal: 1000;
+
+  /* Popup panels (filter, options, location) */
+  --popup-min-width: 420px;
+  --popup-max-width: 400px;
 }
