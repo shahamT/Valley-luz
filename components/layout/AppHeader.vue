@@ -11,7 +11,7 @@
           />
           <img
             v-else
-            src="/logos/galiluz-icon-round.svg"
+            src="/logos/galiluz-icon.svg"
             alt="Galiluz"
             class="AppHeader-logo AppHeader-logo--icon"
           />
