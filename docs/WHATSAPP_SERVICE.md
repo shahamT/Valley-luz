@@ -168,7 +168,7 @@ These are automatically ignored by `.gitignore`.
 
 - **Fail Closed**: If `NODE_ENV=production` and `WHATSAPP_GROUP_IDS` is missing, the process will exit with an error
 - **No Discovery in Production**: Discovery mode is disabled in production
-- **No QR in Production**: QR codes are never displayed in production mode
+- **QR in Production**: When auth is needed (first run or session expired), the QR code is shown in logs in both dev and production so you can authenticate; in production, check Render logs and use the raw QR data with an online QR generator if you cannot scan the terminal output
 
 ### Privacy
 

@@ -60,18 +60,14 @@ export async function initializeClient(options = {}) {
         const { connection, lastDisconnect, qr } = events['connection.update']
 
         if (qr) {
-          if (config.isProduction) {
-            logger.error(LOG_PREFIXES.WHATSAPP, 'QR code should not be displayed in production')
-          } else {
-            logger.info(LOG_PREFIXES.WHATSAPP, '\n=== WhatsApp QR Code ===')
-            logger.info(LOG_PREFIXES.WHATSAPP, 'Scan this QR code with your WhatsApp mobile app:')
-            logger.info(LOG_PREFIXES.WHATSAPP, '')
-            qrcode.generate(qr, { small: true })
-            logger.info(LOG_PREFIXES.WHATSAPP, '')
-            logger.info(LOG_PREFIXES.WHATSAPP, '=== Raw QR Data (paste into any online QR generator) ===')
-            logger.info(LOG_PREFIXES.WHATSAPP, qr)
-            logger.info(LOG_PREFIXES.WHATSAPP, '=== End Raw QR Data ===')
-          }
+          logger.info(LOG_PREFIXES.WHATSAPP, '\n=== WhatsApp QR Code ===')
+          logger.info(LOG_PREFIXES.WHATSAPP, 'Scan this QR code with your WhatsApp mobile app (in production: check Render logs and use raw data below if needed):')
+          logger.info(LOG_PREFIXES.WHATSAPP, '')
+          qrcode.generate(qr, { small: true })
+          logger.info(LOG_PREFIXES.WHATSAPP, '')
+          logger.info(LOG_PREFIXES.WHATSAPP, '=== Raw QR Data (paste into any online QR generator if you cannot scan from logs) ===')
+          logger.info(LOG_PREFIXES.WHATSAPP, qr)
+          logger.info(LOG_PREFIXES.WHATSAPP, '=== End Raw QR Data ===')
         }
 
         if (connection === 'open') {
