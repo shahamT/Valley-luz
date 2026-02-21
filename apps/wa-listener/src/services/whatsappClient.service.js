@@ -60,8 +60,8 @@ export async function initializeClient(options = {}) {
         const { connection, lastDisconnect, qr } = events['connection.update']
 
         if (qr) {
-          logger.info(LOG_PREFIXES.WHATSAPP, '\n=== WhatsApp QR Code ===')
-          logger.info(LOG_PREFIXES.WHATSAPP, 'Scan this QR code with your WhatsApp mobile app (in production: check Render logs and use raw data below if needed):')
+          logger.info(LOG_PREFIXES.WHATSAPP, '\n=== WhatsApp QR Code (scan to authenticate) ===')
+          logger.info(LOG_PREFIXES.WHATSAPP, 'Scan with WhatsApp mobile app. In production: use raw data below in an online QR generator if needed.')
           logger.info(LOG_PREFIXES.WHATSAPP, '')
           qrcode.generate(qr, { small: true })
           logger.info(LOG_PREFIXES.WHATSAPP, '')

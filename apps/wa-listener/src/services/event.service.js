@@ -3,10 +3,9 @@ import { logger } from '../utils/logger.js'
 import { extractMessageId } from '../utils/messageHelpers.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 import { getCategoriesList } from '../consts/events.const.js'
-import { validateEventStructure, validateSearchKeys, validateEventProgrammatic } from './eventValidation.js'
+import { validateEventStructure, validateSearchKeys } from './eventValidation.js'
 import {
   callOpenAIForClassification,
-  callOpenAIForExtraction,
   callOpenAIForComparison,
   callOpenAIForEvidenceLocator,
   callOpenAIForDescriptionBuilder,
@@ -181,12 +180,6 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
     return
   }
 
-  if (config.verificationFirstShadowMode) {
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `[Shadow] Verification-first result for ${messageId}: ${JSON.stringify({ Title: event.Title, date: occurrences[0]?.date, City: locationResult.City, price: priceResult.price })}`)
-    await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.NOT_EVENT, 'Shadow mode: not persisting', sourceGroupId, sourceGroupName)
-    return
-  }
-
   if (candidates && candidates.length > 0) {
     const comparison = await callOpenAIForComparison(event, messageText, candidates)
     if (comparison && (comparison.status === 'existing_event' || comparison.status === 'updated_event')) {
@@ -200,7 +193,7 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
 
 /**
  * Main event processing pipeline.
- * When config.verificationFirstPipeline is true, runs verification-first flow; else legacy: Classify → Extract → Validate → Compare → Enrich → Save
+ * Single pipeline: Evidence Locator → parsers → Description Builder → Compare → Enrich → Save.
  */
 export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, cloudinaryData, originalMessage, client) {
   const messageId = extractMessageId(rawMessage)
@@ -232,88 +225,7 @@ export async function processEventPipeline(eventId, rawMessage, cloudinaryUrl, c
       return
     }
 
-    if (config.verificationFirstPipeline) {
-      await processEventPipelineVerificationFirst(eventId, rawMessage, cloudinaryUrl, cloudinaryData, originalMessage, client, messageId, messagePreview, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `[Call 1/Classify] ${messageId}`)
-    const classification = await callOpenAIForClassification(messageText, cloudinaryUrl)
-
-    if (!classification) {
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.AI_CLASSIFICATION_FAILED, undefined, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    if (!classification.isEvent) {
-      logger.info(LOG_PREFIXES.EVENT_SERVICE, `Not an event (${classification.reason}) — ${messageId}`)
-      const reason = classification.reason === 'multiple_events' || classification.reason?.includes('multiple')
-        ? CONFIRMATION_REASONS.MULTIPLE_EVENTS
-        : classification.reason?.includes('date')
-          ? CONFIRMATION_REASONS.NO_DATE
-          : CONFIRMATION_REASONS.NOT_EVENT
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, reason, undefined, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    const searchKeys = validateSearchKeys(classification.searchKeys) ? classification.searchKeys : []
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `Searching candidates with ${searchKeys.length} key(s) for ${messageId}`)
-    const candidates = await findCandidateEvents(searchKeys, eventId)
-
-    const categoriesList = getCategoriesList()
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `[Call 2/Extract] ${messageId}`)
-    const extractedEvent = await callOpenAIForExtraction(messageText, cloudinaryUrl, categoriesList)
-
-    if (!extractedEvent) {
-      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Extraction failed for ${messageId}`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.AI_COMPARISON_FAILED, undefined, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `[Validate] ${messageId}`)
-    const { event: validatedEvent, corrections } = validateEventProgrammatic(extractedEvent, messageText, categoriesList)
-
-    if (!validatedEvent) {
-      const validationReason = corrections.join('; ')
-      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Validation failed for ${messageId}: ${validationReason}`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, validationReason, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    if (corrections.length > 0) {
-      logger.info(LOG_PREFIXES.EVENT_SERVICE, `Corrections (${corrections.length}): ${corrections.join('; ')}`)
-    }
-
-    const structureCheck = validateEventStructure(validatedEvent)
-    if (!structureCheck.valid) {
-      logger.error(LOG_PREFIXES.EVENT_SERVICE, `Structure invalid after validation: ${structureCheck.reason}`)
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, structureCheck.reason, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    if (!candidates || candidates.length === 0) {
-      logger.info(LOG_PREFIXES.EVENT_SERVICE, `No candidates — new event for ${messageId}`)
-      await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `[Call 3/Compare] ${messageId} vs ${candidates.length} candidate(s)`)
-    const comparison = await callOpenAIForComparison(validatedEvent, messageText, candidates)
-
-    if (!comparison) {
-      logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Comparison failed — treating as new for ${messageId}`)
-      await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    logger.info(LOG_PREFIXES.EVENT_SERVICE, `Comparison: ${comparison.status} (${comparison.reason})`)
-
-    if (comparison.status === 'existing_event' || comparison.status === 'updated_event') {
-      await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.ALREADY_EXISTING, undefined, sourceGroupId, sourceGroupName)
-      return
-    }
-
-    await handleNewEvent(eventId, rawMessage, cloudinaryUrl, cloudinaryData, validatedEvent, originalMessage, client, messagePreview, sourceGroupId, sourceGroupName)
+    await processEventPipelineVerificationFirst(eventId, rawMessage, cloudinaryUrl, cloudinaryData, originalMessage, client, messageId, messagePreview, sourceGroupId, sourceGroupName)
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     logger.error(LOG_PREFIXES.EVENT_SERVICE, `Pipeline error for ${messageId}: ${errorMsg}`)

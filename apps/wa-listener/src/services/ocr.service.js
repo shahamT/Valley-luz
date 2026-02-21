@@ -147,6 +147,7 @@ export async function runOcr(imageUrl, imageBuffer = null) {
   }
 
   if (googleResult) {
+    logger.info(LOG_PREFIXES.EVENT_SERVICE, `${OCR_PREFIX} used Google Vision`)
     return googleResult
   }
 
@@ -154,6 +155,7 @@ export async function runOcr(imageUrl, imageBuffer = null) {
     try {
       const fullText = await runOcrOpenAiVision(imageUrl, buffer)
       if (fullText) {
+        logger.info(LOG_PREFIXES.EVENT_SERVICE, `${OCR_PREFIX} used OpenAI Vision fallback`)
         return { fullText, blocks: [], lines: [] }
       }
     } catch (err) {

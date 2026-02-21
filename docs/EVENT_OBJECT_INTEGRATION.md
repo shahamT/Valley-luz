@@ -23,10 +23,13 @@ flowchart LR
     Queue[queue]
   end
   subgraph pipeline [Pipeline]
+    SourceOCR[Source + OCR]
     Classify[Classify]
-    Extract[Extract]
+    EvidenceLocator[Evidence Locator]
+    Parsers[Parsers]
+    DescBuilder[Description Builder]
+    Validate[Validate structure]
     Compare[Compare if candidates]
-    Validate[Validate]
     Enrich[Enrich]
   end
   subgraph persistence [Persistence]
@@ -35,10 +38,11 @@ flowchart LR
   end
   WA --> Serialize --> DupCheck
   DupCheck --> Media --> InsertStub --> Queue
-  Queue --> Classify --> Extract --> Validate --> Compare
+  Queue --> SourceOCR --> Classify --> EvidenceLocator --> Parsers --> DescBuilder --> Validate --> Compare
   Compare --> Enrich --> UpdateDoc
   Classify --> DeleteDoc
-  Extract --> DeleteDoc
+  EvidenceLocator --> DeleteDoc
+  DescBuilder --> DeleteDoc
   Validate --> DeleteDoc
   Compare --> DeleteDoc
 ```
@@ -78,7 +82,7 @@ The pipeline receives a **raw message** object produced by `serializeMessage(msg
 | `mediaKey` | — | Set when hasMedia (for decryption) |
 | `imgBody` | string \| null | Base64 thumbnail when hasMedia |
 
-Pipeline logic primarily uses `rawMessage.text` and, for enrichment, `rawMessage.author`. When the message had an image, the pipeline also receives a `cloudinaryUrl` (and `cloudinaryData`) from the media upload step. For image messages, OCR (Google Cloud Vision) extracts text used by the verification-first pipeline; if Google Vision is unavailable or fails, OCR can fall back to OpenAI Vision when `OCR_FALLBACK_OPENAI_VISION` is enabled.
+Pipeline logic primarily uses `rawMessage.text` and, for enrichment, `rawMessage.author`. When the message had an image, the pipeline also receives a `cloudinaryUrl` (and `cloudinaryData`) from the media upload step. For image messages, OCR (Google Cloud Vision) extracts text used by the pipeline; if Google Vision is unavailable or fails, OCR can fall back to OpenAI Vision when `OCR_FALLBACK_OPENAI_VISION` is enabled.
 
 ---
 
@@ -252,7 +256,7 @@ For reference, the enriched event object has the following shape:
 - **justifications** (object): `date`, `location`, `startTime`, `endTime`, `price` (strings)
 - **publisherPhone** (string or undefined)
 
-When the verification-first pipeline is used, the event object also includes **verificationReport** (per-field evidence candidates and chosen values for date, timeOfDay, location, price) and **needsReview** (boolean, true when location was not verified or price could not be parsed).
+The event object also includes **verificationReport** (per-field evidence candidates and chosen values for date, timeOfDay, location, price) and **needsReview** (boolean, true when location was not verified or price could not be parsed).
 
 The API or frontend may expose this with different casing (e.g. `title` vs `Title`); see `types/events.d.ts` for the application’s event types.
 

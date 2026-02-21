@@ -92,9 +92,6 @@ function loadConfig() {
       model: process.env.OPENAI_MODEL || 'gpt-4o',
       maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 2000,
     },
-    // Verification-first pipeline (evidence locator + deterministic parsers)
-    verificationFirstPipeline: process.env.VERIFICATION_FIRST_PIPELINE === 'true',
-    verificationFirstShadowMode: process.env.VERIFICATION_FIRST_SHADOW_MODE === 'true',
     // OCR (e.g. Google Cloud Vision); disabled when not configured
     ocr: {
       enabled: process.env.OCR_ENABLED === 'true',

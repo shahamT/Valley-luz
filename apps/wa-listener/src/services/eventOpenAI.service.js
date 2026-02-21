@@ -428,7 +428,12 @@ export async function callOpenAIForDescriptionBuilder(sourceDocument, verifiedCr
   const extractedUrls = sourceDocument?.extractedUrls ?? []
   const categoriesText = categoriesList.map((c) => `- ${c.id}: ${c.label}`).join('\n')
   const summary = verifiedCriticalSummary ? `Verified location: ${verifiedCriticalSummary.location?.City ?? '(none)'}; price: ${verifiedCriticalSummary.price ?? 'null'}` : ''
-  const systemPrompt = `You are a description builder for a Hebrew community events calendar. Produce only: Title, shortDescription, fullDescription (HTML with <p>,<br>,<strong>,<em>,<ul>,<ol>,<li>), categories, mainCategory, urls ({Title,Url}). Use ONLY category ids from:\n${categoriesText}`
+  const systemPrompt = `You are a description builder for a Hebrew community events calendar. Produce only: Title, shortDescription, fullDescription (HTML with <p>,<br>,<strong>,<em>,<ul>,<ol>,<li>), categories, mainCategory, urls ({Title,Url}).
+
+Categories rule: Use ONLY category ids from the list below. mainCategory is the one primary category. categories MUST be an array that includes mainCategory (mainCategory must be one of the elements in categories). Add up to 3 additional ids when the event clearly fits other types (e.g. both music and party). Single-type: categories = [mainCategory]. Multi-type example: categories: ["party", "music"], mainCategory: "party".
+
+Category ids:
+${categoriesText}`
   const userContent = `${summary}\n\nMessage:\n${messageHtml || messageText || '(empty)'}\n\nLinks: ${extractedUrls.length > 0 ? extractedUrls.join(', ') : '(none)'}`
   for (let attempt = 1; attempt <= OPENAI.MAX_ATTEMPTS; attempt++) {
     try {

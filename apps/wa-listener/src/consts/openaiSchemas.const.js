@@ -156,7 +156,7 @@ export const DESCRIPTION_BUILDER_SCHEMA = {
       Title: { type: 'string' },
       shortDescription: { type: 'string' },
       fullDescription: { type: 'string' },
-      categories: { type: 'array', items: { type: 'string' } },
+      categories: { type: 'array', items: { type: 'string' }, minItems: 1, maxItems: 4 },
       mainCategory: { type: 'string' },
       urls: {
         type: 'array',
