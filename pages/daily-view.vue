@@ -65,21 +65,19 @@ const route = useRoute()
 const router = useRouter()
 const { events, isLoading, isError, categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
-const uiStore = useUiStore()
 const { getFilteredEventsByDate } = useEventFilters(events)
 const { navigateToMonth, navigateToMonthInDailyView, navigateToDay, goToPrevDay, goToNextDay } = useCalendarNavigation()
-const { initializeFromUrl, startUrlSync } = useUrlState({ syncMonth: false })
+const { runPageInit } = useCalendarPageInit({ syncMonth: false })
 const slideToDateRequest = ref(null)
 
 // lifecycle
-onMounted(() => {
+onMounted(async () => {
   const dateFromQuery = route.query.date
   if (!dateFromQuery || !isValidRouteDate(String(dateFromQuery).trim())) {
-    router.replace({ path: '/daily-view', query: { ...route.query, date: getTodayDateString() } })
+    await router.replace({ path: '/daily-view', query: { ...route.query, date: getTodayDateString() } })
   }
-  initializeFromUrl()
-  startUrlSync()
-  uiStore.initializeModalFromUrl()
+  await nextTick()
+  runPageInit()
 })
 
 // computed
@@ -120,23 +118,13 @@ const today = computed(() => getTodayDateString())
 const isTodayOrPast = computed(() => dateParam.value <= today.value)
 const eventsByDate = computed(() => getFilteredEventsByDate(visibleDays.value))
 
-// SEO metadata with dynamic date
+// SEO metadata (reactive: useHead tracks pageTitle)
 useHead({ title: pageTitle })
 useSeoMeta({
   description: 'תצוגה יומית של אירועים ופעילויות ב-Valley Luz',
   ogTitle: pageTitle,
   ogDescription: 'תצוגה יומית של אירועים ב-Valley Luz',
 })
-
-// watchers
-watch(headerDate, (newHeaderDate) => {
-  calendarStore.setCurrentDate(newHeaderDate)
-}, { immediate: true })
-watch(dateParam, (date) => {
-  if (date && isValidRouteDate(date)) {
-    calendarStore.setLastDailyViewDate(date)
-  }
-}, { immediate: true })
 
 // methods
 const handlePrevDay = () => {
@@ -179,6 +167,16 @@ const handleBackToMonthly = () => {
 const handleViewChange = ({ view }) => {
   if (view === 'month') handleBackToMonthly()
 }
+
+// watchers
+watch(headerDate, (newHeaderDate) => {
+  calendarStore.setCurrentDate(newHeaderDate)
+}, { immediate: true })
+watch(dateParam, (date) => {
+  if (date && isValidRouteDate(date)) {
+    calendarStore.setLastDailyViewDate(date)
+  }
+}, { immediate: true })
 </script>
 
 <style lang="scss">

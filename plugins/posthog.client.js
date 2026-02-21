@@ -8,7 +8,9 @@ const noopPosthog = {
 
 export default defineNuxtPlugin(() => {
   const runtimeConfig = useRuntimeConfig()
-  if (!import.meta.env.PROD || !runtimeConfig.public.posthogPublicKey) {
+  const runInDev = runtimeConfig.public.posthogInDev === true
+  const shouldInit = runtimeConfig.public.posthogPublicKey && (import.meta.env.PROD || runInDev)
+  if (!shouldInit) {
     return { provide: { posthog: noopPosthog } }
   }
 

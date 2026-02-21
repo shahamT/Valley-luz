@@ -72,17 +72,14 @@ useSeoMeta({
 const { events, isLoading, isError, categories } = useCalendarViewData()
 const calendarStore = useCalendarStore()
 const { currentDate } = storeToRefs(calendarStore)
-const uiStore = useUiStore()
 const { getFilteredEventsForMonth } = useEventFilters(events)
 const { switchToDailyView } = useCalendarNavigation()
-const { initializeFromUrl, startUrlSync } = useUrlState({ syncMonth: true })
+const { runPageInit } = useCalendarPageInit({ syncMonth: true })
 const slideToMonthRequest = ref(null)
 
 // lifecycle
 onMounted(() => {
-  initializeFromUrl()
-  startUrlSync()
-  uiStore.initializeModalFromUrl()
+  runPageInit()
 })
 
 // computed

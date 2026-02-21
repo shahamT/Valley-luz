@@ -4,117 +4,12 @@ import { logger } from '../utils/logger.js'
 import { extractMessageId } from '../utils/messageHelpers.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 import { getCategoriesList, getDateTimeContext, isImageUrl } from '../consts/events.const.js'
+import { CLASSIFICATION_SCHEMA, EXTRACTION_SCHEMA, COMPARISON_SCHEMA } from '../consts/openaiSchemas.const.js'
 import { resolvePublisherPhone } from '../utils/contactHelpers.js'
 import { updateEventDocument, deleteEventDocument, findCandidateEvents } from './mongo.service.js'
 import { sendEventConfirmation, CONFIRMATION_REASONS } from '../utils/messageSender.js'
 import { deleteMediaFromCloudinary } from './cloudinary.service.js'
 import { convertMessageToHtml } from '../utils/whatsappFormatToHtml.js'
-
-// ─── JSON Schemas for Structured Outputs ────────────────────────────────────
-
-const CLASSIFICATION_SCHEMA = {
-  name: 'classification',
-  strict: true,
-  schema: {
-    type: 'object',
-    required: ['isEvent', 'searchKeys', 'reason'],
-    additionalProperties: false,
-    properties: {
-      isEvent: { type: 'boolean' },
-      searchKeys: { type: 'array', items: { type: 'string' } },
-      reason: { type: ['string', 'null'] },
-    },
-  },
-}
-
-const EVENT_SCHEMA_PROPERTIES = {
-  media: { type: 'array', items: { type: 'string' } },
-  urls: {
-    type: 'array',
-    items: {
-      type: 'object',
-      required: ['Title', 'Url'],
-      additionalProperties: false,
-      properties: {
-        Title: { type: 'string' },
-        Url: { type: 'string' },
-      },
-    },
-  },
-  categories: { type: 'array', items: { type: 'string' } },
-  mainCategory: { type: 'string' },
-  Title: { type: 'string' },
-  fullDescription: { type: 'string' },
-  shortDescription: { type: 'string' },
-  location: {
-    type: 'object',
-    required: ['City', 'CityEvidence', 'addressLine1', 'addressLine2', 'locationDetails', 'wazeNavLink', 'gmapsNavLink'],
-    additionalProperties: false,
-    properties: {
-      City: { type: 'string' },
-      CityEvidence: { type: ['string', 'null'] },
-      addressLine1: { type: ['string', 'null'] },
-      addressLine2: { type: ['string', 'null'] },
-      locationDetails: { type: ['string', 'null'] },
-      wazeNavLink: { type: ['string', 'null'] },
-      gmapsNavLink: { type: ['string', 'null'] },
-    },
-  },
-  price: { type: ['number', 'null'] },
-  occurrences: {
-    type: 'array',
-    minItems: 1,
-    items: {
-      type: 'object',
-      required: ['date', 'hasTime', 'startTime', 'endTime'],
-      additionalProperties: false,
-      properties: {
-        date: { type: 'string' },
-        hasTime: { type: 'boolean' },
-        startTime: { type: 'string' },
-        endTime: { type: ['string', 'null'] },
-      },
-    },
-  },
-  justifications: {
-    type: 'object',
-    required: ['date', 'location', 'startTime', 'endTime', 'price'],
-    additionalProperties: false,
-    properties: {
-      date: { type: 'string' },
-      location: { type: 'string' },
-      startTime: { type: 'string' },
-      endTime: { type: 'string' },
-      price: { type: 'string' },
-    },
-  },
-}
-
-const EXTRACTION_SCHEMA = {
-  name: 'event_extraction',
-  strict: true,
-  schema: {
-    type: 'object',
-    required: Object.keys(EVENT_SCHEMA_PROPERTIES),
-    additionalProperties: false,
-    properties: EVENT_SCHEMA_PROPERTIES,
-  },
-}
-
-const COMPARISON_SCHEMA = {
-  name: 'comparison',
-  strict: true,
-  schema: {
-    type: 'object',
-    required: ['status', 'matchedCandidateId', 'reason'],
-    additionalProperties: false,
-    properties: {
-      status: { type: 'string', enum: ['new_event', 'existing_event', 'updated_event'] },
-      matchedCandidateId: { type: ['string', 'null'] },
-      reason: { type: 'string' },
-    },
-  },
-}
 
 /** Normalized phrase for justifications when a field has no source in message or image. */
 const NOT_STATED_JUSTIFICATION = 'Not stated in message or image.'
