@@ -98,6 +98,32 @@ export const EVENT_CATEGORIES = {
 }
 
 /**
+ * Category groups for filter UI — group label and ordered category IDs
+ */
+export const CATEGORY_GROUPS = [
+  {
+    id: 'music_nature_movement',
+    label: 'מוזיקה, טבע ותנועה',
+    categoryIds: ['party', 'show', 'jam', 'festival', 'nature', 'sport', 'music'],
+  },
+  {
+    id: 'food_art_shopping',
+    label: 'אוכל, אמנות ושופינג',
+    categoryIds: ['food', 'second_hand', 'fair', 'art'],
+  },
+  {
+    id: 'community',
+    label: 'קהילה',
+    categoryIds: ['community_meetup', 'volunteering', 'religion', 'politics', 'kids'],
+  },
+  {
+    id: 'workshops_studies',
+    label: 'סדנאות ולימודים',
+    categoryIds: ['lecture', 'workshop', 'course', 'studies', 'technology', 'open_day', 'health'],
+  },
+]
+
+/**
  * Returns an array of category objects with id and label
  * @returns {Array<{id: string, label: string}>} Array of category objects
  */

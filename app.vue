@@ -2,6 +2,7 @@
   <div class="App">
     <NuxtPage />
     <EventModal v-if="isEventModalShowing" />
+    <UiWelcomeModal />
   </div>
 </template>
 

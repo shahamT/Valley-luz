@@ -4,48 +4,35 @@
       <div class="AppHeader-side AppHeader-side--logo">
         <ClientOnly>
           <img
-            v-if="!isMobile"
             src="/logos/galiluz-logo.svg"
             alt="Galiluz"
             class="AppHeader-logo"
-          />
-          <img
-            v-else
-            src="/logos/galiluz-icon.svg"
-            alt="Galiluz"
-            class="AppHeader-logo AppHeader-logo--icon"
           />
           <template #fallback>
             <span class="AppHeader-logoPlaceholder" aria-hidden="true" />
           </template>
         </ClientOnly>
       </div>
-      <div class="AppHeader-side AppHeader-side--center">
-        <button class="AppHeader-whatsappButton" aria-label="לבוט הוואטסאפ שלנו">
+      <div class="AppHeader-side AppHeader-side--whatsapp">
+        <a
+          :href="CONTACT_WHATSAPP_LINK"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="AppHeader-whatsappButton"
+          aria-label="דברו איתנו בוואטסאפ"
+        >
           <img src="/icons/whatsapp-icon.svg" alt="" class="AppHeader-whatsappIcon" />
-          <span class="AppHeader-whatsappText">לבוט הוואטסאפ שלנו</span>
-        </button>
-      </div>
-      <div class="AppHeader-side AppHeader-side--menu">
-        <ClientOnly>
-          <button class="AppHeader-menuButton" type="button" aria-label="תפריט">
-            <UiIcon name="menu" size="md" class="AppHeader-menuIcon" />
-          </button>
-          <template #fallback>
-            <span class="AppHeader-menuButtonPlaceholder" aria-hidden="true" />
-          </template>
-        </ClientOnly>
+          <span class="AppHeader-whatsappText">דברו איתנו</span>
+        </a>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { MOBILE_BREAKPOINT } from '~/consts/ui.const'
+import { CONTACT_WHATSAPP_LINK } from '~/consts/ui.const'
 
 defineOptions({ name: 'AppHeader' })
-
-const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
 </script>
 
 <style lang="scss">
@@ -66,7 +53,7 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     padding-inline: var(--spacing-3xl);
     height: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr auto;
     grid-template-rows: 1fr;
     align-items: center;
     gap: var(--spacing-md);
@@ -82,20 +69,15 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     min-width: 0;
     grid-row: 1;
 
-    &--menu {
-      justify-content: flex-end;
-      grid-column: 3;
-    }
-
-    &--center {
-      justify-content: center;
-      grid-column: 2;
-    }
-
     &--logo {
       justify-content: flex-end;
       grid-column: 1;
       direction: ltr;
+    }
+
+    &--whatsapp {
+      justify-content: flex-start;
+      grid-column: 2;
     }
   }
 
@@ -107,41 +89,10 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     direction: ltr;
   }
 
-  &-menuButtonPlaceholder {
-    display: inline-block;
-    width: var(--control-height);
-    height: var(--control-height);
-    flex-shrink: 0;
-  }
-
   &-logoPlaceholder {
     display: inline-block;
     height: 2rem;
     width: 2rem;
-    flex-shrink: 0;
-  }
-
-  &-menuButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--control-height);
-    height: var(--control-height);
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-md);
-    background-color: transparent;
-    color: var(--brand-dark-green);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    flex-shrink: 0;
-
-    &:hover {
-      background-color: var(--weekend-day-bg);
-    }
-  }
-
-  &-menuIcon {
     flex-shrink: 0;
   }
 
@@ -157,6 +108,7 @@ const isMobile = useScreenWidth(MOBILE_BREAKPOINT)
     transition: opacity 0.2s ease;
     flex-shrink: 0;
     height: var(--control-height);
+    text-decoration: none;
 
     &:hover {
       opacity: 0.9;

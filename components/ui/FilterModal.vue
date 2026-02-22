@@ -15,12 +15,14 @@
             <UiIcon name="close" size="md" />
           </button>
         </div>
-        <UiFilterPanel
-          :categories="categories"
-          :selected-categories-count="selectedCategoriesCount"
-          :hours-filter-label="hoursFilterLabel"
-          @close="handleClose"
-        />
+        <div class="FilterModal-body">
+          <UiFilterPanel
+            :categories="categories"
+            :selected-categories-count="selectedCategoriesCount"
+            :hours-filter-label="hoursFilterLabel"
+            @close="handleClose"
+          />
+        </div>
       </div>
     </div>
   </Teleport>
@@ -93,8 +95,8 @@ const handleClose = () => {
       border-radius: 0;
       margin: 0;
       padding: 0;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
+      display: flex;
+      flex-direction: column;
     }
   }
 
@@ -104,9 +106,22 @@ const handleClose = () => {
     align-items: center;
     padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
 
+  &-body {
     @include mobile {
-      display: none;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      .FilterPanel {
+        flex: 1;
+        min-height: 0;
+        height: auto;
+      }
     }
   }
 

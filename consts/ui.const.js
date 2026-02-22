@@ -6,6 +6,14 @@ export const MOBILE_BREAKPOINT = 768 // Main mobile breakpoint for layouts and n
 export const SMALL_MOBILE_BREAKPOINT = 560 // Breakpoint for compact mobile layouts (e.g., view toggle)
 export const DAY_CELL_BREAKPOINT = 920 // Breakpoint for day cell chip display logic
 
+// Welcome modal: localStorage key and expiry (days) for "first visit / every N days"
+export const WELCOME_MODAL_STORAGE_KEY = 'galiluz-welcome-seen'
+export const WELCOME_MODAL_EXPIRY_DAYS = 1
+
+// Contact: display number and WhatsApp deep link (Israel: 972 + number without leading 0)
+export const CONTACT_WHATSAPP_DISPLAY = '055-989-6278'
+export const CONTACT_WHATSAPP_LINK = 'https://wa.me/972559896278'
+
 export const MODAL_TEXT = {
   title: 'פרטי אירוע',
   close: 'סגור',

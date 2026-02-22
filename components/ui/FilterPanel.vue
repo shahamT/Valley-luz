@@ -33,14 +33,31 @@
         role="tabpanel"
         class="FilterPanel-panel FilterPanel-panel--categories"
       >
-        <UiCategoryPill
-          v-for="(category, categoryId) in categoriesList"
-          :key="categoryId"
-          :category="category"
-          :category-id="categoryId"
-          :is-selected="selectedCategoriesList.includes(categoryId)"
-          @click="handleToggleCategory(categoryId)"
-        />
+        <div
+          v-for="group in categoriesByGroup"
+          :key="group.id"
+          class="FilterPanel-group"
+        >
+          <div class="FilterPanel-groupHeader">
+            <h3 class="FilterPanel-groupTitle">{{ group.label }}</h3>
+            <button
+              type="button"
+              class="FilterPanel-groupToggleButton"
+              :aria-label="isGroupFullySelected(group) ? ariaRemoveAllGroup : ariaSelectAllGroup"
+              @click="handleGroupToggleAll(group)"
+            >
+              {{ isGroupFullySelected(group) ? REMOVE_ALL_GROUP : SELECT_ALL_GROUP }}
+            </button>
+          </div>
+          <UiCategoryPill
+            v-for="item in group.categories"
+            :key="item.id"
+            :category="item.category"
+            :category-id="item.id"
+            :is-selected="selectedCategoriesList.includes(item.id)"
+            @click="handleToggleCategory(item.id)"
+          />
+        </div>
       </div>
       <div
         v-show="activeTab === 'hours'"
@@ -74,6 +91,7 @@
 
 <script setup>
 import { UI_TEXT, MINUTES_PER_DAY } from '~/consts/calendar.const'
+import { CATEGORY_GROUPS } from '~/consts/events.const'
 
 defineOptions({ name: 'FilterPanel' })
 
@@ -102,6 +120,11 @@ const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calen
 const resetButtonText = UI_TEXT.resetFilter
 const doneButtonText = UI_TEXT.filterDone
 
+const SELECT_ALL_GROUP = 'בחר/י הכל'
+const REMOVE_ALL_GROUP = 'הסר/י הכל'
+const ariaSelectAllGroup = 'בחר את כל הקטגוריות בקבוצה'
+const ariaRemoveAllGroup = 'הסר את כל הקטגוריות בקבוצה'
+
 // computed
 const categoriesTabLabel = computed(
   () => `${UI_TEXT.categoriesFilter} (${props.selectedCategoriesCount})`
@@ -109,6 +132,17 @@ const categoriesTabLabel = computed(
 
 const selectedCategoriesList = computed(() => selectedCategories?.value ?? [])
 const categoriesList = computed(() => props.categories ?? {})
+
+const categoriesByGroup = computed(() => {
+  const categories = categoriesList.value
+  return CATEGORY_GROUPS.map((group) => ({
+    id: group.id,
+    label: group.label,
+    categories: group.categoryIds
+      .filter((id) => categories[id])
+      .map((id) => ({ id, category: categories[id] })),
+  })).filter((group) => group.categories.length > 0)
+})
 
 const isTimeFilterActive = computed(() => {
   return timeFilterStart.value !== 0 || timeFilterEnd.value !== MINUTES_PER_DAY
@@ -119,6 +153,23 @@ const hasAnyFilter = computed(() => {
 })
 
 // methods
+function isGroupFullySelected(group) {
+  return group.categories.every((item) => selectedCategoriesList.value.includes(item.id))
+}
+
+function handleGroupToggleAll(group) {
+  const selected = [...(selectedCategoriesList.value ?? [])]
+  const allSelected = group.categories.every((item) => selected.includes(item.id))
+  group.categories.forEach((item) => {
+    const isSelected = selected.includes(item.id)
+    if (allSelected && isSelected) {
+      calendarStore.toggleCategory(item.id)
+    } else if (!allSelected && !isSelected) {
+      calendarStore.toggleCategory(item.id)
+    }
+  })
+}
+
 const handleToggleCategory = (categoryId) => {
   calendarStore.toggleCategory(categoryId)
 }
@@ -137,7 +188,7 @@ const handleClearAllFilters = () => {
   height: 100%;
 
   @include mobile {
-    height: 100dvh;
+    min-height: 0;
   }
 
   &-tabs {
@@ -146,6 +197,7 @@ const handleClearAllFilters = () => {
     border-bottom: 2px solid var(--color-border);
     overflow: hidden;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    flex-shrink: 0;
 
     @include mobile {
       border-radius: 0;
@@ -185,21 +237,23 @@ const handleClearAllFilters = () => {
     padding: var(--spacing-lg);
     min-height: 320px;
     overflow-y: auto;
+    direction: ltr;
 
     @include mobile {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
     }
   }
 
   &-panel {
+    direction: rtl;
+
     &--categories {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: var(--spacing-md);
-      row-gap: calc((var(--spacing-sm) + var(--spacing-md)) / 2);
+      flex-direction: column;
+      gap: var(--spacing-lg);
+      align-items: stretch;
     }
 
     &--hours {
@@ -207,10 +261,61 @@ const handleClearAllFilters = () => {
     }
   }
 
+  &-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    row-gap: calc((var(--spacing-sm) + var(--spacing-md)) / 2);
+
+    &:not(:first-child) {
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--spacing-lg);
+      margin-top: var(--spacing-sm);
+    }
+  }
+
+  &-groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  &-groupTitle {
+    flex: 1;
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-light);
+    text-align: start;
+  }
+
+  &-groupToggleButton {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--brand-dark-green);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.85;
+      text-decoration: underline;
+    }
+  }
+
   &-footer {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
     padding-top: var(--spacing-md);
     border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
 
     @include mobile {
       display: flex;

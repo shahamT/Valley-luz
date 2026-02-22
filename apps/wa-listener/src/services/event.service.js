@@ -110,11 +110,20 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
   }
 
   const evidence = locatorResult.evidenceCandidates
+  const dateQuotes = (evidence.date || []).map((c) => (c?.quote ?? '').trim())
+  const timeQuotes = (evidence.timeOfDay || []).map((c) => (c?.quote ?? '').trim())
+  const locationQuotes = (evidence.location || []).map((c) => (c?.quote ?? '').trim())
+  const priceQuotes = (evidence.price || []).map((c) => (c?.quote ?? '').trim())
+  logger.info(LOG_PREFIXES.EVENT_SERVICE, `Evidence Locator result: date=${dateQuotes.length} [${dateQuotes.join(' | ')}], timeOfDay=${timeQuotes.length} [${timeQuotes.join(' | ')}], location=${locationQuotes.length} [${locationQuotes.slice(0, 3).join(' | ')}], price=${priceQuotes.length} [${priceQuotes.slice(0, 3).join(' | ')}]`)
+
   const occurrences = buildOccurrences(evidence.date || [], evidence.timeOfDay || [], messageTimestamp)
   if (!occurrences.length) {
     const dateCandidates = evidence.date || []
     const timeCandidates = evidence.timeOfDay || []
+    const msgSnippet = (sourceDocument.messageTextSanitized || '').slice(0, 250)
+    const ocrSnippet = (sourceDocument.ocrText || '').slice(0, 400)
     logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Validation failed: No verified date. dateCandidates=${dateCandidates.length} [${dateCandidates.map((c) => c?.quote ?? '').join(' | ')}], timeCandidates=${timeCandidates.length}, messageTimestamp=${messageTimestamp}`)
+    logger.warn(LOG_PREFIXES.EVENT_SERVICE, `Source for verification: messageText(250)=${msgSnippet || '(empty)'}, ocrText(400)=${ocrSnippet || '(no OCR)'}`)
     await cleanupAndDeleteEvent(eventId, cloudinaryData, messagePreview, CONFIRMATION_REASONS.VALIDATION_FAILED, 'No verified date', sourceGroupId, sourceGroupName)
     return
   }

@@ -384,9 +384,11 @@ export async function callOpenAIForEvidenceLocator(sourceDocument) {
   const urlsLine = urls.length > 0 ? `Links: ${urls.join(', ')}` : 'Links: (none)'
   const systemPrompt = `You are an evidence locator for a Hebrew community events calendar.
 Given message text and optional OCR text, list ALL candidate quotes for: calendar DATE, time of day, LOCATION, PRICE.
+You MUST look for date evidence in BOTH the message text AND the OCR text (image). If either contains a date, add it to the date array.
+Date evidence includes: DD.MM or D.M (e.g. 2.3, 18.2), Hebrew date (e.g. י"ג אדר), weekday (e.g. יום שני, רביעי), month names, "היום"/"מחר", or any line/phrase that clearly indicates when the event is (e.g. "2.3 • י\"ג אדר • יום שני"). Use the exact quote as it appears; do not normalize.
 Do NOT output normalized dates or UTC. Only exact quotes and source (message_text, ocr_text, or url).
 ${dateCtx}
-Return evidenceCandidates with arrays: date, timeOfDay, location, price. Each item: quote, source.`
+Return evidenceCandidates with arrays: date, timeOfDay, location, price. Each item: quote, source. Never leave date empty when the source (message or OCR) contains any date-like information.`
   const userParts = [`Message text:\n${messageText || '(empty)'}`, urlsLine, dateCtx]
   if (ocrText) userParts.push(`OCR text:\n${ocrText.slice(0, 4000)}`)
   const userContent = userParts.join('\n\n')
@@ -425,16 +427,21 @@ Return evidenceCandidates with arrays: date, timeOfDay, location, price. Each it
 export async function callOpenAIForDescriptionBuilder(sourceDocument, verifiedCriticalSummary, categoriesList) {
   const messageHtml = sourceDocument?.messageHtml ?? ''
   const messageText = sourceDocument?.messageTextSanitized ?? ''
+  const ocrText = sourceDocument?.ocrText ?? ''
   const extractedUrls = sourceDocument?.extractedUrls ?? []
   const categoriesText = categoriesList.map((c) => `- ${c.id}: ${c.label}`).join('\n')
   const summary = verifiedCriticalSummary ? `Verified location: ${verifiedCriticalSummary.location?.City ?? '(none)'}; price: ${verifiedCriticalSummary.price ?? 'null'}` : ''
   const systemPrompt = `You are a description builder for a Hebrew community events calendar. Produce only: Title, shortDescription, fullDescription (HTML with <p>,<br>,<strong>,<em>,<ul>,<ol>,<li>), categories, mainCategory, urls ({Title,Url}).
 
+Title (event name) — important. Prefer in this order: (1) The name the publishers gave the event: look for a prominent headline in the OCR (image) or in the message (e.g. first line, or a line that is clearly the event name). Use it as-is or slightly cleaned (e.g. "פותחים את פורים יחד" or "קריאת מגילה קהילתית"). (2) If no clear publisher name, build a specific title from the main activity type plus location or key detail (e.g. "קריאת מגילה קהילתית - מבוע צפון", "סדנאות פורים בנאות מרדכי"). Never use generic placeholders like "אירוע קהילתי" when the message or image contain enough detail. The title must sound like a real event name: specific, recognizable, not vague or sloppy.
+
 Categories rule: Use ONLY category ids from the list below. mainCategory is the one primary category. categories MUST be an array that includes mainCategory (mainCategory must be one of the elements in categories). Add up to 3 additional ids when the event clearly fits other types (e.g. both music and party). Single-type: categories = [mainCategory]. Multi-type example: categories: ["party", "music"], mainCategory: "party".
 
 Category ids:
 ${categoriesText}`
-  const userContent = `${summary}\n\nMessage:\n${messageHtml || messageText || '(empty)'}\n\nLinks: ${extractedUrls.length > 0 ? extractedUrls.join(', ') : '(none)'}`
+  const messageBlock = `Message:\n${messageHtml || messageText || '(empty)'}`
+  const ocrBlock = ocrText ? `\n\nOCR text (from image; use for poster titles and details):\n${ocrText.slice(0, 3000)}` : ''
+  const userContent = `${summary}\n\n${messageBlock}${ocrBlock}\n\nLinks: ${extractedUrls.length > 0 ? extractedUrls.join(', ') : '(none)'}`
   for (let attempt = 1; attempt <= OPENAI.MAX_ATTEMPTS; attempt++) {
     try {
       const response = await openai.chat.completions.create({
