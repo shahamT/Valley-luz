@@ -74,7 +74,7 @@ npm run dev
 
 ### Step 3: View Available Groups
 
-When the client is ready, it will automatically list all your groups with their IDs.
+When the client is ready, it will automatically list all your groups with their IDs. You can also list groups on demand (same auth, no MongoDB): from `apps/wa-listener` run `npm run list-groups` to print all group names and IDs plus a ready-to-paste `WHATSAPP_GROUP_IDS=...` line for your `.env`.
 
 ### Step 4: Test Message
 

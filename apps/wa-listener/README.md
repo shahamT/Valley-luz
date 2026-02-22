@@ -38,4 +38,6 @@ MONGODB_COLLECTION_RAW_MESSAGES=raw_messages
 npm run dev
 ```
 
+To list all groups (name + ID) for easy management, run from `apps/wa-listener`: `npm run list-groups`. Uses the same auth as the listener; no MongoDB required.
+
 See `docs/WHATSAPP_SERVICE.md` for full documentation.

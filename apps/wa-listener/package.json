@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node src/index.js",
     "start": "node src/index.js",
+    "list-groups": "node scripts/list-groups.js",
     "test": "node test/parsers/dateTimeParser.test.js && node test/parsers/priceParser.test.js && node test/parsers/locationVerifier.test.js"
   },
   "dependencies": {
