@@ -16,3 +16,4 @@ export {
   appendToPreviousVersions,
   getEventDocument,
 } from './eventRepository.js'
+export { findByExactText, insertProcessedText } from './processedMessageTextRepository.js'

@@ -7,14 +7,14 @@ import { LOG_PREFIXES } from '../consts/index.js'
 import { serializeMessage, processMessage, isMessageTypeAllowed } from './message.service.js'
 import { uploadMessageMedia } from './media.service.js'
 import { printGroupMetadata } from './group.service.js'
-import { insertEventDocument, findEventBySignature } from './mongo.service.js'
+import { insertEventDocument, findEventBySignature, findByExactText, insertProcessedText } from './mongo.service.js'
 import { queueMessage } from './queue.service.js'
 import { getClient } from './whatsappClient.service.js'
 import { deleteMediaFromCloudinary } from './cloudinary.service.js'
 import { sendEventConfirmation, CONFIRMATION_REASONS } from '../utils/messageSender.js'
 
 /**
- * Handles a single incoming Baileys message: duplicate check, media upload, insert event doc, queue pipeline.
+ * Handles a single incoming Baileys message: exact-text duplicate check, signature duplicate check, media upload, insert event doc, queue pipeline.
  * @param {Object} msg - Baileys message object (proto.IWebMessageInfo)
  */
 export async function handleIncomingMessage(msg) {
@@ -61,6 +61,34 @@ export async function handleIncomingMessage(msg) {
   }
 
   const messageText = rawMessage.text || ''
+
+  if (messageText.trim()) {
+    const existingByText = await findByExactText(messageText)
+    if (existingByText) {
+      // Exact text duplicate: same message already seen (e.g. same event in multiple groups) — skip all processing
+      const messageId = extractMessageId(rawMessage)
+      logger.info(LOG_PREFIXES.DUPLICATE_DETECTION, `Duplicate message (exact text match): ${messageId} - skipping processing`)
+      const messagePreview = (messageText || '').substring(0, 20) || '(no text)'
+      const reasonDetail = 'טקסט זהה להודעה שכבר נשמרה'
+      let groupName = null
+      try {
+        if (sock) {
+          const meta = await sock.groupMetadata(groupId)
+          groupName = meta.subject || null
+        }
+      } catch (_) { /* ignore */ }
+      const context = { sourceGroupId: groupId, sourceGroupName: groupName }
+      try {
+        await sendEventConfirmation(messagePreview, CONFIRMATION_REASONS.DUPLICATE_MESSAGE, reasonDetail, context)
+      } catch (sendError) {
+        const sendErrorMsg = sendError instanceof Error ? sendError.message : String(sendError)
+        logger.error(LOG_PREFIXES.WHATSAPP, `Failed to send duplicate log to log group: ${sendErrorMsg}`)
+      }
+      return
+    }
+    await insertProcessedText(messageText)
+  }
+
   const messageSignature = computeMessageSignature(messageText)
 
   if (messageSignature) {

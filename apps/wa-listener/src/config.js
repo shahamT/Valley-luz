@@ -86,6 +86,7 @@ function loadConfig() {
       dbName: mongodbDbName,
       collectionRawMessages: process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages',
       collectionEvents: process.env.MONGODB_COLLECTION_EVENTS || 'events',
+      collectionProcessedMessageTexts: process.env.MONGODB_COLLECTION_PROCESSED_MESSAGE_TEXTS || 'processed_message_texts',
     },
     // OpenAI configuration
     openai: {

@@ -35,6 +35,14 @@ export async function ensureTextIndex() {
       await collection.createIndex({ 'rawMessage.text': 'text' })
       logger.info(LOG_PREFIXES.MONGODB, 'Created text index on rawMessage.text')
     }
+
+    const processedCol = db.collection(config.mongodb.collectionProcessedMessageTexts)
+    const processedIndexes = await processedCol.indexes()
+    const hasHashIndex = processedIndexes.some(idx => idx.key && idx.key.textHash === 1)
+    if (!hasHashIndex) {
+      await processedCol.createIndex({ textHash: 1 }, { unique: true })
+      logger.info(LOG_PREFIXES.MONGODB, `Created unique index on ${config.mongodb.collectionProcessedMessageTexts}.textHash`)
+    }
     return true
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
