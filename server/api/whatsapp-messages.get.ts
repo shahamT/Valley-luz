@@ -4,10 +4,11 @@ import { checkRateLimit } from '~/server/utils/rateLimit'
 import { MESSAGES_DEFAULT, MESSAGES_MAX } from '~/server/consts/index'
 
 export default defineEventHandler(async (event) => {
-  checkRateLimit(event)
+  await checkRateLimit(event)
   requireApiSecret(event)
   const query = getQuery(event)
-  const limit = Math.min(parseInt(query.limit as string) || MESSAGES_DEFAULT, MESSAGES_MAX)
+  const parsed = parseInt(query.limit as string, 10)
+  const limit = Number.isNaN(parsed) ? MESSAGES_DEFAULT : Math.min(parsed, MESSAGES_MAX)
 
   try {
     const config = useRuntimeConfig()

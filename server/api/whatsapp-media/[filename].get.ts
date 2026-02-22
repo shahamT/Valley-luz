@@ -8,7 +8,7 @@ import { checkRateLimit } from '~/server/utils/rateLimit'
  * Looks up message by filename pattern in MongoDB and redirects to Cloudinary URL
  */
 export default defineEventHandler(async (event) => {
-  checkRateLimit(event)
+  await checkRateLimit(event)
   requireApiSecret(event)
   const filename = getRouterParam(event, 'filename')
 

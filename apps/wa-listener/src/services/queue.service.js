@@ -1,7 +1,12 @@
+import { config } from '../config.js'
 import { logger } from '../utils/logger.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 import { processEventPipeline } from './event.service.js'
 import { extractMessageId } from '../utils/messageHelpers.js'
+import { getMonthlyUsage } from './usageTracking.service.js'
+
+/** Conservative estimate of OpenAI calls per pipeline run (classification, evidence locator, description, verification, comparison, etc.). */
+const ESTIMATE_OPENAI_PER_MESSAGE = 10
 
 /**
  * Message processing queue
@@ -47,7 +52,23 @@ class MessageQueue {
 
       try {
         logger.info(LOG_PREFIXES.MESSAGE_SERVICE, `Processing message ${messageId} (${remainingInQueue} remaining in queue)`)
-        
+
+        const openAILimit = config.budget?.monthlyOpenAICallLimit ?? 0
+        const visionLimit = config.budget?.monthlyGoogleVisionLimit ?? 0
+        if (openAILimit > 0 || visionLimit > 0) {
+          const monthKey = new Date().toISOString().slice(0, 7)
+          const usage = await getMonthlyUsage(monthKey)
+          const wouldUseVision = !!(task.cloudinaryUrl && config.ocr?.enabled)
+          if (openAILimit > 0 && usage.openaiCalls + ESTIMATE_OPENAI_PER_MESSAGE > openAILimit) {
+            logger.error(LOG_PREFIXES.MESSAGE_SERVICE, `BUDGET_LIMIT_EXCEEDED service=openai month=${monthKey} limit=${openAILimit} current=${usage.openaiCalls} messageId=${messageId} — skipping message`)
+            continue
+          }
+          if (visionLimit > 0 && wouldUseVision && usage.googleVisionCalls + 1 > visionLimit) {
+            logger.error(LOG_PREFIXES.MESSAGE_SERVICE, `BUDGET_LIMIT_EXCEEDED service=google_vision month=${monthKey} limit=${visionLimit} current=${usage.googleVisionCalls} messageId=${messageId} — skipping message`)
+            continue
+          }
+        }
+
         await processEventPipeline(
           task.eventId,
           task.rawMessage,

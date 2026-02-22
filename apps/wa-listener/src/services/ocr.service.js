@@ -3,6 +3,7 @@ import { logger } from '../utils/logger.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 import { isImageUrl } from '../consts/events.const.js'
 import { openai } from './openai.service.js'
+import { incrementOpenAICalls, incrementGoogleVisionCalls } from './usageTracking.service.js'
 
 const OCR_PREFIX = 'OCR'
 
@@ -53,6 +54,7 @@ async function runOcrOpenAiVision(imageUrl, buffer) {
     messages: [{ role: 'user', content }],
     max_tokens: 2000,
   })
+  await incrementOpenAICalls()
   const text = response.choices?.[0]?.message?.content?.trim() ?? ''
   return text || null
 }
@@ -147,6 +149,7 @@ export async function runOcr(imageUrl, imageBuffer = null) {
   }
 
   if (googleResult) {
+    await incrementGoogleVisionCalls()
     logger.info(LOG_PREFIXES.EVENT_SERVICE, `${OCR_PREFIX} used Google Vision`)
     return googleResult
   }

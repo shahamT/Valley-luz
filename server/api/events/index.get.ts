@@ -1,4 +1,5 @@
 import { getMongoConnection } from '~/server/utils/mongodb'
+import { checkRateLimit } from '~/server/utils/rateLimit'
 
 /** Returns YYYY-MM-DD in Israel (Asia/Jerusalem) from an ISO date-time string. Used when deriving occurrence.date from startTime. */
 function getDateInIsraelFromIso(isoString: string | undefined): string | undefined {
@@ -68,7 +69,10 @@ function transformEventForFrontend(doc: any) {
   }
 }
 
+const EVENTS_QUERY_LIMIT = 500
+
 export default defineEventHandler(async (event) => {
+  await checkRateLimit(event)
   const config = useRuntimeConfig()
   const mongoUri = config.mongodbUri || process.env.MONGODB_URI
   const mongoDbName = config.mongodbDbName || process.env.MONGODB_DB_NAME
@@ -100,7 +104,7 @@ export default defineEventHandler(async (event) => {
       ],
     }
 
-    const documents = await collection.find(query).toArray()
+    const documents = await collection.find(query).limit(EVENTS_QUERY_LIMIT).toArray()
 
     const transformedEvents = documents
       .map((doc) => {

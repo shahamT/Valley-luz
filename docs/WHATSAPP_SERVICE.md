@@ -35,6 +35,7 @@ Create a `.env` file in `apps/wa-listener` and configure:
   - `CLOUDINARY_API_KEY` - Your Cloudinary API key (from dashboard)
   - `CLOUDINARY_API_SECRET` - Your Cloudinary API secret (from dashboard)
   - `CLOUDINARY_FOLDER=whatsapp-listener` (optional, defaults to this)
+- **Production / security:** See [SECURITY_AND_BUDGET.md](SECURITY_AND_BUDGET.md) for `API_SECRET` (Nuxt API protection) and optional monthly budget limits (`MONTHLY_OPENAI_CALL_LIMIT`, `MONTHLY_GOOGLE_VISION_LIMIT`) for the wa-listener.
 
 ### 3. Run the Service
 

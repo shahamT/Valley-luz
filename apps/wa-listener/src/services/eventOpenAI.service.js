@@ -2,6 +2,7 @@ import { openai } from './openai.service.js'
 import { config } from '../config.js'
 import { logger } from '../utils/logger.js'
 import { LOG_PREFIXES } from '../consts/index.js'
+import { incrementOpenAICalls } from './usageTracking.service.js'
 import { OPENAI } from '../consts/index.js'
 import { getDateTimeContext, isImageUrl } from '../consts/events.const.js'
 import {
@@ -138,6 +139,7 @@ Message with only "ימי ראשון ... ימי שני" (Sundays ... Mondays) an
       if (!content) return null
 
       const result = JSON.parse(content)
+      await incrementOpenAICalls()
       return {
         isEvent: result.isEvent,
         searchKeys: result.searchKeys || [],
@@ -280,7 +282,9 @@ Message: "🎶 ערב מוזיקה אתיופית - 25/02 בשעה 20:00\nמתח
       const content = response.choices[0]?.message?.content
       if (!content) return null
 
-      return JSON.parse(content)
+      const parsed = JSON.parse(content)
+      await incrementOpenAICalls()
+      return parsed
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error(LOG_PREFIXES.EVENT_SERVICE, `Extraction API error (attempt ${attempt}/${maxAttempts}): ${errorMsg}`)
@@ -355,7 +359,9 @@ Decide: new_event, existing_event, or updated_event?`
       const content = response.choices[0]?.message?.content
       if (!content) return null
 
-      return JSON.parse(content)
+      const parsed = JSON.parse(content)
+      await incrementOpenAICalls()
+      return parsed
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error(LOG_PREFIXES.EVENT_SERVICE, `Comparison API error (attempt ${attempt}/${maxAttempts}): ${errorMsg}`)
@@ -404,7 +410,10 @@ Return evidenceCandidates with arrays: date, timeOfDay, location, price. Each it
       const content = response.choices[0]?.message?.content
       if (!content) return null
       const parsed = JSON.parse(content)
-      if (parsed?.evidenceCandidates) return parsed
+      if (parsed?.evidenceCandidates) {
+        await incrementOpenAICalls()
+        return parsed
+      }
       return null
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
@@ -453,7 +462,9 @@ ${categoriesText}`
       })
       const content = response.choices[0]?.message?.content
       if (!content) return null
-      return JSON.parse(content)
+      const parsed = JSON.parse(content)
+      await incrementOpenAICalls()
+      return parsed
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error(LOG_PREFIXES.EVENT_SERVICE, `Description builder API error (attempt ${attempt}): ${errorMsg}`)
@@ -484,7 +495,9 @@ export async function callOpenAIForFieldVerification(verifiedEvent, evidenceQuot
       })
       const content = response.choices[0]?.message?.content
       if (!content) return null
-      return JSON.parse(content)
+      const parsed = JSON.parse(content)
+      await incrementOpenAICalls()
+      return parsed
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       logger.error(LOG_PREFIXES.EVENT_SERVICE, `Field verification API error (attempt ${attempt}): ${errorMsg}`)

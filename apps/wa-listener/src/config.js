@@ -87,6 +87,12 @@ function loadConfig() {
       collectionRawMessages: process.env.MONGODB_COLLECTION_RAW_MESSAGES || 'raw_messages',
       collectionEvents: process.env.MONGODB_COLLECTION_EVENTS || 'events',
       collectionProcessedMessageTexts: process.env.MONGODB_COLLECTION_PROCESSED_MESSAGE_TEXTS || 'processed_message_texts',
+      collectionApiUsage: process.env.MONGODB_COLLECTION_API_USAGE || 'api_usage',
+    },
+    // Monthly API budget limits (0 = disabled). When set, pipeline skips processing when limit exceeded.
+    budget: {
+      monthlyOpenAICallLimit: parseInt(process.env.MONTHLY_OPENAI_CALL_LIMIT, 10) || 0,
+      monthlyGoogleVisionLimit: parseInt(process.env.MONTHLY_GOOGLE_VISION_LIMIT, 10) || 0,
     },
     // OpenAI configuration
     openai: {
