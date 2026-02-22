@@ -5,6 +5,25 @@ const HEBREW_DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמי
 const HEBREW_MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר']
 const ENGLISH_MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december']
 
+const MAX_OCCURRENCES_FROM_RANGE = 60
+
+/** Expand startDate (YYYY-MM-DD) through endDate (inclusive) into array of YYYY-MM-DD; cap at maxLen. */
+function expandDateRange(startDate, endDate, maxLen = MAX_OCCURRENCES_FROM_RANGE) {
+  const start = new Date(startDate + 'T12:00:00Z')
+  const end = new Date(endDate + 'T12:00:00Z')
+  if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return []
+  const out = []
+  const cur = new Date(start)
+  while (cur <= end && out.length < maxLen) {
+    const y = cur.getUTCFullYear()
+    const m = String(cur.getUTCMonth() + 1).padStart(2, '0')
+    const d = String(cur.getUTCDate()).padStart(2, '0')
+    out.push(`${y}-${m}-${d}`)
+    cur.setUTCDate(cur.getUTCDate() + 1)
+  }
+  return out
+}
+
 /**
  * Parse explicit date from quote: DD/MM, DD.MM, DD-MM, D.M, Hebrew/English month.
  * @param {string} quote - Raw quote
@@ -59,6 +78,71 @@ export function parseDateFromQuote(quote, refUnixSeconds) {
     if (day < 1 || day > 31) return null
     const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     return { date: dateStr }
+  }
+
+  return null
+}
+
+/**
+ * Parse date range from quote: DD-DD.MM, DD.MM-DD.MM, or Hebrew "X עד Y בפברואר". Returns array of YYYY-MM-DD or null.
+ * @param {string} quote - Raw quote
+ * @param {number|null} refUnixSeconds - Message timestamp for year
+ * @returns {{ dates: string[] } | null}
+ */
+export function parseDateRangeFromQuote(quote, refUnixSeconds) {
+  if (!quote || typeof quote !== 'string') return null
+  const s = quote.trim()
+  const ref = refUnixSeconds != null && Number.isFinite(refUnixSeconds) ? new Date(refUnixSeconds * 1000) : new Date()
+  const year = ref.getFullYear()
+
+  const ddMmDashDdMm = s.match(/(\d{1,2})[./\-](\d{1,2})\s*-\s*(\d{1,2})[./\-](\d{1,2})(?:[./\-](\d{2,4}))?/)
+  if (ddMmDashDdMm) {
+    const [, d1, m1, d2, m2, yPart] = ddMmDashDdMm
+    const month1 = parseInt(m1, 10)
+    const month2 = parseInt(m2, 10)
+    if (month1 < 1 || month1 > 12 || month2 < 1 || month2 > 12) return null
+    const day1 = parseInt(d1, 10)
+    const day2 = parseInt(d2, 10)
+    if (day1 < 1 || day1 > 31 || day2 < 1 || day2 > 31) return null
+    const y = yPart ? (parseInt(yPart, 10) < 100 ? 2000 + parseInt(yPart, 10) : parseInt(yPart, 10)) : year
+    const startStr = `${y}-${String(month1).padStart(2, '0')}-${String(day1).padStart(2, '0')}`
+    const endStr = `${y}-${String(month2).padStart(2, '0')}-${String(day2).padStart(2, '0')}`
+    const dates = expandDateRange(startStr, endStr)
+    if (dates.length === 0) return null
+    return { dates }
+  }
+
+  const ddDashDdMm = s.match(/(\d{1,2})\s*-\s*(\d{1,2})[./\-](\d{1,2})(?:[./\-](\d{2,4}))?/)
+  if (ddDashDdMm) {
+    const [, d1, d2, m, yPart] = ddDashDdMm
+    const month = parseInt(m, 10)
+    if (month < 1 || month > 12) return null
+    const day1 = parseInt(d1, 10)
+    const day2 = parseInt(d2, 10)
+    if (day1 < 1 || day1 > 31 || day2 < 1 || day2 > 31) return null
+    const y = yPart ? (parseInt(yPart, 10) < 100 ? 2000 + parseInt(yPart, 10) : parseInt(yPart, 10)) : year
+    const startStr = `${y}-${String(month).padStart(2, '0')}-${String(Math.min(day1, day2)).padStart(2, '0')}`
+    const endStr = `${y}-${String(month).padStart(2, '0')}-${String(Math.max(day1, day2)).padStart(2, '0')}`
+    const dates = expandDateRange(startStr, endStr)
+    if (dates.length === 0) return null
+    return { dates }
+  }
+
+  const hebrewRange = s.match(/(\d{1,2})\s*עד\s*(?:ה)?(\d{1,2})\s*(?:ב)?(בפברואר|בינואר|במרץ|באפריל|במאי|ביוני|ביולי|באוגוסט|בספטמבר|באוקטובר|בנובמבר|בדצמבר|פברואר|ינואר|מרץ|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר)/i)
+  if (hebrewRange) {
+    const [, d1, d2, monthPart] = hebrewRange
+    const monthName = monthPart.replace(/^ב/, '').trim()
+    const monthIndex = HEBREW_MONTHS.findIndex((m) => monthName === m || monthName.includes(m))
+    if (monthIndex === -1) return null
+    const month = monthIndex + 1
+    const day1 = parseInt(d1, 10)
+    const day2 = parseInt(d2, 10)
+    if (day1 < 1 || day1 > 31 || day2 < 1 || day2 > 31) return null
+    const startStr = `${year}-${String(month).padStart(2, '0')}-${String(Math.min(day1, day2)).padStart(2, '0')}`
+    const endStr = `${year}-${String(month).padStart(2, '0')}-${String(Math.max(day1, day2)).padStart(2, '0')}`
+    const dates = expandDateRange(startStr, endStr)
+    if (dates.length === 0) return null
+    return { dates }
   }
 
   return null
@@ -174,11 +258,31 @@ export function parseDateEvidence(candidates, messageTimestamp) {
 }
 
 /**
- * Parse time evidence and return hasTime, startTime (ISO UTC), endTime (ISO UTC | null).
+ * Parse date or date range evidence: tries range first, then single date, then relative.
+ * @returns {{ dates: string[], evidenceQuote: string|null, evidenceSource: string|null }}
+ */
+export function parseDateOrRangeEvidence(candidates, messageTimestamp) {
+  const list = Array.isArray(candidates) ? candidates : []
+  const ts = messageTimestamp != null && Number.isFinite(messageTimestamp) ? messageTimestamp : Math.floor(Date.now() / 1000)
+  for (const c of list) {
+    const q = c?.quote?.trim()
+    if (!q) continue
+    const range = parseDateRangeFromQuote(q, ts)
+    if (range?.dates?.length) return { dates: range.dates, evidenceQuote: q, evidenceSource: c.source || 'message_text' }
+    const explicit = parseDateFromQuote(q, ts)
+    if (explicit) return { dates: [explicit.date], evidenceQuote: q, evidenceSource: c.source || 'message_text' }
+    const relative = parseRelativeDateFromQuote(q, ts)
+    if (relative) return { dates: [relative.date], evidenceQuote: q, evidenceSource: c.source || 'message_text' }
+  }
+  return { dates: [], evidenceQuote: null, evidenceSource: null }
+}
+
+/**
+ * Parse time evidence and return hasTime, startTime (ISO UTC), endTime (ISO UTC | null), and when hasTime: hour, minute, endHour, endMinute.
  * @param {Array<{ quote: string, source: string }>} candidates
  * @param {string} dateStr - YYYY-MM-DD
  * @param {number|null} messageTimestamp
- * @returns {{ hasTime: boolean, startTime: string, endTime: string | null, evidenceQuote: string | null, evidenceSource: string | null }}
+ * @returns {{ hasTime: boolean, startTime: string, endTime: string | null, hour?: number, minute?: number, endHour?: number, endMinute?: number, evidenceQuote: string | null, evidenceSource: string | null }}
  */
 export function parseTimeEvidence(candidates, dateStr, messageTimestamp) {
   const list = Array.isArray(candidates) ? candidates : []
@@ -199,6 +303,10 @@ export function parseTimeEvidence(candidates, dateStr, messageTimestamp) {
       hasTime: true,
       startTime,
       endTime,
+      hour: parsed.hour,
+      minute: parsed.minute,
+      endHour: parsed.endHour ?? undefined,
+      endMinute: parsed.endMinute ?? undefined,
       evidenceQuote: q,
       evidenceSource: c.source || 'message_text',
     }
@@ -214,29 +322,45 @@ export function parseTimeEvidence(candidates, dateStr, messageTimestamp) {
 }
 
 /**
- * Build occurrences array from date and time evidence. Single occurrence when one date; multi-day not expanded here.
+ * Build occurrences array from date (or date range) and time evidence. One occurrence per date; same time applied to each day.
  * @param {Array<{ quote: string, source: string }>} dateCandidates
  * @param {Array<{ quote: string, source: string }>} timeCandidates
  * @param {number|null} messageTimestamp
  * @returns {Array<{ date: string, hasTime: boolean, startTime: string, endTime: string | null, verified: boolean, evidenceQuote?: string, evidenceSource?: string }>}
  */
 export function buildOccurrences(dateCandidates, timeCandidates, messageTimestamp) {
-  const { date, evidenceQuote: dateQuote, evidenceSource: dateSource } = parseDateEvidence(dateCandidates, messageTimestamp)
-  if (!date) {
+  const { dates, evidenceQuote: dateQuote, evidenceSource: dateSource } = parseDateOrRangeEvidence(dateCandidates, messageTimestamp)
+  if (!dates.length) {
     return []
   }
-  const timeResult = parseTimeEvidence(timeCandidates, date, messageTimestamp)
+  const timeResult = parseTimeEvidence(timeCandidates, dates[0], messageTimestamp)
   const verified = !!(dateQuote && (timeResult.hasTime ? timeResult.evidenceQuote : true))
-  const occ = {
-    date,
-    hasTime: timeResult.hasTime,
-    startTime: timeResult.startTime,
-    endTime: timeResult.endTime,
-    verified,
+  const result = []
+  for (const date of dates) {
+    let startTime
+    let endTime = null
+    if (timeResult.hasTime && timeResult.hour != null && timeResult.minute != null) {
+      const timeStr = `${timeResult.hour}:${String(timeResult.minute).padStart(2, '0')}`
+      startTime = localTimeIsraelToUtcIso(date, timeStr)
+      if (timeResult.endHour != null && timeResult.endMinute != null) {
+        const endStr = `${timeResult.endHour}:${String(timeResult.endMinute).padStart(2, '0')}`
+        endTime = localTimeIsraelToUtcIso(date, endStr) || null
+      }
+    } else {
+      startTime = israelMidnightToUtcIso(date)
+    }
+    const occ = {
+      date,
+      hasTime: timeResult.hasTime,
+      startTime,
+      endTime,
+      verified,
+    }
+    if (dateQuote) {
+      occ.evidenceQuote = [dateQuote, timeResult.evidenceQuote].filter(Boolean).join('; ') || dateQuote
+      occ.evidenceSource = dateSource || timeResult.evidenceSource
+    }
+    result.push(occ)
   }
-  if (dateQuote) {
-    occ.evidenceQuote = [dateQuote, timeResult.evidenceQuote].filter(Boolean).join('; ') || dateQuote
-    occ.evidenceSource = dateSource || timeResult.evidenceSource
-  }
-  return [occ]
+  return result
 }

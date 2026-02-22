@@ -132,7 +132,7 @@ async function processEventPipelineVerificationFirst(eventId, rawMessage, cloudi
   const priceResult = parsePriceEvidence(evidence.price || [])
 
   const verificationReport = {
-    date: { candidates: evidence.date || [], chosen: occurrences[0]?.date ?? null, reasonChosen: occurrences[0]?.evidenceQuote || 'parsed from evidence' },
+    date: { candidates: evidence.date || [], chosen: occurrences.length > 1 ? `${occurrences[0]?.date}…${occurrences[occurrences.length - 1]?.date}` : (occurrences[0]?.date ?? null), reasonChosen: occurrences[0]?.evidenceQuote || 'parsed from evidence' },
     timeOfDay: { candidates: evidence.timeOfDay || [], chosen: occurrences[0]?.startTime ?? null, reasonChosen: occurrences[0]?.evidenceQuote || 'parsed' },
     location: { candidates: evidence.location || [], chosen: locationResult, reasonChosen: locationResult.evidenceQuote || 'verified' },
     price: { candidates: evidence.price || [], chosen: priceResult.price, reasonChosen: priceResult.evidenceQuote || 'parsed' },

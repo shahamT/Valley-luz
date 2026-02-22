@@ -391,7 +391,7 @@ export async function callOpenAIForEvidenceLocator(sourceDocument) {
   const systemPrompt = `You are an evidence locator for a Hebrew community events calendar.
 Given message text and optional OCR text, list ALL candidate quotes for: calendar DATE, time of day, LOCATION, PRICE.
 You MUST look for date evidence in BOTH the message text AND the OCR text (image). If either contains a date, add it to the date array.
-Date evidence includes: DD.MM or D.M (e.g. 2.3, 18.2), Hebrew date (e.g. י"ג אדר), weekday (e.g. יום שני, רביעי), month names, "היום"/"מחר", or any line/phrase that clearly indicates when the event is (e.g. "2.3 • י\"ג אדר • יום שני"). Use the exact quote as it appears; do not normalize.
+Date evidence includes: DD.MM or D.M (e.g. 2.3, 18.2), Hebrew date (e.g. י"ג אדר), weekday (e.g. יום שני, רביעי), month names, "היום"/"מחר", or any line/phrase that clearly indicates when the event is (e.g. "2.3 • י\"ג אדר • יום שני"). Date evidence can also be a range or multiple dates (e.g. 18-23.2, 18.2-1.3, 18 עד 21 בפברואר); return the exact quote as written. Use the exact quote as it appears; do not normalize.
 Do NOT output normalized dates or UTC. Only exact quotes and source (message_text, ocr_text, or url).
 ${dateCtx}
 Return evidenceCandidates with arrays: date, timeOfDay, location, price. Each item: quote, source. Never leave date empty when the source (message or OCR) contains any date-like information.`

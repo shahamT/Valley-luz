@@ -7,6 +7,8 @@ import {
   parseRelativeDateFromQuote,
   parseTimeFromQuote,
   parseDateEvidence,
+  parseDateRangeFromQuote,
+  parseDateOrRangeEvidence,
   parseTimeEvidence,
   buildOccurrences,
 } from '../../src/parsers/dateTimeParser.js'
@@ -59,6 +61,27 @@ function run() {
 
   const noDate = buildOccurrences([], [], refUnix)
   ok('no date candidates -> empty occurrences', noDate.length === 0)
+
+  const range1 = parseDateRangeFromQuote('18-23.2', refUnix)
+  ok('parseDateRangeFromQuote 18-23.2 returns 6 dates', range1 && range1.dates.length === 6 && range1.dates[0] === '2025-02-18' && range1.dates[5] === '2025-02-23')
+  const range2 = parseDateRangeFromQuote('18.2 - 1.3', refUnix)
+  ok('parseDateRangeFromQuote 18.2-1.3 cross-month', range2 && range2.dates.length === 12 && range2.dates[0] === '2025-02-18' && range2.dates[11] === '2025-03-01')
+  const range3 = parseDateRangeFromQuote('18 עד ה21 בפברואר', refUnix)
+  ok('parseDateRangeFromQuote Hebrew 18 עד ה21 בפברואר returns 4 dates', range3 && range3.dates.length === 4 && range3.dates[0] === '2025-02-18' && range3.dates[3] === '2025-02-21')
+  ok('parseDateRangeFromQuote non-range returns null', parseDateRangeFromQuote('25/02', refUnix) === null)
+
+  const rangeEvidence = parseDateOrRangeEvidence([{ quote: '18-23.2', source: 'message_text' }], refUnix)
+  ok('parseDateOrRangeEvidence range returns dates array', rangeEvidence.dates.length === 6)
+  const singleEvidence = parseDateOrRangeEvidence([{ quote: '25/02', source: 'message_text' }], refUnix)
+  ok('parseDateOrRangeEvidence single date returns one date', singleEvidence.dates.length === 1)
+
+  const multiOccs = buildOccurrences(
+    [{ quote: '18-23.2', source: 'message_text' }],
+    [{ quote: '20:00', source: 'message_text' }],
+    refUnix
+  )
+  ok('buildOccurrences with range returns multiple occurrences', multiOccs.length === 6)
+  ok('multi-occurrence same time on each', multiOccs.every((o) => o.hasTime && o.startTime && o.date && o.date.startsWith('2025-02')))
 
   console.log(`\nResult: ${passed} passed, ${failed} failed`)
   process.exit(failed > 0 ? 1 : 0)
