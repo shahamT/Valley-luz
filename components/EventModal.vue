@@ -37,6 +37,7 @@
             <!-- Info Bar (Location, Time, Price) -->
             <UiEventModalInfoBar
               :basic-location="basicLocation"
+              :event-date-and-day="eventDateAndDay"
               :event-time="eventTime"
               :event-price="eventPrice"
               :has-location-details="hasLocationDetails"
@@ -170,6 +171,7 @@ const {
   eventImages,
   eventMedia,
   eventTime,
+  eventDateAndDay,
   eventPrice,
   eventDescription,
   basicLocation,
@@ -263,7 +265,10 @@ watch(isEventModalShowing, (isShowing) => {
   &-body {
     @include mobile {
       flex: 1;
-      padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
+      min-height: 0;
+      overflow-y: auto;
+      background-color: var(--color-background);
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
     }
   }
 

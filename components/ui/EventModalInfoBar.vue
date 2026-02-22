@@ -16,6 +16,11 @@
     </div>
     <div class="EventModal-infoDivider" />
     <div class="EventModal-infoItem">
+      <UiIcon name="calendar_month" size="md" color="var(--brand-dark-green)" class="EventModal-infoIcon" />
+      <span>{{ eventDateAndDay || '—' }}</span>
+    </div>
+    <div class="EventModal-infoDivider" />
+    <div class="EventModal-infoItem">
       <UiIcon name="schedule" size="md" color="var(--brand-dark-green)" class="EventModal-infoIcon" />
       <span>{{ eventTime }}</span>
     </div>
@@ -46,6 +51,10 @@ const props = defineProps({
   basicLocation: {
     type: String,
     required: true,
+  },
+  eventDateAndDay: {
+    type: String,
+    default: '',
   },
   eventTime: {
     type: String,

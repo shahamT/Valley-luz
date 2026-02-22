@@ -120,8 +120,8 @@ const { selectedCategories, timeFilterStart, timeFilterEnd } = storeToRefs(calen
 const resetButtonText = UI_TEXT.resetFilter
 const doneButtonText = UI_TEXT.filterDone
 
-const SELECT_ALL_GROUP = 'בחר/י הכל'
-const REMOVE_ALL_GROUP = 'הסר/י הכל'
+const SELECT_ALL_GROUP = 'בחרו הכל'
+const REMOVE_ALL_GROUP = 'הסירו הכל'
 const ariaSelectAllGroup = 'בחר את כל הקטגוריות בקבוצה'
 const ariaRemoveAllGroup = 'הסר את כל הקטגוריות בקבוצה'
 
@@ -271,8 +271,8 @@ function handleClearAllFilters() {
 
     &:not(:first-child) {
       border-top: 1px solid var(--color-border);
-      padding-top: var(--spacing-lg);
-      margin-top: var(--spacing-sm);
+      padding-top: var(--spacing-sm);
+      margin-top: var(--spacing-xs);
     }
   }
 
@@ -288,7 +288,7 @@ function handleClearAllFilters() {
   &-groupTitle {
     flex: 1;
     margin: 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--color-text-light);
     text-align: start;

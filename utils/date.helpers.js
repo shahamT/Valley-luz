@@ -208,7 +208,7 @@ export function isBeforeToday(date) {
 }
 
 /**
- * Formats date for kanban column header (e.g., "יום שני, 20.2")
+ * Formats date for kanban column header (e.g., "שני, 20.2")
  * @param {string} dateString - Date string in YYYY-MM-DD format
  * @returns {string} Formatted date string (weekday, day.month)
  */
@@ -218,6 +218,26 @@ export function formatKanbanDateHeader(dateString) {
   const day = date.getDate()
   const month = date.getMonth() + 1
   return `${weekday}, ${day}.${month}`
+}
+
+/**
+ * Formats date for event modal (e.g., "יום רביעי, 22.4")
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {string} Formatted date string (יום weekday, day.month) or '' if invalid
+ */
+export function formatEventDateAndDay(dateString) {
+  if (!dateString || typeof dateString !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateString.trim())) {
+    return ''
+  }
+  try {
+    const date = parseDateString(dateString.trim().slice(0, 10))
+    const weekday = HEBREW_WEEKDAYS[date.getDay()]
+    const day = date.getDate()
+    const month = date.getMonth() + 1
+    return `יום ${weekday}, ${day}.${month}`
+  } catch {
+    return ''
+  }
 }
 
 /**

@@ -1,5 +1,5 @@
 import { formatEventTime, formatEventPrice } from '~/utils/events.helpers'
-import { getDateInIsraelFromIso } from '~/utils/date.helpers'
+import { getDateInIsraelFromIso, formatEventDateAndDay } from '~/utils/date.helpers'
 import { isVideoUrl, getCloudinaryVideoThumbnailUrl } from '~/utils/media.helpers'
 import { MODAL_TEXT } from '~/consts/ui.const'
 
@@ -73,6 +73,11 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
   const eventTime = computed(() => {
     if (!selectedOccurrence.value) return ''
     return formatEventTime(selectedOccurrence.value)
+  })
+
+  const eventDateAndDay = computed(() => {
+    const dateStr = calendarStartDate.value
+    return dateStr ? formatEventDateAndDay(dateStr) : ''
   })
 
   const eventPrice = computed(() => {
@@ -153,6 +158,7 @@ export function useEventModalData(selectedEvent, selectedOccurrence) {
     eventImages,
     eventMedia,
     eventTime,
+    eventDateAndDay,
     eventPrice,
     eventDescription,
     basicLocation,

@@ -79,14 +79,11 @@ const getCategoryLabel = (categoryId) => {
 .EventModal {
   &-imageHeader {
     position: relative;
-    min-height: 180px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-
-    @include mobile {
-      min-height: 160px;
-    }
+    flex-shrink: 0;
+    min-height: min-content;
   }
 
   &-image {
@@ -152,10 +149,11 @@ const getCategoryLabel = (categoryId) => {
     padding: var(--spacing-lg);
     padding-top: 80px;
     z-index: 5;
+    flex-shrink: 0;
 
     @include mobile {
       padding: var(--spacing-md);
-      padding-top: var(--spacing-lg);
+      padding-top: 80px;
     }
   }
 
