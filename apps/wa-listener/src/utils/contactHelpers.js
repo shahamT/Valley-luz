@@ -2,12 +2,13 @@ import { logger } from './logger.js'
 import { LOG_PREFIXES } from '../consts/index.js'
 
 /**
- * Resolves WhatsApp author ID to phone number
- * In Baileys, participant JIDs are typically "972501234567@s.whatsapp.net"
- * @param {string} authorId - Participant JID from message
- * @param {Object} message - Baileys message object (unused but kept for API compatibility)
- * @param {Object} sock - Baileys socket instance
- * @returns {Promise<string|undefined>} Phone number string or undefined
+ * Resolves WhatsApp author ID to phone number.
+ * In Baileys, participant can be a phone JID (972501234567@s.whatsapp.net) or a LID (e.g. 82734072487978@lid).
+ * For LID we use message.key.participantAlt (Baileys v7) or sock.signalRepository.lidMapping.getPNForLID.
+ * @param {string} authorId - Participant JID from message (may be LID or phone JID)
+ * @param {Object} message - Baileys message object (message.key.participantAlt when participant is LID)
+ * @param {Object} sock - Baileys socket instance (signalRepository.lidMapping for LID lookup)
+ * @returns {Promise<string|undefined>} Phone number string (digits) or undefined
  */
 export async function resolvePublisherPhone(authorId, message, sock) {
   if (!authorId) {
@@ -15,13 +16,28 @@ export async function resolvePublisherPhone(authorId, message, sock) {
   }
 
   try {
-    // Method 1: Extract phone directly from participant JID (most reliable in Baileys)
-    const phone = extractPhoneFromJid(authorId)
-    if (phone) {
-      return phone
+    // LID: never use LID digits as phone; resolve via participantAlt or lidMapping (Baileys v7)
+    if (authorId.endsWith('@lid')) {
+      const fromAlt = message?.key?.participantAlt && extractPhoneFromJid(message.key.participantAlt)
+      if (fromAlt) return fromAlt
+      const lidMapping = sock?.signalRepository?.lidMapping
+      if (typeof lidMapping?.getPNForLID === 'function') {
+        try {
+          const pnJid = await lidMapping.getPNForLID(authorId)
+          if (pnJid) {
+            const phone = extractPhoneFromJid(pnJid)
+            if (phone) return phone
+          }
+        } catch (_) { /* continue */ }
+      }
+      logger.warn(LOG_PREFIXES.CONTACT_SERVICE, `Could not resolve phone for LID authorId: ${authorId}`)
+      return undefined
     }
 
-    // Method 2: Try onWhatsApp lookup if sock is available
+    // Phone JID: extract digits; fallback onWhatsApp if needed
+    const phone = extractPhoneFromJid(authorId)
+    if (phone) return phone
+
     if (sock?.onWhatsApp) {
       try {
         const [result] = await sock.onWhatsApp(authorId)
@@ -42,22 +58,24 @@ export async function resolvePublisherPhone(authorId, message, sock) {
 }
 
 /**
- * Extracts phone number from a WhatsApp JID
- * Handles formats like:
- * - "972501234567@s.whatsapp.net" -> "972501234567"
- * - "972501234567@c.us" -> "972501234567"
- * - "82734072487978@lid" -> tries to extract digits
+ * Extracts phone number from a WhatsApp JID.
+ * Handles: "972501234567@s.whatsapp.net" -> "972501234567"; "972501234567:0@s.whatsapp.net" -> "972501234567".
+ * Does not treat LID as phone (LID digits are not a wa.me number).
  * @param {string} jid - WhatsApp JID string
- * @returns {string|undefined} Phone number or undefined
+ * @returns {string|undefined} Phone number (digits) or undefined
  */
 function extractPhoneFromJid(jid) {
   if (!jid || typeof jid !== 'string') {
     return undefined
   }
+  if (jid.endsWith('@lid')) {
+    return undefined
+  }
 
   const number = jid.split('@')[0]
-  if (/^\d+$/.test(number) && number.length >= 7 && number.length <= 15) {
-    return number
+  const userPart = number.includes(':') ? number.split(':')[0] : number
+  if (/^\d+$/.test(userPart) && userPart.length >= 7 && userPart.length <= 15) {
+    return userPart
   }
 
   const digitMatch = jid.match(/\d{7,15}/)

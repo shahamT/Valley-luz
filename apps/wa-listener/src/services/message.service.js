@@ -49,7 +49,7 @@ export function serializeMessage(msg) {
   serialized.notifyName = msg.pushName || null
   serialized.from = msg.key?.remoteJid || null
   serialized.to = msg.key?.remoteJid || null
-  serialized.author = msg.key?.participant || null
+  serialized.author = msg.key?.participantAlt || msg.key?.participant || null
 
   if (hasMedia) {
     serialized.imgBody = inner?.jpegThumbnail ? Buffer.from(inner.jpegThumbnail).toString('base64') : null

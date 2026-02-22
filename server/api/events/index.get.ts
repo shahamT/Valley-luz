@@ -64,6 +64,7 @@ function transformEventForFrontend(doc: any) {
     isActive: doc.isActive !== false,
     dateCreated: dateCreated,
     publisherPhone: backendEvent.publisherPhone || undefined,
+    publisherName: backendEvent.publisherName || undefined,
   }
 }
 

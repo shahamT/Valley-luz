@@ -20,6 +20,9 @@ export async function enrichEvent(event, authorId, cloudinaryUrl, originalMessag
     event.publisherPhone = undefined
   }
 
+  const pushName = originalMessage?.pushName
+  event.publisherName = typeof pushName === 'string' && pushName.trim() ? pushName.trim() : undefined
+
   event.media = cloudinaryUrl ? [cloudinaryUrl] : []
 
   return event

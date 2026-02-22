@@ -51,6 +51,7 @@ export interface Event {
   urls?: Array<{ Title: string; Url: string }> // Array of URL objects with Title and Url
   media?: any[] // Media attachments (images, videos)
   publisherPhone?: string // WhatsApp contact number
+  publisherName?: string // Sender display name (push name) from WhatsApp
 }
 
 /**
