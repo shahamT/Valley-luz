@@ -2,13 +2,18 @@
 
 ## API secret (production)
 
-The Nuxt API routes `/api/whatsapp-messages` and `/api/whatsapp-media/[filename]` are protected by an optional API secret.
+The Nuxt API routes `/api/whatsapp-messages` and `/api/whatsapp-media/[filename]` are protected by an API secret.
 
 - **Env:** `API_SECRET` (server-side, e.g. in `.env` or deployment env).
-- **Behavior:** If `API_SECRET` is set, every request to these routes must send the same value via:
-  - Header: `X-API-Key: <your-secret>`
-  - Or query: `?apiKey=<your-secret>`
-- **Recommendation:** In production, always set `API_SECRET`. If it is not set, these routes are reachable by anyone (only rate-limited). Set a strong random value and keep it out of client-side code.
+- **Production:** In production (`NODE_ENV=production`), `API_SECRET` is **required**. If it is not set, requests to these routes receive **503 Service Unavailable** until the secret is configured.
+- **How to send the secret (preferred):** Use the **header** `X-API-Key: <your-secret>` so the value is not logged in URLs or Referer. Avoid passing the secret in the query string (`?apiKey=...`); if you must, be aware it can appear in server logs, Referer headers, and browser history.
+- **Value:** Use a long, random string (e.g. 32+ characters). Generate one with: `openssl rand -hex 32` or a password manager. Keep it out of client-side code and do not commit it to the repo.
+
+### Where to set API_SECRET on Render
+
+- **Environment group:** **galiluz-shared** (used by the Nuxt web service `galiluz-web`).
+- **Steps:** Dashboard → Environment Groups → **galiluz-shared** → Add Variable (or edit if the key was added via the blueprint): key `API_SECRET`, value = your long random secret.
+- **What the value should be:** A single random string, no spaces. Example: run `openssl rand -hex 32` in a terminal and paste the output (64 hex characters). Anyone calling `/api/whatsapp-messages` or `/api/whatsapp-media/...` must send that same value in the `X-API-Key` header.
 
 ## Monthly API budget (wa-listener)
 

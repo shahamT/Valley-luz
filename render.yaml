@@ -58,6 +58,8 @@ envVarGroups:
         sync: false
       - key: MONGODB_DB_NAME
         sync: false
+      - key: API_SECRET
+        sync: false
 
   # WA worker only – secrets that the Nuxt app does not need
   - name: galiluz-wa-secrets
