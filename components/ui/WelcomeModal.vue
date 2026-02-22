@@ -14,21 +14,21 @@
               class="WelcomeModal-logo"
             />
             <p class="WelcomeModal-intro">
-            ברוכים הבאים לגרסת הבטא של <span class="WelcomeModal-brandGreen">גלי</span><span class="WelcomeModal-brandBlue">לו"ז</span>!
-          </p>
-          <p class="WelcomeModal-disclaimer">
-            בגרסה זו - האירועים המופיעים בלו"ז התקבלו מפרסומים בקבוצות וואטסאפ ולא ישירות מהמארגנים. האירועים עברו עיבוד בAI כדי להציג אותם בצורה מיטבית ואין לנו איך לאמת את הפרטים.
-            <span class="WelcomeModal-disclaimerHighlight">אז לפני שאתם שמים את האירוע ביומן - אל תשכחו לוודא שהבינה המלאכותית לא הוזה...</span>
-          </p>
-          <p class="WelcomeModal-organizers">
-            מארגנים אירוע/אירועים? מעוניינים לפרסם אצלנו אירועים בעצמכם בצורה ישירה?
-            <a
-              :href="CONTACT_WHATSAPP_LINK"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="WelcomeModal-whatsappLink"
-            >שלחו לנו הודעה</a>
-          </p>
+              ברוכים הבאים לגרסת הבטא של <span class="WelcomeModal-brandGreen">גלי</span><span class="WelcomeModal-brandBlue">לו"ז</span>!
+            </p>
+            <p class="WelcomeModal-disclaimer">
+              בגרסה זו - האירועים המופיעים בלו"ז התקבלו מפרסומים בקבוצות וואטסאפ ולא ישירות מהמארגנים. האירועים עברו עיבוד בAI כדי להציג אותם בצורה מיטבית ואין לנו איך לאמת את הפרטים.
+              <span class="WelcomeModal-disclaimerHighlight">אז לפני שאתם שמים את האירוע ביומן - אל תשכחו לוודא שהבינה המלאכותית לא הוזה...</span>
+            </p>
+            <p class="WelcomeModal-organizers">
+              מארגנים אירוע/אירועים? מעוניינים לפרסם אצלנו אירועים בעצמכם בצורה ישירה?
+              <a
+                :href="CONTACT_WHATSAPP_LINK"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="WelcomeModal-whatsappLink"
+              >שלחו לנו הודעה</a>
+            </p>
           </div>
         </section>
         <div class="WelcomeModal-actions">

@@ -170,11 +170,11 @@ function handleGroupToggleAll(group) {
   })
 }
 
-const handleToggleCategory = (categoryId) => {
+function handleToggleCategory(categoryId) {
   calendarStore.toggleCategory(categoryId)
 }
 
-const handleClearAllFilters = () => {
+function handleClearAllFilters() {
   calendarStore.resetFilter()
 }
 </script>

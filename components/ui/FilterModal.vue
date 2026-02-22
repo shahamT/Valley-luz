@@ -8,6 +8,7 @@
         <div class="FilterModal-header">
           <h2 class="FilterModal-title">{{ title }}</h2>
           <button
+            type="button"
             class="FilterModal-closeButton"
             @click="handleClose"
             aria-label="סגור"
